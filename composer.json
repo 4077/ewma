@@ -9,7 +9,9 @@
     ],
     "version": "0.0.5",
     "minimum-stability": "stable",
-    "vendor-dir": "vendor-modules",
+    "config": {
+        "vendor-dir": "vendor-modules"
+    },
     "require": {
 
     }
