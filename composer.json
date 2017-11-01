@@ -7,7 +7,7 @@
             "email": "platinumaccount@yandex.com"
         }
     ],
-    "version": "0.0.1",
+    "version": "0.0.2",
     "minimum-stability": "stable",
     "require": {
         "oyejorge/less.php": "~1.7.0.10",
