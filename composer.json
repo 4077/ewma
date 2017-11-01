@@ -9,9 +9,6 @@
         }
     ],
     "minimum-stability": "stable",
-    "config": {
-        "vendor-dir": "modules-vendor"
-    },
     "require": {
         "fed/ewma-module-installer-plugin": "*"
     }
