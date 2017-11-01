@@ -7,7 +7,6 @@
             "email": "platinumaccount@yandex.com"
         }
     ],
-    "version": "0.0.5",
     "minimum-stability": "stable",
     "config": {
         "vendor-dir": "vendor-modules"
