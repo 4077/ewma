@@ -1,5 +1,6 @@
 {
     "name": "fed/ewma",
+    "type": "ewma-module",
     "description": "ewma fw",
     "authors": [
         {
@@ -12,6 +13,6 @@
         "vendor-dir": "vendor-modules"
     },
     "require": {
-
+        "fed/ewma-module-installer-plugin": "*"
     }
 }
