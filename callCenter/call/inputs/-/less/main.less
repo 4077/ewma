@@ -1,0 +1,214 @@
+// head {
+@import "../../../../../../css/std/-/less/main.less";
+@import "../../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_callCenter_call_inputs__main";
+// }
+
+.@{__nodeId__} {
+
+    > .inputs {
+        padding: 0 5px;
+
+        .input {
+            position: relative;
+            background-color: #F0F0F0;
+            border-top: 1px solid #FFFFFF;
+            border-bottom: 1px solid #E6E6E6;
+            padding: 2px;
+            min-width: 150px;
+
+            .buttons {
+                @buttonSize: 24px;
+
+                display: none;
+                position: absolute;
+                right: 2px;
+                z-index: 2;
+
+                .button {
+                    cursor: pointer;
+                    float: left;
+                    width: @buttonSize;
+                    height: @buttonSize;
+                    border-radius: 3px;
+                    margin: 1px;
+
+                    .__gradient(#F9F9F9, #E4E4E4);
+                    .__border(#DDDDDD);
+
+                    .icon {
+                        float: left;
+                        margin: (@buttonSize - 16px) / 2;
+                        width: 16px;
+                        height: 16px;
+                        background: url("images/icons_454545.png") 16px 16px;
+                    }
+
+                    &.delete {
+
+                        .icon {
+                            .ui-icon-trash;
+                        }
+                    }
+
+                    &.duplicate {
+
+                        .icon {
+                            .ui-icon-copy;
+                        }
+                    }
+
+                    &.hover {
+                        .__gradient(#FFFFFF, #F0F0F0);
+                    }
+                }
+            }
+
+            .type {
+                position: relative;
+                float: left;
+                padding: 2px;
+                z-index: 2;
+            }
+
+            .name {
+                position: relative;
+                padding-left: 60px;
+
+                .txt {
+                    padding: 5px;
+
+                    &.hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                input {
+                    position: relative;
+                    z-index: 3;
+                    background-color: #63788C;
+                    color: #FFFFFF;
+                    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                    border-radius: 3px;
+                }
+            }
+
+            .path {
+                position: relative;
+
+                .txt {
+                    padding: 5px;
+                    color: #008bb1;
+
+                    &.hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                input {
+                    position: relative;
+                    z-index: 3;
+                    background-color: #008bb1;
+                    color: #FFFFFF;
+                    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                    border-radius: 3px;
+                }
+            }
+
+            .value {
+                position: relative;
+
+                &.data {
+
+                    input {
+                        position: relative;
+                        z-index: 3;
+                        background-color: #518C60 !important;
+                        color: #FFFFFF;
+                        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                    }
+                }
+
+                &.string {
+
+                    .txt {
+                        padding: 5px;
+                    }
+
+                    input {
+                        position: relative;
+                        z-index: 3;
+                        background-color: #518C60;
+                        color: #FFFFFF;
+                        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                        border-radius: 3px;
+                    }
+                }
+
+                &.bool {
+
+                    .bool_value_button {
+                        cursor: pointer;
+                        float: left;
+                        padding: 5px;
+
+                        &.true {
+                            color: #0046DA;
+                        }
+
+                        &.false {
+                            color: #D52D27;
+                        }
+
+                        &.hover {
+                            text-decoration: underline;
+                        }
+                    }
+                }
+            }
+
+            .null_button {
+                cursor: pointer;
+                float: right;
+                padding: 2px 5px;
+                background-color: #E0E0E0;
+                color: #404040;
+
+                &.hover {
+                    background-color: #FFF;
+                }
+
+                &.pressed {
+                    background-color: #981d7f;
+                    color: #ff8fb8;
+
+                    &.hover {
+                        background-color: #983A84;
+                        color: #FFABC6;
+                    }
+                }
+            }
+
+            &.hover {
+
+                .buttons {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    > .create_button {
+        cursor: pointer;
+        float: right;
+        margin: 5px;
+        font-size: 11px;
+        color: #B0B0B0;
+
+        &.hover {
+            text-decoration: underline;
+            color: #000;
+        }
+    }
+}

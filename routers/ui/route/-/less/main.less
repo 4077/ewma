@@ -1,0 +1,192 @@
+// head {
+@import "../../../-/less/common.less";
+@import "../../../../../../css/std/-/less/main.less";
+
+@__nodeId__: ~"ewma_routers_ui_route__main";
+// }
+
+.@{__nodeId__} {
+    min-width: 250px;
+
+    .__table {
+        display: table;
+    }
+
+    .__row {
+        display: table-row;
+    }
+
+    .__cell {
+        display: table-cell;
+    }
+
+    .compile_button {
+        .__button;
+        .blue;
+        .small;
+
+        float: right;
+        margin-bottom: 10px;
+    }
+
+    .table {
+        .__table;
+        width: 100%;
+        border-spacing: 1px;
+
+        .row {
+            .__row;
+
+            .cell {
+                .__cell;
+                vertical-align: middle;
+                background-color: #F4F4F4;
+
+                &.label {
+                    padding: 10px;
+                    background-color: #EDEDED;
+                    width: 1px;
+                    white-space: nowrap;
+                }
+
+                &.value {
+                    cursor: pointer;
+                    position: relative;
+
+                    input {
+                        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                    }
+
+                    .name_txt {
+                        padding: 10px;
+                        font-weight: bold;
+                    }
+
+                    .pattern {
+
+                        .base_pattern {
+                            float: left;
+                            padding: 10px 0 10px 10px;
+                            color: #808080;
+                        }
+
+                        .route_pattern {
+                            float: left;
+
+                            .pattern_txt {
+                                .__txt_control;
+                                float: left;
+                                margin-left: -10px;
+                                padding: 10px;
+                                color: #404040;
+                            }
+                        }
+                    }
+
+                    .target_method_path_txt {
+                        padding: 10px;
+                        color: #404040;
+                    }
+
+                    .target_type_selector {
+                        float: left;
+                        margin: 0 10px;
+                        border-radius: 3px;
+                        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+
+                        .target_type_button {
+                            float: left;
+                            padding: 5px 10px;
+                            background-color: #FCFCFC;
+                            color: #404040;
+
+                            &.method {
+                                border-radius: 3px 0 0 3px;
+
+                                &.selected {
+                                    background-color: #8070BA;
+                                    color: #FFFFFF;
+                                }
+
+                                &.hover {
+                                    background-color: #8070BA;
+                                    color: #FFFFFF;
+                                }
+                            }
+
+                            &.handlers_output {
+                                border-radius: 0 3px 3px 0;
+
+                                &.selected {
+                                    background-color: #E74162;
+                                    color: #FFFFFF;
+                                }
+
+                                &.hover {
+                                    background-color: #E74162;
+                                    color: #FFFFFF;
+                                }
+                            }
+
+                            .__button_active;
+                        }
+                    }
+
+                    .wrapper_selector {
+                        float: left;
+                        margin: 0 10px;
+                        border-radius: 3px;
+                        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+
+                        .wrapper_button {
+                            cursor: pointer;
+                            float: left;
+                            padding: 5px 10px;
+                            background-color: #FFFFFF;
+                            color: #7B7B7B;
+
+                            &.hover {
+                                background-color: darken(#FBF6F6, 5%);
+                                color: darken(#7B7B7B, 5%);
+                            }
+
+                            &.ewma_html {
+                                border-radius: 3px 0 0 3px;
+
+                                &.pressed {
+                                    background-color: #69A01F;
+                                    color: #DBFF92;
+                                }
+
+                                &.hover {
+                                    background-color: darken(#69A01F, 5%);
+                                    color: #DBFF92;
+                                }
+                            }
+
+                            &.none {
+                                border-radius: 0 3px 3px 0;
+
+                                &.pressed {
+                                    background-color: #404040;
+                                    color: #FFFFFF;
+                                }
+
+                                &.hover {
+                                    background-color: darken(#404040, 5%);
+                                    color: #FFFFFF;
+                                }
+                            }
+
+                            .__button_active;
+                        }
+                    }
+
+                    .data_jedit {
+                        margin: 5px 10px;
+                    }
+                }
+            }
+        }
+    }
+}

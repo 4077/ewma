@@ -1,0 +1,112 @@
+// head {
+@import "../../../../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_access_ui_groups__main_permissions_nodeControl";
+// }
+
+.@{__nodeId__} {
+    @buttonSize: 28px;
+
+    cursor: pointer;
+    position: relative;
+    min-height: @buttonSize;
+    //background-color: #D5D5D5;
+
+    .name {
+        padding: 7px 10px;
+    }
+
+    .buttons {
+        display: none;
+        position: absolute;
+        right: 0;
+
+        .button {
+            cursor: pointer;
+            float: left;
+            width: @buttonSize;
+            height: @buttonSize;
+            background-color: #F3F3F3;
+
+            .icon {
+                float: left;
+                margin: (@buttonSize - 16px) / 2;
+                width: 16px;
+                height: 16px;
+                background: url("../../images/icons_454545.png") 16px 16px;
+            }
+
+            &.hover {
+                background-color: #E0E0E0;
+            }
+
+            &.create {
+
+                .icon {
+                    .ui-icon-plus;
+                }
+            }
+
+            &.delete {
+
+                .icon {
+                    .ui-icon-trash;
+                }
+            }
+        }
+    }
+
+    &.root {
+        cursor: default;
+        background-color: #404040;
+        color: #FFFFFF;
+
+        .button {
+            background-color: #404040;
+
+            .icon {
+                background: url("../../images/icons_ffffff.png");
+            }
+
+            &.hover {
+                background-color: #5D5D5D;
+            }
+        }
+    }
+
+    &.hover {
+        background-color: #F3F3F3;
+
+        &.root {
+            background-color: #404040;
+        }
+
+        .buttons {
+            display: block;
+        }
+    }
+
+    &.has_nested_enabled {
+        color: #009e39;
+    }
+
+    &.auto_enabled {
+        background-color: #E2F4E2;
+        color: #008800;
+
+        &.hover {
+            background-color: #D8F4D7;
+            color: #007900;
+        }
+    }
+
+    &.enabled {
+        background-color: #4b9270;
+        color: #a0ffb9;
+
+        &.hover {
+            background-color: #72927D;
+            color: #C8FFD4;
+        }
+    }
+}

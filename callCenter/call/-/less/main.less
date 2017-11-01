@@ -1,0 +1,263 @@
+// head {
+@import "../../../../../css/std/-/less/main.less";
+@import "../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_callCenter_call__main";
+// }
+
+.@{__nodeId__} {
+    @buttonSize: 28px;
+
+    position: relative;
+
+    > input {
+        position: relative;
+        z-index: 3;
+        background-color: #EFEFEF;
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+        border-radius: 3px;
+    }
+
+    .call_button {
+        .__button;
+
+        position: relative;
+        padding: 0;
+        margin: 0;
+        min-width: 100px;
+        float: none;
+
+        .content {
+            text-align: left;
+
+            .txt {
+                padding: 8px 10px 7px;
+            }
+        }
+
+        .buttons {
+            display: none;
+            position: absolute;
+            top: -1px;
+            right: -@buttonSize * 4;
+            z-index: 2;
+            border-radius: 0 3px 3px 0;
+
+            .button {
+                cursor: pointer;
+                float: left;
+                width: @buttonSize;
+                height: @buttonSize;
+                border-radius: 3px;
+
+                .icon {
+                    float: left;
+                    margin: (@buttonSize - 16px) / 2;
+                    width: 16px;
+                    height: 16px;
+                    background: url("images/icons_ffffff.png") 16px 16px;
+                }
+
+                &.rename {
+
+                    .icon {
+                        .ui-icon-pencil;
+                    }
+                }
+
+                &.settings {
+
+                    .icon {
+                        .ui-icon-gear;
+                    }
+                }
+
+                &.delete {
+
+                    .icon {
+                        .ui-icon-trash;
+                    }
+                }
+
+                &.duplicate {
+
+                    .icon {
+                        .ui-icon-copy;
+                    }
+                }
+            }
+        }
+
+        &.blue {
+
+            .buttons {
+                .__gradient(#5BA7D9, #559AC8);
+                .__border(#559AC8);
+
+                .button {
+
+                    &.hover {
+                        background-color: #6CB0D9;
+                    }
+                }
+            }
+        }
+
+        &.red {
+
+            .buttons {
+                .__gradient(#FC4D34, #D8422D);
+                .__border(#D8422D);
+
+                .button {
+
+                    &.hover {
+                        background-color: #FF6242;
+                    }
+                }
+            }
+        }
+
+        &.hover {
+
+            .buttons {
+                display: block;
+            }
+        }
+    }
+
+    .show_output_button {
+        @buttonSize: 28px;
+
+        cursor: pointer;
+        position: absolute;
+        right: -@buttonSize - 10px;
+        width: @buttonSize;
+        height: @buttonSize;
+        border-radius: 3px;
+
+        .icon {
+            float: left;
+            margin: (@buttonSize - 16px) / 2;
+            width: 16px;
+            height: 16px;
+            background: url("images/icons_454545.png") 16px 16px;
+            .ui-icon-document;
+            opacity: 0.2;
+        }
+
+        &.hover {
+
+            .icon {
+                opacity: 1;
+            }
+        }
+
+        &.pressed {
+
+            .icon {
+                opacity: 1;
+            }
+        }
+    }
+
+    > .settings {
+        margin: 1px 0;
+        border: 1px solid #DCDCDC;
+        border-radius: 3px;
+        padding: 3px;
+        background-color: #FFF;
+
+        .path {
+            position: relative;
+
+            .txt {
+                padding: 7px 5px;
+                color: #8070BA;
+
+                &.empty {
+                    color: #E0E0E0;
+                }
+            }
+
+            input {
+                position: relative;
+                z-index: 3;
+                background-color: #8070BA;
+                color: #FFFFFF;
+                box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) inset;
+                border-radius: 3px;
+            }
+        }
+
+        .data {
+            padding: 5px 5px;
+        }
+
+        > .buttons {
+            margin: 3px 3px 6px;
+
+            @buttonSize: 22px;
+
+            .button {
+                cursor: pointer;
+                float: left;
+                margin: 1px;
+                width: @buttonSize;
+                height: @buttonSize;
+                border-radius: 3px;
+                color: #404040;
+                text-align: center;
+
+                .__gradient(#F9F9F9, #E4E4E4);
+                .__border(#DDDDDD);
+
+                .icon {
+                    float: left;
+                    margin: (@buttonSize - 16px) / 2;
+                    width: 16px;
+                    height: 16px;
+                    background: url("images/icons_bbbbbb.png") 16px 16px;
+                }
+
+                &.hover {
+                    background-color: #6CB0D9;
+                }
+
+                &.require_confirmation {
+
+                    .icon {
+                        .ui-icon-alert;
+                    }
+
+                    &.hover {
+                        .__gradient(#FF7575, #FF5050);
+                        .__border(#D04646);
+
+                        .icon {
+                            background-image: url("images/icons_ffffff.png");
+                        }
+                    }
+
+                    &.pressed {
+                        .__gradient(#FF5050, #FF7575);
+                        .__border(#D04646);
+
+                        .icon {
+                            background-image: url("images/icons_ffffff.png");
+                        }
+
+                        &.hover {
+                            .__gradient(#FF9497, #FFB0AE);
+                            .__border(#D08787);
+
+                            .icon {
+                                background-image: url("images/icons_ffffff.png");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

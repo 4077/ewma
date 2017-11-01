@@ -1,0 +1,19 @@
+// head {
+@import "../../common.less";
+
+@__nodeId__: ~"ewma_handlers_ui_assignments__main_value_cp";
+// }
+
+.@{__nodeId__} {
+    background-color: @value_bg_color;
+
+    .button {
+        float: left;
+        font-size: 11px;
+        padding: 7px;
+
+        &.hover {
+            background-color: lighten(@value_bg_color, 10%);
+        }
+    }
+}

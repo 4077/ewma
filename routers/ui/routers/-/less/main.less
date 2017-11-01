@@ -1,0 +1,28 @@
+// head {
+@import "../../../../../../css/std/-/less/main.less";
+
+@__nodeId__: ~"ewma_routers_ui_routers__main";
+// }
+
+.@{__nodeId__} {
+
+    .compile_button {
+        .__button;
+        .blue;
+        .small;
+
+        float: right;
+        margin-bottom: 10px;
+    }
+
+    > .button {
+        cursor: pointer;
+
+        &.create {
+            .__button;
+            .green;
+            .small;
+            margin-top: 10px;
+        }
+    }
+}

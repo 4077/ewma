@@ -1,0 +1,70 @@
+// head {
+@import "../../../assignments/-/less/common.less";
+
+@__nodeId__: ~"ewma_handlers_ui_catItems__main";
+// }
+
+.@{__nodeId__} {
+    min-width: 250px;
+
+    > .buttons {
+
+        .create_button {
+            cursor: pointer;
+            float: left;
+            font-size: 11px;
+            margin: 1px;
+            padding: 4px 7px;
+            display: inline-block;
+
+            &.output {
+                background-color: @output_bg_color;
+                color: @output_color;
+
+                &.hover {
+                    background-color: lighten(@output_bg_color, 5%);
+                }
+            }
+
+            &.input {
+                background-color: @input_bg_color;
+                color: @input_color;
+
+                &.hover {
+                    background-color: lighten(@input_bg_color, 5%);
+                }
+            }
+
+            &.var {
+                background-color: @var_bg_color;
+                color: @var_color;
+
+                &.hover {
+                    background-color: lighten(@var_bg_color, 5%);
+                }
+            }
+
+            &.handler {
+                background-color: @handler_bg_color;
+                color: @handler_color;
+
+                &.hover {
+                    background-color: lighten(@handler_bg_color, 5%);
+                }
+            }
+
+            &.value {
+                background-color: @value_bg_color;
+                color: @var_color;
+
+                &.hover {
+                    background-color: lighten(@value_bg_color, 5%);
+                }
+            }
+
+            &.hover {
+                //background-color: lighten(@var_bg_color, 5%);
+            }
+        }
+    }
+}

@@ -1,0 +1,44 @@
+// head {
+@import "../../../../../css/std/-/less/main.less";
+
+@__nodeId__: ~"ewma_routers_ui__main";
+// }
+
+.@{__nodeId__} {
+
+    .__block {
+        float: left;
+        padding: 10px;
+        margin: 5px;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    > .routers {
+        .__block;
+    }
+
+    > .router {
+        .__block;
+
+        .compile_button {
+            .__button;
+            .blue;
+            .small;
+
+            float: right;
+            margin-bottom: 10px;
+        }
+
+        > .settings {
+
+        }
+
+        > .router {
+
+        }
+    }
+
+    > .route {
+        .__block;
+    }
+}

@@ -1,0 +1,186 @@
+// head {
+@import "themes/default.less";
+
+@__nodeId__: ~"ewma_css_ui__main";
+// }
+
+#@{__nodeId__} {
+    background-color: @backgroundColor;
+
+    .table {
+        display: table;
+    }
+
+    .row {
+        display: table-row;
+    }
+
+    .cell {
+        display: table-cell;
+        padding: 2px;
+    }
+
+    //
+
+    .label {
+        float: left;
+        padding: 5px 10px;
+        font-weight: bold;
+        min-width: 80px;
+        color: @label__color;
+    }
+
+    .compiler, .combiner {
+
+        .table.dirs {
+            cursor: pointer;
+            margin: 5px 0 10px 0;
+            width: 100%;
+
+            .cell.left {
+                width: 1px;
+            }
+
+            .label {
+                font-weight: normal;
+                padding: 5px 5px 5px 0;
+                white-space: nowrap;
+                color: @dir_label_color;
+            }
+
+            .txt {
+                padding: 5px 10px;
+
+                &.hover {
+                    text-decoration: underline;
+                }
+
+                input {
+                    border-radius: 3px;
+                    background-color: #FFFFEA;
+                    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2) inset;
+                }
+            }
+        }
+    }
+
+    .button {
+        cursor: pointer;
+        float: left;
+        width: 70px;
+        padding: 5px 10px;
+        background-color: @button__backgroundColor;
+        color: @button__color;
+        text-align: center;
+
+        &.increase_version {
+            width: auto;
+
+            &.hover {
+                background-color: #AD393F;
+                color: #FFFF00;
+            }
+        }
+
+        &.toggle_compiler,
+        &.toggle_combiner {
+            background-color: #EFEFEF;
+            color: #606060;
+
+            &.hover {
+                background-color: #D4D4D4;
+                color: #383838;
+            }
+
+            &.pressed {
+                background-color: @compiler__enabled__backgroundColor;
+                color: @compiler__enabled__color;
+
+                &.hover {
+                    background-color: @compiler__enabled__backgroundColor_hover;
+                    color: @compiler__enabled__color_hover;
+                }
+
+                &.disabled {
+                    cursor: default;
+
+                    &.hover {
+                        background-color: @compiler__enabled__backgroundColor;
+                        color: @compiler__enabled__color;
+                    }
+                }
+            }
+        }
+
+        &.toggle_compiler_minify,
+        &.toggle_combiner_minify {
+            background-color: #EFEFEF;
+            color: #606060;
+
+            &.hover {
+                background-color: #D4D4D4;
+                color: #383838;
+            }
+
+            &.pressed {
+                background-color: #389163;
+                color: #FFF9FF;
+
+                &.hover {
+                    background-color: #35885D;
+                    color: #FFF9FF;
+                }
+            }
+        }
+
+        &.toggle_compiler_dev_mode {
+            background-color: #EFEFEF;
+            color: #606060;
+
+            &.hover {
+                background-color: #D4D4D4;
+                color: #383838;
+            }
+
+            &.pressed {
+                background-color: #5C5C5C;
+                color: #FFFFFF;
+
+                &.hover {
+                    background-color: #505050;
+                    color: #FFFFFF;
+                }
+            }
+        }
+
+        &.toggle_combiner_use {
+            background-color: #EFEFEF;
+            color: #606060;
+
+            &.hover {
+                background-color: #D4D4D4;
+                color: #383838;
+            }
+
+            &.pressed {
+                background-color: #D0ED6D;
+                color: #3F6005;
+
+                &.hover {
+                    background-color: #C8E469;
+                    color: #3F6005;
+                }
+            }
+        }
+
+        &.disabled {
+            cursor: default;
+            color: #AEAEAE;
+
+            &.hover {
+                background-color: #EFEFEF;
+                color: #AEAEAE;
+            }
+        }
+    }
+}

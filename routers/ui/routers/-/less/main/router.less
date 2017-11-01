@@ -1,0 +1,110 @@
+// head {
+@import "../../../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_routers_ui_routers__main_router";
+// }
+
+@buttonSize: 33px;
+
+.@{__nodeId__} {
+
+    > .content {
+        cursor: pointer;
+        margin-bottom: 1px;
+        position: relative;
+        background-color: #F1F1F1;
+
+        .name {
+            float: left;
+            padding: 10px 15px;
+        }
+
+        .id {
+            display: none;
+            padding: 10px 0;
+            color: #000000;
+        }
+
+        .buttons {
+            display: none;
+            position: absolute;
+            right: 0;
+
+            .button {
+                cursor: pointer;
+                float: left;
+                width: @buttonSize;
+                height: @buttonSize;
+                background-color: #FDFDFD;
+
+                .icon {
+                    float: left;
+                    margin: (@buttonSize - 16px) / 2;
+                    width: 16px;
+                    height: 16px;
+                    background: url("../images/icons_454545.png") 16px 16px;
+                }
+
+                &.hover {
+                    background-color: #E0E0E0;
+                }
+            }
+
+            .button {
+
+                &.toggle_enabled {
+
+                    .icon {
+                        .ui-icon-radio-off;
+                    }
+
+                    &.enabled {
+
+                        .icon {
+                            .ui-icon-bullet;
+                        }
+                    }
+                }
+
+                &.delete {
+
+                    .icon {
+                        .ui-icon-trash;
+                    }
+                }
+            }
+        }
+
+        &.disabled {
+
+            .name {
+                color: #B5B5B5;
+            }
+        }
+
+        &.selected {
+            font-weight: bold;
+        }
+
+        &.hover {
+            background-color: #B5D0E8;
+            color: #005390;
+
+            .id {
+                display: block;
+            }
+
+            .buttons {
+                display: block;
+
+                .button {
+                    background-color: #B5D0E8;
+
+                    &.hover {
+                        background-color: #9CBFD7;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,156 @@
+// head {
+@import "../../../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_routers_ui_router__main_nodeControl";
+// }
+
+@buttonSize: 28px;
+
+.@{__nodeId__} {
+
+    & > .content {
+        cursor: pointer;
+        position: relative;
+        min-height: @buttonSize;
+        //background-color: #D5D5D5;
+
+        .name {
+            padding: 7px 10px;
+            color: #000000;
+        }
+
+        &.listen_disabled {
+
+            .name {
+                color: #CE3E3E;
+            }
+        }
+
+        &.disabled {
+
+            .name {
+                color: #BEBEBE;
+            }
+
+            &.listen_disabled {
+
+                .name {
+                    color: #D8989A;
+                }
+            }
+        }
+
+        .buttons {
+            display: none;
+            position: absolute;
+            right: 0;
+
+            .button {
+                cursor: pointer;
+                float: left;
+                width: @buttonSize;
+                height: @buttonSize;
+                background-color: #F3F3F3;
+
+                .icon {
+                    float: left;
+                    margin: (@buttonSize - 16px) / 2;
+                    width: 16px;
+                    height: 16px;
+                    background: url("../images/icons_454545.png") 16px 16px;
+                }
+
+                &.hover {
+                    background-color: #E0E0E0;
+                }
+
+                &.toggle_enabled {
+
+                    .icon {
+                        .ui-icon-radio-off;
+                    }
+
+                    &.enabled {
+
+                        .icon {
+                            .ui-icon-bullet;
+                        }
+                    }
+                }
+
+                &.toggle_listen {
+
+                    .icon {
+                        background-image: url("../images/icons_bbbbbb.png");
+                        .ui-icon-signal-diag;
+                    }
+
+                    &.enabled {
+
+                        .icon {
+                            background-image: url("../images/icons_454545.png");
+                        }
+                    }
+                }
+
+                &.create {
+
+                    .icon {
+                        .ui-icon-plus;
+                    }
+                }
+
+                &.exchange {
+
+                    .icon {
+                        .ui-icon-transfer-e-w;
+                    }
+                }
+
+                &.duplicate {
+
+                    .icon {
+                        .ui-icon-copy;
+                    }
+                }
+
+                &.delete {
+
+                    .icon {
+                        .ui-icon-trash;
+                    }
+                }
+            }
+        }
+
+        &.root {
+            cursor: default;
+            background-color: #404040;
+            color: #FFFFFF;
+
+            .button {
+                background-color: #404040;
+
+                .icon {
+                    background: url("../images/icons_ffffff.png");
+                }
+
+                &.hover {
+                    background-color: #5D5D5D;
+                }
+            }
+        }
+
+        &.hover {
+            background-color: #FAFAFA;
+
+            &.root {
+                background-color: #404040;
+            }
+
+            .buttons {
+                display: block;
+            }
+        }
+    }
+}

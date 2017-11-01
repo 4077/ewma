@@ -1,0 +1,118 @@
+// head {
+@import "../../../../../../../css/std/-/less/main.less";
+@import "../../../../../../../jquery/ui/-/less/icons.less";
+
+@__nodeId__: ~"ewma_access_ui_permissions__main_permissions";
+// }
+
+.@{__nodeId__} {
+    min-width: 300px;
+    padding-bottom: 5px;
+    
+    .module {
+        position: relative;
+        background-color: #EAEAEA;
+        border-radius: 5px 5px 0 0;
+
+        &.full_access_enabled {
+            background-color: #4B9270;
+        }
+
+        .module_select {
+            margin-right: 70px;
+            padding: 5px;
+
+            select {
+                width: 100%;
+                padding: 5px;
+            }
+        }
+
+        .buttons {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+
+            .button {
+                @buttonSize: 28px;
+
+                cursor: pointer;
+                float: left;
+                margin-left: 4px;
+                width: @buttonSize;
+                height: @buttonSize - 1px;
+
+                .__gradient(#F9F9F9, #E4E4E4);
+                .__radius(2px);
+                .__border(#DDDDDD);
+
+                .__button_color;
+
+                .icon {
+                    float: left;
+                    margin: (@buttonSize - 16px) / 2;
+                    width: 16px;
+                    height: 16px;
+                    background-image: url("../images/icons_454545.png");
+                }
+
+                &.delete {
+
+                    .icon {
+                        .ui-icon-trash;
+                    }
+
+                    &.hover {
+                        .red;
+
+                        .icon {
+                        }
+                    }
+                }
+
+                &.add {
+
+                    .icon {
+                        .ui-icon-plus;
+                    }
+
+                    &.hover {
+                        .green;
+
+                        .icon {
+
+                        }
+                    }
+                }
+
+                &.hover {
+
+                    .icon {
+                        background-image: url("../images/icons_ffffff.png");
+                    }
+                }
+            }
+        }
+    }
+
+    .tree {
+        margin-top: -1px;
+
+        .node {
+
+            &.droppable_hover {
+
+                .content.root {
+                    background-color: #9D3A77;
+                }
+
+                .content {
+
+                    .segment {
+                        color: #93C5FF;
+                    }
+                }
+            }
+        }
+    }
+}

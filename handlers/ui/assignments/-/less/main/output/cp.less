@@ -1,0 +1,52 @@
+// head {
+@import "../../common.less";
+
+@__nodeId__: ~"ewma_handlers_ui_assignments__main_output_cp";
+// }
+
+.@{__nodeId__} {
+    background-color: @output_bg_color;
+    color: @output_color;
+
+    position: relative;
+
+    .button {
+        cursor: pointer;
+        float: left;
+        font-size: 11px;
+        padding: 7px;
+
+        &.hover {
+            background-color: lighten(@output_bg_color, 5%);
+        }
+    }
+
+    .id {
+        float: left;
+        font-size: 11px;
+        padding: 7px;
+        color: @output_bg_color + #444444;
+    }
+
+    .name {
+        cursor: pointer;
+        float: right;
+
+        .txt {
+            color: #F1C4AE;
+            padding: 7px;
+            font-size: 11px;
+
+            &.hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    input {
+        text-align: right;
+        background-color: @output_bg_color;
+        color: #F1C4AE;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3) inset;
+    }
+}
