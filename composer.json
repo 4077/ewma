@@ -8,7 +8,7 @@
         }
     ],
     "version": "0.0.1",
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "oyejorge/less.php": "~1.7.0.10",
         "illuminate/filesystem": "^5.2",
