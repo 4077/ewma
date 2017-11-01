@@ -9,7 +9,7 @@
     ],
     "version": "0.0.5",
     "minimum-stability": "stable",
-    "target-dir": "ewma-modules",
+    "vendor-dir": "vendor-modules",
     "require": {
 
     }
