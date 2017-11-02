@@ -4,7 +4,7 @@ class User
 {
     public $model;
 
-    public function __construct(\ewma\models\access\User $user)
+    public function __construct(\ewma\access\models\User $user)
     {
         $this->model = $user;
     }
@@ -43,12 +43,12 @@ class User
 
             $userGroupsIds = $user->groups()->get()->pluck('id')->all();
 
-            $registeredUserGroup = \ewma\models\access\Group::where('system_type', 'REGISTERED')->first();
+            $registeredUserGroup = \ewma\access\models\Group::where('system_type', 'REGISTERED')->first();
             if ($registeredUserGroup) {
                 merge($userGroupsIds, $registeredUserGroup->id);
             }
 
-            $userPermissionsByGroups = \ewma\models\access\Permission::where('module_namespace', $module->namespace)
+            $userPermissionsByGroups = \ewma\access\models\Permission::where('module_namespace', $module->namespace)
                 ->whereHas('groups', function ($query) use ($userGroupsIds) {
                     $query->whereIn('id', $userGroupsIds);
                 })->get()->pluck('path')->all();

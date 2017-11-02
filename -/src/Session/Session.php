@@ -2,7 +2,7 @@
 
 use ewma\App\App;
 use ewma\Service\Service;
-use ewma\models\session\Session as SessionModel;
+use ewma\models\Session as SessionModel;
 
 class Session extends Service
 {

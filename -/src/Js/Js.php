@@ -18,7 +18,7 @@ class Js extends Service
 
     public function boot()
     {
-        $this->settings = $this->app->ewmaController->d('js~', [
+        $this->settings = $this->app->ewmaController->d('~js', [
             'version'  => 0,
             'compiler' => [
                 'enabled'      => true,

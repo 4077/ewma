@@ -7,8 +7,11 @@ use ewma\Js\JsFileUpdater\JsFileUpdater;
 class Node
 {
     private $app;
+
     private $controller;
+
     private $relativePath;
+
     private $id;
 
     public function __construct(Controller $controller, $relativePath, $id)
@@ -40,6 +43,7 @@ class Node
 
         $jsFilePath = $this->controller->_nodeFilePath($this->relativePath, 'js');
         $jsFileAbsPath = abs_path($jsFilePath . '.js');
+
         if (file_exists($jsFileAbsPath)) {
             $jsFileMTime = filemtime($jsFileAbsPath);
             $jsFileUpdated = !isset($this->app->js->cache['nodes_m_times'][$this->id]) || $this->app->js->cache['nodes_m_times'][$this->id] != $jsFileMTime;

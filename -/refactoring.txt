@@ -1,0 +1,1 @@
+\ewma\controllers\Configs -> \ewma\controllers\main\Configs (методы могут использоваться в хэндлерах, в коде нет)

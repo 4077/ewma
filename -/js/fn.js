@@ -4,12 +4,6 @@ $.fn.rebind = function (e, callback) {
     return this;
 };
 
-//function e(object) {
-//    if (object) {
-//        return eval('(' + object + ')');
-//    }
-//}
-
 function reload() {
     setTimeout(function () {
         location.reload()
@@ -22,13 +16,9 @@ function href(url) {
     }, 0);
 }
 
-//
-
 function p(input) {
     console.log(input);
 }
-
-
 
 // php:
 

@@ -25,7 +25,7 @@ class Html extends Service
 
     public function boot()
     {
-        $this->controller = $this->app->c('\ewma html');
+        $this->controller = $this->app->c('\ewma~html');
     }
 
     //

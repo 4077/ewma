@@ -20,7 +20,7 @@ class Meta extends Service
 
     public function boot()
     {
-        $this->controller = $this->app->c('\ewma html/meta');
+        $this->controller = $this->app->c('\ewma~html/meta');
     }
 
     //

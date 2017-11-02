@@ -335,11 +335,11 @@ class Response extends Service
             $this->app->events->trigger('app/terminate');
 
             if ($this->app->mode == App::REQUEST_MODE_CLI) {
-                if (!is_scalar($response)) {
-                    $response = j_($response);
+                if (is_array($response)) {
+                    $response = implode(PHP_EOL, $response);
                 }
 
-                $response = $response . PHP_EOL;
+                $response .= PHP_EOL;
 
                 fwrite(STDOUT, $response);
                 fwrite(STDERR, false);

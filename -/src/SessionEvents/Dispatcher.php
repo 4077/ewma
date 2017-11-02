@@ -53,7 +53,7 @@ class Dispatcher
         list($path, $data) = array_pad(func_get_args(), 2, null);
 
         if (null !== $path) {
-            $this->controller->c('\ewma\sessionEvents~:bind', [
+            $this->controller->c('\ewma~sessionEvents:bind', [
                 'event_path'     => $this->eventPath,
                 'event_name'     => $this->eventName,
                 'event_filter'   => $this->eventFilter,
@@ -69,7 +69,7 @@ class Dispatcher
 
     public function unbind()
     {
-        $this->controller->c('\ewma\sessionEvents~:unbind', [
+        $this->controller->c('\ewma~sessionEvents~:unbind', [
             'event_path'     => $this->eventPath,
             'event_name'     => $this->eventName,
             'event_instance' => $this->eventInstance
@@ -83,7 +83,7 @@ class Dispatcher
         list($path, $data) = array_pad(func_get_args(), 2, null);
 
         if (null !== $path) {
-            $this->controller->c('\ewma\sessionEvents~:rebind', [
+            $this->controller->c('\ewma~sessionEvents:rebind', [
                 'event_path'     => $this->eventPath,
                 'event_name'     => $this->eventName,
                 'event_instance' => $this->eventInstance,
@@ -98,7 +98,7 @@ class Dispatcher
 
     public function unbindNested()
     {
-        $this->controller->c('\ewma\sessionEvents~:unbindNested', [
+        $this->controller->c('\ewma~sessionEvents:unbindNested', [
             'event_path'     => $this->eventPath,
             'event_instance' => $this->eventInstance
         ]);
@@ -108,7 +108,7 @@ class Dispatcher
 
     public function trigger($data = [])
     {
-        $this->controller->c('\ewma\sessionEvents~:trigger', [
+        $this->controller->c('\ewma~sessionEvents:trigger', [
             'event_path'   => $this->eventPath,
             'event_name'   => $this->eventName,
             'event_filter' => $this->eventFilter,

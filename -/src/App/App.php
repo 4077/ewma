@@ -172,7 +172,7 @@ class App extends Service
         $this->ewmaController = $this->modules->getByNamespace('ewma')->getController();
         $this->requestHandlerController = $this->c('requestHandler');
 
-        $this->ewmaController->c('~:bindEventDispatchers');
+        $this->ewmaController->c('~events:bindDispatchers');
 
         #6 авторизация
         if ($this->mode != self::REQUEST_MODE_CLI) {

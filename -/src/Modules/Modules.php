@@ -21,9 +21,20 @@ class Modules extends Service
 
     private $modulesByNamespace = [];
 
+    private $cache;
+
+    public function getCache()
+    {
+        if (null === $this->cache) {
+            $this->cache = $this->app->cache->read('modules');
+        }
+
+        return $this->cache;
+    }
+
     protected function boot()
     {
-        if (null !== $modulesCache = $this->readFromCache()) {
+        if (null !== $modulesCache = $this->getCache()) {
             foreach ($modulesCache as $moduleCacheData) {
                 $module = Module::create($moduleCacheData);
 
@@ -42,11 +53,6 @@ class Modules extends Service
         foreach ($this->modulesByPath as $module) {
             Autoload::registerModule($module->namespace, $module->path);
         }
-    }
-
-    private function readFromCache()
-    {
-        return $this->app->cache->read('modules');
     }
 
     private function saveToCache()

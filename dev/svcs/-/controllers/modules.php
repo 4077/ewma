@@ -20,7 +20,9 @@ class Modules extends \Controller
 //                $this->updateCache();
             }
 
-            $this->tree = jread($cacheFilePath);
+            $t1 = $this->tree = jread($cacheFilePath);
+
+            $t2 = $this->app->modules->getCache();
         }
 
         return $this->tree;

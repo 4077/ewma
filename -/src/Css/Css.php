@@ -18,7 +18,7 @@ class Css extends Service
 
     public function boot()
     {
-        $this->settings = $this->app->ewmaController->d('css~', [
+        $this->settings = $this->app->ewmaController->d('~css', [
             'version'  => 0,
             'compiler' => [
                 'enabled'      => true,

@@ -29,7 +29,7 @@ class Auth extends Service
         $userToken = $this->app->request->cookies->get($tokenCookieName);
 
         if ($userToken) {
-            $user = \ewma\models\access\User::where('token', $userToken)->first();
+            $user = \ewma\access\models\User::where('token', $userToken)->first();
 
             if ($user) {
                 $this->app->access->setUser($user);
@@ -56,7 +56,7 @@ class Auth extends Service
         $sessionKey = $this->app->request->cookies->get($sessionKeyCookieName);
 
         if ($sessionKey) {
-            if (\ewma\models\session\Session::where('key', $sessionKey)->first()) {
+            if (\ewma\models\Session::where('key', $sessionKey)->first()) {
                 $this->app->session->setKey($sessionKey);
 
                 $this->app->rootController->cookie_(
@@ -76,7 +76,7 @@ class Auth extends Service
     {
         do {
             $token = k(32);
-        } while (\ewma\models\access\User::where('token', $token)->first());
+        } while (\ewma\access\models\User::where('token', $token)->first());
 
         return $token;
     }
@@ -86,7 +86,7 @@ class Auth extends Service
         if ($this->app->access->getUser()) {
             return true;
         } else {
-            $user = \ewma\models\access\User::getByUniqueField($uniqueFieldValue);
+            $user = \ewma\access\models\User::getByUniqueField($uniqueFieldValue);
 
             if ($user) {
                 $loginBySentPass = false;

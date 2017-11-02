@@ -19,12 +19,11 @@ class Access extends Service
 
     private $user;
 
-    public function setUser(\ewma\models\access\User $user)
+    public function setUser(\ewma\access\models\User $user)
     {
         $this->user = new User($user);
 
         $this->updateUserSession($user->session_key);
-
     }
 
     public function updateUserSession($sessionKey)
@@ -59,7 +58,7 @@ class Access extends Service
     {
         do {
             $key = k(32);
-        } while (\ewma\models\session\Session::where('key', $key)->first());
+        } while (\ewma\models\Session::where('key', $key)->first());
 
         return $key;
     }
@@ -72,7 +71,7 @@ class Access extends Service
     /**
      * @return User
      */
-    public function getUser(\ewma\models\access\User $user = null)
+    public function getUser(\ewma\access\models\User $user = null)
     {
         if (null !== $user) {
             return $this->getOtherUser($user);
@@ -86,7 +85,7 @@ class Access extends Service
     /**
      * @return User
      */
-    private function getOtherUser(\ewma\models\access\User $user)
+    private function getOtherUser(\ewma\access\models\User $user)
     {
         if (!isset($this->users[$user->id])) {
             $this->users[$user->id] = new User($user);

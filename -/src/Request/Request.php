@@ -50,7 +50,10 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_XHR;
 
-        $this->app->ewmaController->c('logs~:write:requests', ['type' => 'xhr', 'call' => $call]);
+        $this->app->ewmaController->c('~logs:write:requests', [
+            'type' => 'xhr',
+            'call' => $call
+        ]);
 
         $this->app->requestHandlerController->_call($call)->perform(Controller::XHR);
 
@@ -64,9 +67,12 @@ class Request extends Service
         $this->setRoute();
         $this->setData();
 
-        $this->app->ewmaController->c('logs~:write:requests', ['type' => 'route', 'route' => $this->app->route]);
+        $this->app->ewmaController->c('~logs:write:requests', [
+            'type' => 'route',
+            'route' => $this->app->route
+        ]);
 
-        $response = $this->app->ewmaController->c('~:processRequest');
+        $response = $this->app->ewmaController->c('~request:handle');
 
         if ($response instanceof View) {
             $response = $response->render();
@@ -95,7 +101,7 @@ class Request extends Service
 
     /**
      * @param bool|false $path
-     * @param null       $value
+     * @param null $value
      *
      * @return $this|null
      */

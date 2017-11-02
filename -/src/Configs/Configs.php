@@ -80,7 +80,17 @@ class Configs extends Service
         return $created;
     }
 
-    public function updateFromModules($mergeMode = AA)
+    public function addFromModules()
+    {
+        return $this->app->configs->updateFromModules(AA);
+    }
+
+    public function rewriteFromModules()
+    {
+        return $this->app->configs->updateFromModules(RR);
+    }
+
+    public function updateFromModules($mergeMode = RA)
     {
         $output = [];
         foreach ($this->app->modules->getAll() as $module) {

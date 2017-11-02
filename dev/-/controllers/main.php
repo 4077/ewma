@@ -62,7 +62,7 @@ class Main extends \Controller
             }
 
             if ($this->dataHas('reset')) {
-                $report[] = $this->c('\ewma\cache~:reset');
+                $report[] = $this->c('\ewma~cache~:reset');
             }
 
             return implode(PHP_EOL, $report);
@@ -71,11 +71,11 @@ class Main extends \Controller
 
     public function resetGrids()
     {
-        $builder = \ewma\models\session\Session::where('module_namespace', 'std\ui\grid');
+        $builder = \ewma\models\Session::where('module_namespace', 'std\ui\grid');
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
-        $builder = \ewma\models\session\Session::where('module_namespace', 'std\ui\grid2');
+        $builder = \ewma\models\Session::where('module_namespace', 'std\ui\grid2');
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
@@ -84,7 +84,7 @@ class Main extends \Controller
 
     public function resetTrees()
     {
-        $builder = \ewma\models\session\Session::where('module_namespace', 'std\ui\tree');
+        $builder = \ewma\models\Session::where('module_namespace', 'std\ui\tree');
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
@@ -93,7 +93,7 @@ class Main extends \Controller
 
     public function resetDialogs()
     {
-        $builder = \ewma\models\session\Session::where('module_namespace', 'std\ui\dialogs');
+        $builder = \ewma\models\Session::where('module_namespace', 'std\ui\dialogs');
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
@@ -122,12 +122,12 @@ class Main extends \Controller
 
     public function resetSessionEvents()
     {
-        \ewma\models\session\Session::where('module_namespace', 'ewma\sessionEvents')->delete();
+        \ewma\models\Session::where('module_namespace', 'ewma\sessionEvents')->delete();
 
         return 'session events reseted';
     }
 
-    public function emailmysqldump()
+    public function emailmysqldump() ////
     {
         $user = app()->getConfig('databases/default/user');
         $pass = app()->getConfig('databases/default/pass');

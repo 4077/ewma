@@ -28,7 +28,7 @@ class Autoload
         static::$appRoot = $appRoot;
 
         static::loadCache();
-        static::registerModule('ewma', 'ewma');
+        static::registerModule('ewma', 'fed/ewma');
     }
 
     private static $cache = [];

@@ -2,7 +2,7 @@
 
 use ewma\App\App;
 use ewma\Service\Service;
-use ewma\models\storage\Storage as StorageModel;
+use ewma\models\Storage as StorageModel;
 
 class Storage extends Service
 {
