@@ -51,7 +51,8 @@ class Modules extends Service
         }
 
         foreach ($this->modulesByPath as $module) {
-            Autoload::registerModule($module->namespace, $module->path);
+            /* @var $module Module */
+            Autoload::registerModule($module->namespace, $module->path, $module->location);
         }
     }
 
@@ -67,23 +68,202 @@ class Modules extends Service
         $this->app->cache->write('modules', $modulesCache);
     }
 
+    /*
+     * 1. Запускается рекурсия регистрации по папке modules
+     *      для каждого модуля в списке проверяется наличие файла location.php
+     *          если файла нет, то регистрируется этот модуль
+     *          если файл есть, то:
+     *              если type=local, то регистрируется этот модуль,
+     *              если type=external, то запускается рекурсия регистрации на пути external_path
+     *              если type=vendor, то ничего не происходит
+     *
+     *      неймспейс зарегистрированного модуля добавляется в список зарегистрированных модулей
+     * 2. Запускается рекурсия регистрации по папке modules-vendor
+     *      если неймспейс модуля не состоит в списке зарегистрированных, то модуль регистрируется
+     */
+
+    private function localModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '')
+    {
+        $modulePath = a2p($modulePathArray);
+
+        $moduleDir = abs_path('modules', $modulePath);
+
+        $location = 'local';
+
+        if ($modulePathArray) {
+            $locationFilePath = abs_path($moduleDir . '/location.php');
+
+            if (file_exists($locationFilePath)) {
+                $locationSettings = require $locationFilePath;
+
+                $location = $locationSettings['type'];
+            }
+        }
+
+        if ($location == 'local') {
+            $settingsFilePath = $moduleDir . '/settings.php';
+            if (file_exists($settingsFilePath)) {
+                $settings = require $settingsFilePath;
+            } else {
+                $settings = [
+                    'namespace' => implode('\\', $modulePathArray)
+                ];
+            }
+
+            $settings['location'] = $location;
+
+            $module = Module::create($settings);
+
+            $module->path = $modulePath;
+            $module->masterModulePath = $module->type == 'slave'
+                ? $masterModulePath
+                : a2p($modulePathArray);
+
+            $module->config = $this->app->configs->load($module);
+
+            if (file_exists($moduleDir . '/-/src/helpers.php')) {
+                $module->helpers = true;
+            }
+
+            $this->modulesByPath[$module->path] = $module;
+            $this->modulesByNamespace[$module->namespace] = $module;
+
+            foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
+                if ($fileInfo->isDot()) {
+                    continue;
+                }
+
+                if ($fileInfo->isDir()) {
+                    $fileName = $fileInfo->getFilename();
+
+                    if ($fileName != '-') {
+                        $modulePathArray[] = $fileName;
+
+                        $this->localModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '');
+
+                        array_pop($modulePathArray);
+                    }
+                }
+            }
+        }
+
+//        if ($location == 'external') {
+//            if (isset($locationSettings['external_path'])) {
+//                $basePath = $locationSettings['external_path'];
+//
+//                $this->externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '');
+//            }
+//        }
+    }
+
+//    private function externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '')
+//    {
+//        $modulePath = a2p($modulePathArray);
+//
+//        $moduleDir = abs_path($basePath, $modulePath);
+//    }
+
+    private function vendorModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '')
+    {
+        $modulePath = a2p($modulePathArray);
+
+        $moduleDir = abs_path('modules-vendor', $modulePath);
+
+        $settingsFilePath = $moduleDir . '/settings.php';
+        if (file_exists($settingsFilePath)) {
+            $settings = require $settingsFilePath;
+        } else {
+            $settings = [
+                'namespace' => implode('\\', $modulePathArray)
+            ];
+        }
+
+        if (!isset($this->modulesByNamespace[$settings['namespace']])) {
+            $settings['location'] = 'vendor';
+
+            $module = Module::create($settings);
+
+            $module->path = $modulePath;
+            $module->masterModulePath = $module->type == 'slave'
+                ? $masterModulePath
+                : a2p($modulePathArray);
+
+            $module->config = $this->app->configs->load($module);
+
+            if (file_exists($moduleDir . '/-/src/helpers.php')) {
+                $module->helpers = true;
+            }
+
+            $this->modulesByPath[$module->path] = $module;
+            $this->modulesByNamespace[$module->namespace] = $module;
+        }
+
+        foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
+            if ($fileInfo->isDot()) {
+                continue;
+            }
+
+            if ($fileInfo->isDir()) {
+                $fileName = $fileInfo->getFilename();
+
+                if ($fileName != '-') {
+                    $modulePathArray[] = $fileName;
+
+                    $this->vendorModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '');
+
+                    array_pop($modulePathArray);
+                }
+            }
+        }
+    }
+
     private function registerModules()
     {
-        $this->registerRecursion();
+        $this->localModulesRegisterRecursion();
+        $this->vendorModulesRegisterRecursion();
     }
 
     private function registerRecursion($modulePathArray = [], $masterModulePath = '')
     {
         $modulePath = a2p($modulePathArray);
-        $moduleDir = abs_path('modules', $modulePath);
 
-        if (file_exists($moduleDir . '/settings.php')) {
-            $moduleSettingsFileData = require $moduleDir . '/settings.php';
-        } else {
-            throw new \Exception('Settings file for module "' . $modulePath . '" does not exists');
+        $location = 'local';
+
+        $vendorDir = abs_path('modules-vendor', $modulePath);
+        $localDir = abs_path('modules', $modulePath);
+
+        $hasLocalCode = is_dir($localDir);
+        $hasVendorCode = is_dir($vendorDir) && $modulePath;
+
+        if ($hasLocalCode) {
+            $moduleDir = $localDir;
+
+            $locationFilePath = abs_path($moduleDir . '/location.php');
+
+            if (file_exists($locationFilePath)) {
+                $locationSettings = require $locationFilePath;
+
+                $location = $locationSettings['type'] ?? $location;
+            }
+        } elseif ($hasVendorCode) {
+            $moduleDir = $vendorDir;
+
+            $location = 'vendor';
         }
 
-        $module = Module::createFromSettingsFileData($moduleSettingsFileData);
+        $settingsFilePath = $moduleDir . '/settings.php';
+
+        if (file_exists($settingsFilePath)) {
+            $moduleSettings = require $settingsFilePath;
+        } else {
+            $moduleSettings = [
+                'namespace' => implode('\\', $modulePathArray)
+            ];
+        }
+
+        $moduleSettings['location'] = $location;
+
+        $module = Module::create($moduleSettings);
 
         $module->path = $modulePath;
 
@@ -102,6 +282,17 @@ class Modules extends Service
         $this->modulesByPath[$module->path] = $module;
         $this->modulesByNamespace[$module->namespace] = $module;
 
+        if ($hasLocalCode) {
+            $this->moduleDirRecursion($localDir, $module, $modulePathArray);
+        }
+
+        if ($hasVendorCode) {
+            $this->moduleDirRecursion($vendorDir, $module, $modulePathArray);
+        }
+    }
+
+    private function moduleDirRecursion($moduleDir, $module, $modulePathArray)
+    {
         foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
             if ($fileInfo->isDot()) {
                 continue;
@@ -112,7 +303,7 @@ class Modules extends Service
                 if ($fileName != '-') {
                     $modulePathArray[] = $fileName;
 
-                    $this->registerRecursion($modulePathArray, isset($module) ? $module->masterModulePath : '');
+                    $this->registerRecursion($modulePathArray, $module->masterModulePath ?? '');
 
                     array_pop($modulePathArray);
                 }
@@ -160,15 +351,5 @@ class Modules extends Service
     public function getAll()
     {
         return $this->modulesByPath;
-    }
-
-    /**
-     * @param $modulePath
-     *
-     * @return string
-     */
-    public function getDir($modulePath)
-    {
-        return abs_path('modules', $modulePath);
     }
 }

@@ -28,7 +28,7 @@ class Autoload
         static::$appRoot = $appRoot;
 
         static::loadCache();
-        static::registerModule('ewma', 'fed/ewma');
+        static::registerModule('ewma', 'fed/ewma', 'vendor');
     }
 
     private static $cache = [];
@@ -48,16 +48,32 @@ class Autoload
     }
 
     /**
-     * Кеш путей модулей по их неймспейсам
+     * Кеш путей модулей по неймспейсам
      *
      * @var array
      */
     private static $modulesPathsByNamespaces = [];
 
-    public static function registerModule($moduleNamespace, $modulePath)
+    /**
+     * Кеш типов расположения модулей по неймспейсам
+     *
+     * @var array
+     */
+    private static $modulesLocationsByNamespaces = [];
+
+    /**
+     * Кеш путей внешних модулей
+     *
+     * @var array
+     */
+    private static $externalModulesPaths = [];
+
+    public static function registerModule($namespace, $path, $location = null, $externalPath = null)
     {
-        if (!in_array($modulePath, static::$modulesPathsByNamespaces)) {
-            static::$modulesPathsByNamespaces[$moduleNamespace] = $modulePath;
+        if (!in_array($path, static::$modulesPathsByNamespaces)) {
+            static::$modulesPathsByNamespaces[$namespace] = $path;
+            static::$modulesLocationsByNamespaces[$namespace] = $location;
+            static::$externalModulesPaths[$namespace] = $externalPath;
         }
     }
 
@@ -82,7 +98,7 @@ class Autoload
 
                 $moduleNamespace = implode('\\', array_slice($classPathArray, 0, $pos));
 
-                $moduleDirPath = '/' . path(static::$appRoot . '/modules', static::$modulesPathsByNamespaces[$moduleNamespace]);
+                $moduleDirPath = static::getModuleDirPath($moduleNamespace);
 
                 $filePath = $moduleDirPath . '/-/models/' . implode('/', array_slice($classPathArray, $pos + 1)) . '.php';
 
@@ -97,7 +113,7 @@ class Autoload
 
                 $moduleNamespace = implode('\\', array_slice($classPathArray, 0, $pos));
 
-                $moduleDirPath = '/' . path(static::$appRoot . '/modules', static::$modulesPathsByNamespaces[$moduleNamespace]);
+                $moduleDirPath = static::getModuleDirPath($moduleNamespace);
 
                 $classPathArray[count($classPathArray) - 1] = lcfirst(end($classPathArray));
 
@@ -110,7 +126,7 @@ class Autoload
 
             // поиск в src
             if (empty($found)) {
-                $lastFoundModulePath = '';
+                $lastFoundModuleNamespace = '';
                 $searchNamespace = '';
 
                 $classPathTailArray = $classPathArray;
@@ -120,13 +136,15 @@ class Autoload
                     $moduleNamespace = str_replace('/', '\\', trim_l_slash($searchNamespace));
 
                     if (isset(static::$modulesPathsByNamespaces[$moduleNamespace])) {
-                        $lastFoundModulePath = static::$modulesPathsByNamespaces[$moduleNamespace];
+                        $lastFoundModuleNamespace = $moduleNamespace;
+
+                        //$lastFoundModulePath = static::$modulesPathsByNamespaces[$moduleNamespace];
 
                         array_shift($classPathTailArray);
                     }
                 }
 
-                $moduleDirPath = '/' . path(static::$appRoot . '/modules', $lastFoundModulePath);
+                $moduleDirPath = static::getModuleDirPath($lastFoundModuleNamespace); // '/' . path(static::$appRoot . '/modules', $lastFoundModulePath);
 
                 $filePath = $moduleDirPath . '/-/src/' . implode('/', $classPathTailArray) . '.php';
 
@@ -145,5 +163,20 @@ class Autoload
 
             static::$cacheUpdated = true;
         }
+    }
+
+    private static function getModuleDirPath($moduleNamespace)
+    {
+        $location = static::$modulesLocationsByNamespaces[$moduleNamespace];
+
+        if ($location == 'local') {
+            $moduleDirPath = '/' . path(static::$appRoot . '/modules', static::$modulesPathsByNamespaces[$moduleNamespace]);
+        } elseif ($location == 'vendor') {
+            $moduleDirPath = '/' . path(static::$appRoot . '/modules-vendor', static::$modulesPathsByNamespaces[$moduleNamespace]);
+        } else {
+            $moduleDirPath = path(static::$externalModulesPaths[$moduleNamespace], static::$modulesPathsByNamespaces[$moduleNamespace]);
+        }
+
+        return $moduleDirPath;
     }
 }

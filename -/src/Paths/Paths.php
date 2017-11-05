@@ -66,7 +66,15 @@ class Paths extends Service
         if (!isset($this->resolvedNodesFilesPaths[$controller->__meta__->absPath][(string)$path][$nodeType])) {
             list($modulePath, $nodePath) = $this->separateAbsPath($absPath);
 
-            $moduleNodesDirPath = $modulePath ? '/modules/' . $modulePath . '/-' : '';
+            $node = $controller->n($path);
+
+            $modulesDir = $node->__meta__->module->location == 'local'
+                ? 'modules'
+                : 'modules-vendor';
+
+            // todo хранить прямо в модуле путь к его папке
+
+            $moduleNodesDirPath = $modulePath ? '/' . $modulesDir . '/' . $modulePath . '/-' : '';
             $nodeFilePath = ($nodeType ? '/' . $nodeType : '') . '/' . $nodePath;
 
             $this->resolvedNodesFilesPaths[$controller->__meta__->absPath][(string)$path][$nodeType] = path($moduleNodesDirPath, $nodeFilePath);

@@ -10,6 +10,10 @@ class Module
 
     public $type;
 
+    public $location;
+
+    public $externalPath;
+
     public $masterModulePath = false;
 
     public $lessAutoImport;
@@ -24,24 +28,17 @@ class Module
     {
         $module = new self;
 
-        $module->namespace = $settings['namespace'];
-        $module->path = $settings['path'];
-        $module->type = $settings['type'];
-        $module->masterModulePath = $settings['master_module_path'];
-        $module->lessAutoImport = $settings['less_auto_import'];
-        $module->config = $settings['config'];
-        $module->helpers = $settings['helpers'];
-
-        return $module;
-    }
-
-    public static function createFromSettingsFileData($settingsFileData)
-    {
-        $module = new self;
-
-        $module->namespace = isset($settingsFileData['namespace']) ? $settingsFileData['namespace'] : '';
-        $module->type = !empty($settingsFileData['type']) ? $settingsFileData['type'] : 'master';
-        $module->lessAutoImport = !empty($settingsFileData['less_auto_import']) ? $settingsFileData['less_auto_import'] : '';
+        \ewma\Data\Data::extract($module, $settings, '
+            namespace           namespace,
+            path                path,
+            type                type,
+            location            location,
+            externalPath        external_path,
+            masterModulePath    master_module_path,
+            lessAutoImport      less_auto_import,
+            config              config,
+            helpers             helpers
+        ');
 
         return $module;
     }
@@ -51,8 +48,10 @@ class Module
         return [
             'namespace'          => $this->namespace,
             'path'               => $this->path,
-            'master_module_path' => $this->masterModulePath,
             'type'               => $this->type,
+            'location'           => $this->location,
+            'external_path'      => $this->externalPath,
+            'master_module_path' => $this->masterModulePath,
             'less_auto_import'   => $this->lessAutoImport,
             'config'             => $this->config,
             'helpers'            => $this->helpers
@@ -78,13 +77,18 @@ class Module
         return $this->controller;
     }
 
-    public function getNearestMaster()
-    {
-
-    }
-
     public function getDir()
     {
-        return abs_path('modules', $this->path);
+        if ($this->location == 'local') {
+            return abs_path('modules', $this->path);
+        }
+
+        if ($this->location == 'vendor') {
+            return abs_path('modules-vendor', $this->path);
+        }
+
+        if ($this->location == 'external') {
+            return implode('/', [$this->externalPath, $this->path]);
+        }
     }
 }

@@ -50,6 +50,7 @@ class Node
 
         foreach (l2a($paths) as $path) {
             $importPath = $controller->_nodeFilePath($path, 'less');
+
             if (!in_array($importPath, $this->importPaths)) {
                 $this->importPaths[] = $importPath;
                 $this->importIds[] = $controller->_nodeId($path);

@@ -27,6 +27,27 @@ class Controllers extends Service
         }
     }
 
+    public function getNodeController($callPath, Controller $caller)
+    {
+        list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);
+        list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+
+        $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
+
+        if ($prototype = $this->getPrototype($absPath)){
+            $controller = clone $prototype;
+
+            $controllerId = ++$this->increment;
+            $this->controllersById[$controllerId] = $controller;
+
+            $controller->__meta__->id = $controllerId;
+            $controller->__meta__->callerId = $caller->__meta__->id;
+            $controller->__meta__->instance = $instance;
+
+            return $controller;
+        }
+    }
+
     public function call($callPath, $data, Controller $caller)
     {
         list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);

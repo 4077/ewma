@@ -102,18 +102,18 @@ class Configs extends Service
         return $output;
     }
 
-    private function updateFromModule($module, $mergeMode = AA)
+    private function updateFromModule(\ewma\Modules\Module $module, $mergeMode = AA)
     {
-        $moduleDir = abs_path('modules', $module->path);
+        $moduleDir = $module->getDir();
 
         if (file_exists($moduleDir . '/settings.php')) {
-            $moduleSettingsFileData = require $moduleDir . '/settings.php';
+            $settings = require $moduleDir . '/settings.php';
         } else {
-            throw new \Exception('Settings file for module "' . $module->path . '" does not exists');
+            $settings = [];
         }
 
-        if (!empty($moduleSettingsFileData['config'])) {
-            $settingsConfig = $moduleSettingsFileData['config'];
+        if (!empty($settings['config'])) {
+            $settingsConfig = $settings['config'];
 
             $configDir = $this->getConfigDir($module);
 

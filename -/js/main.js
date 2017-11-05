@@ -192,6 +192,8 @@ var ewma = {
 
             if (instruction.type == 'raw') {
                 eval(instruction.code);
+
+                // p(instruction.code);
             }
         }
 

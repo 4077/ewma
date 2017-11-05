@@ -230,7 +230,9 @@ class TemplateCompiler
     // iterators branches
 
     private $iteratorsBranches = [];
+
     private $iteratorsBranchesIndex = [];
+
     private $currentIteratorBranch = 0;
 
     private function onCurrentBranch($iterator)

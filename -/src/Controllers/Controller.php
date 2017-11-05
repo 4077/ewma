@@ -480,6 +480,11 @@ class Controller
         return $this->app->controllers->call($path, $data, $this);
     }
 
+    public function n($path)
+    {
+        return $this->app->controllers->getNodeController($path, $this);
+    }
+
     /**
      * Проксирование вызова на другой путь
      *
