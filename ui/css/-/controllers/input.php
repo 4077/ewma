@@ -1,4 +1,4 @@
-<?php namespace ewma\css\ui\controllers;
+<?php namespace ewma\ui\css\controllers;
 
 class Input extends \Controller
 {
