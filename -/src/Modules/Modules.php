@@ -62,7 +62,7 @@ class Modules extends Service
 
         foreach ($this->modulesByPath as $module) {
             /* @var $module Module */
-            $modulesCache[] = $module->toCacheFormat();
+            $modulesCache[$module->id] = $module->toCacheFormat();
         }
 
         $this->app->cache->write('modules', $modulesCache);
@@ -82,7 +82,9 @@ class Modules extends Service
      *      если неймспейс модуля не состоит в списке зарегистрированных, то модуль регистрируется
      */
 
-    private function localModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '')
+    private $currentModuleId = 0;
+
+    private function localModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
     {
         $modulePath = a2p($modulePathArray);
 
@@ -114,6 +116,9 @@ class Modules extends Service
 
             $module = Module::create($settings);
 
+            $module->id = ++$this->currentModuleId;
+            $module->parentId = $parentId;
+
             $module->path = $modulePath;
             $module->masterModulePath = $module->type == 'slave'
                 ? $masterModulePath
@@ -139,7 +144,7 @@ class Modules extends Service
                     if ($fileName != '-') {
                         $modulePathArray[] = $fileName;
 
-                        $this->localModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '');
+                        $this->localModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id);
 
                         array_pop($modulePathArray);
                     }
@@ -156,14 +161,7 @@ class Modules extends Service
 //        }
     }
 
-//    private function externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '')
-//    {
-//        $modulePath = a2p($modulePathArray);
-//
-//        $moduleDir = abs_path($basePath, $modulePath);
-//    }
-
-    private function vendorModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '')
+    private function vendorModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
     {
         $modulePath = a2p($modulePathArray);
 
@@ -182,6 +180,9 @@ class Modules extends Service
             $settings['location'] = 'vendor';
 
             $module = Module::create($settings);
+
+            $module->id = ++$this->currentModuleId;
+            $module->parentId = $parentId;
 
             $module->path = $modulePath;
             $module->masterModulePath = $module->type == 'slave'
@@ -209,13 +210,20 @@ class Modules extends Service
                 if ($fileName != '-') {
                     $modulePathArray[] = $fileName;
 
-                    $this->vendorModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '');
+                    $this->vendorModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
 
                     array_pop($modulePathArray);
                 }
             }
         }
     }
+
+//    private function externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '')
+//    {
+//        $modulePath = a2p($modulePathArray);
+//
+//        $moduleDir = abs_path($basePath, $modulePath);
+//    }
 
     private function registerModules()
     {

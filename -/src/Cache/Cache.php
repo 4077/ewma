@@ -81,7 +81,7 @@ class Cache extends Service
         }
 
         if (!empty($reseted)) {
-            $this->app->events->trigger('app/cache/reset/' . $filePath);
+//            $this->app->events->trigger('app/cache/reset/' . $filePath);
 
             return true;
         }

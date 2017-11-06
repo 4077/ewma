@@ -80,7 +80,11 @@ class Main extends \Controller
             'MODULE_PATH' => $modulePath
         ]);
 
-        $node = ap($this->tree, $modulePath);
+        if ($modulePath) {
+            $node = ap($this->tree, '/' . $modulePath);
+        } else {
+            $node = $this->tree[''];
+        }
 
         $expand = $this->isExpand($modulePath);
 
@@ -88,16 +92,17 @@ class Main extends \Controller
 
         $hasSubnodes = count(diff($nodeKeys, '-', true));
 
-        $class = '';
-        if (null !== $this->s['selected_module_path'] && $this->s['selected_module_path'] == $modulePath) {
-            $class .= ' selected';
+        $class = [];
+        if (isset($this->sMain['current_module_path']) && $this->sMain['current_module_path'] == $modulePath) {
+            $class[] = 'current';
         }
 
-        $class .= ' ' . (isset($node['-']['settings']['type']) ? $node['-']['settings']['type'] : 'master');
+        $class[] = $node['-']['settings']['type'];
+        $class[] = $modulePath ? $node['-']['settings']['location'] : '';
 
         $v->assign('nodes/node', [
             'NAME'                   => $moduleName,
-            'CLASS'                  => $class,
+            'CLASS'                  => implode(' ', $class),
             'INDENT_WIDTH'           => ($this->level + 1) * 16 + 5,
             'INDENT_CLICKABLE_CLASS' => $hasSubnodes ? ' clickable' : '',
             'EXPAND_ICON_CLASS'      => $hasSubnodes ? ($expand ? 'rd_arrow' : 'r_arrow') : 'hidden',
@@ -115,6 +120,8 @@ class Main extends \Controller
             $v->assign('nodes/subnodes', [
                 'HIDDEN_CLASS' => ''
             ]);
+
+            ksort($node);
 
             foreach ($node as $moduleName => $moduleData) {
                 if ($moduleName != '-') {

@@ -4,6 +4,10 @@ use ewma\Controllers\Controller;
 
 class Module
 {
+    public $id;
+
+    public $parentId;
+
     public $namespace;
 
     public $path;
@@ -29,6 +33,8 @@ class Module
         $module = new self;
 
         \ewma\Data\Data::extract($module, $settings, '
+            id                  id,
+            parentId            parent_id,
             namespace           namespace,
             path                path,
             type                type,
@@ -46,6 +52,8 @@ class Module
     public function toCacheFormat()
     {
         return [
+            'id'                 => $this->id,
+            'parent_id'          => $this->parentId,
             'namespace'          => $this->namespace,
             'path'               => $this->path,
             'type'               => $this->type,
