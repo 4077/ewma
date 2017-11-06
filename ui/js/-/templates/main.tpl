@@ -1,4 +1,4 @@
-<div id="{__NODE_ID__}">
+<div class="{__NODE_ID__}">
 
     <div class="table">
         <div class="row version">

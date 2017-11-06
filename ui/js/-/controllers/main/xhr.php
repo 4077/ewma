@@ -1,6 +1,6 @@
-<?php namespace ewma\ui\css\controllers;
+<?php namespace ewma\ui\js\controllers\main;
 
-class Input extends \Controller
+class Xhr extends \Controller
 {
     public $allow = self::XHR;
 
@@ -27,8 +27,8 @@ class Input extends \Controller
         $compiler = &$this->d('^:compiler');
         invert($compiler['dev_mode']);
 
-        $this->c('\ewma\cache~:reset', [
-            'cssCompiler' => true
+        $this->c('\ewma~cache:reset', [
+            'jsCompiler' => true
         ]);
 
         $this->reload();
