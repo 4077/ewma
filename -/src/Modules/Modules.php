@@ -112,6 +112,8 @@ class Modules extends Service
                 ];
             }
 
+            aa($settings, ['namespace' => '']);
+
             $settings['location'] = $location;
 
             $module = Module::create($settings);
