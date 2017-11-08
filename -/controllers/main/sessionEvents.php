@@ -144,8 +144,8 @@ class SessionEvents extends \Controller
 
     public function reset()
     {
-        \ewma\models\Session::where('module_namespace', '\ewma\sessionEvents')->delete();
+        \ewma\models\Session::where('module_namespace', 'ewma')->where('node_path', 'main/sessionEvents')->delete();
 
-        return 'session events reseted';
+        return 'reset sessionEvents';
     }
 }
