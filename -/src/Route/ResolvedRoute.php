@@ -22,7 +22,7 @@ class ResolvedRoute
         $this->setBaseRoute = $setBaseRoute;
     }
 
-    public function to($callPath, $data = [])
+    public function to($callPath, $data = [], $responseCallback = null)
     {
         list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
 
@@ -39,10 +39,16 @@ class ResolvedRoute
         $controller->__meta__->baseRoute = $this->setBaseRoute;
 
         if ($method) {
-            $this->controller->__meta__->routeResponse = $controller->__run__($method);
+            $response = $controller->__run__($method);
         } else {
-            $this->controller->__meta__->routeResponse = $controller;
+            $response = $controller;
         }
+
+        if (null !== $responseCallback) {
+            $response = call_user_func($responseCallback, $response);
+        }
+
+        $this->controller->__meta__->routeResponse = $response;
     }
 
     public function __call($method, $parameters)

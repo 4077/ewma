@@ -15,6 +15,10 @@ class Router extends \Controller implements RouterInterface
         $this->route('dev/handlers')->to('\ewma\handlers\ui~:view');
         $this->route('dev/routers')->to('\ewma\routers\ui~:view');
 
+        $this->route('dev/cache-reset')->to('\ewma~cache:reset', [], function ($response) {
+            return implode('<br>', $response);
+        });
+
         $this->route('login')->to('\std\auth login:view');
 
         return $this->routeResponse();
