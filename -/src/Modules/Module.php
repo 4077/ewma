@@ -12,6 +12,8 @@ class Module
 
     public $path;
 
+    public $dir;
+
     public $type;
 
     public $location;
@@ -37,6 +39,7 @@ class Module
             parentId            parent_id,
             namespace           namespace,
             path                path,
+            dir                 dir,
             type                type,
             location            location,
             externalPath        external_path,
@@ -56,6 +59,7 @@ class Module
             'parent_id'          => $this->parentId,
             'namespace'          => $this->namespace,
             'path'               => $this->path,
+            'dir'                => $this->dir,
             'type'               => $this->type,
             'location'           => $this->location,
             'external_path'      => $this->externalPath,
@@ -83,20 +87,5 @@ class Module
         }
 
         return $this->controller;
-    }
-
-    public function getDir()
-    {
-        if ($this->location == 'local') {
-            return abs_path('modules', $this->path);
-        }
-
-        if ($this->location == 'vendor') {
-            return abs_path('modules-vendor', $this->path);
-        }
-
-        if ($this->location == 'external') {
-            return implode('/', [$this->externalPath, $this->path]);
-        }
     }
 }

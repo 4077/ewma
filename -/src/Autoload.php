@@ -28,7 +28,7 @@ class Autoload
         static::$appRoot = $appRoot;
 
         static::loadCache();
-        static::registerModule('ewma', 'fed/ewma', 'vendor');
+        static::registerModule('ewma', 'fed/ewma', $appRoot . '/modules-vendor/fed/ewma');
     }
 
     private static $cache = [];
@@ -55,11 +55,11 @@ class Autoload
     private static $modulesPathsByNamespaces = [];
 
     /**
-     * Кеш типов расположения модулей по неймспейсам
+     * Кеш папок модулей по неймспейсам
      *
      * @var array
      */
-    private static $modulesLocationsByNamespaces = [];
+    private static $modulesDirsByNamespaces = [];
 
     /**
      * Кеш путей внешних модулей
@@ -68,12 +68,11 @@ class Autoload
      */
     private static $externalModulesPaths = [];
 
-    public static function registerModule($namespace, $path, $location = null, $externalPath = null)
+    public static function registerModule($namespace, $path, $dir)
     {
-        if (!in_array($path, static::$modulesPathsByNamespaces)) {
+        if (!isset(static::$modulesPathsByNamespaces[$namespace])) {
             static::$modulesPathsByNamespaces[$namespace] = $path;
-            static::$modulesLocationsByNamespaces[$namespace] = $location;
-            static::$externalModulesPaths[$namespace] = $externalPath;
+            static::$modulesDirsByNamespaces[$namespace] = $dir;
         }
     }
 
@@ -138,13 +137,12 @@ class Autoload
                     if (isset(static::$modulesPathsByNamespaces[$moduleNamespace])) {
                         $lastFoundModuleNamespace = $moduleNamespace;
 
-                        //$lastFoundModulePath = static::$modulesPathsByNamespaces[$moduleNamespace];
 
                         array_shift($classPathTailArray);
                     }
                 }
 
-                $moduleDirPath = static::getModuleDirPath($lastFoundModuleNamespace); // '/' . path(static::$appRoot . '/modules', $lastFoundModulePath);
+                $moduleDirPath = static::getModuleDirPath($lastFoundModuleNamespace);
 
                 $filePath = $moduleDirPath . '/-/src/' . implode('/', $classPathTailArray) . '.php';
 
@@ -167,16 +165,6 @@ class Autoload
 
     private static function getModuleDirPath($moduleNamespace)
     {
-        $location = static::$modulesLocationsByNamespaces[$moduleNamespace];
-
-        if ($location == 'local') {
-            $moduleDirPath = '/' . path(static::$appRoot . '/modules', static::$modulesPathsByNamespaces[$moduleNamespace]);
-        } elseif ($location == 'vendor') {
-            $moduleDirPath = '/' . path(static::$appRoot . '/modules-vendor', static::$modulesPathsByNamespaces[$moduleNamespace]);
-        } else {
-            $moduleDirPath = path(static::$externalModulesPaths[$moduleNamespace], static::$modulesPathsByNamespaces[$moduleNamespace]);
-        }
-
-        return $moduleDirPath;
+        return static::$modulesDirsByNamespaces[$moduleNamespace];;
     }
 }

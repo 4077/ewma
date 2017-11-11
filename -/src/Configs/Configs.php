@@ -104,7 +104,7 @@ class Configs extends Service
 
     private function updateFromModule(\ewma\Modules\Module $module, $mergeMode = AA)
     {
-        $moduleDir = $module->getDir();
+        $moduleDir = $module->dir;
 
         if (file_exists($moduleDir . '/settings.php')) {
             $settings = require $moduleDir . '/settings.php';

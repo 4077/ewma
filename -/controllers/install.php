@@ -4,7 +4,7 @@ class Install extends \Controller
 {
     public function run()
     {
-        $dir = $this->_module()->getDir();
+        $dir = $this->_module()->dir;
 
         $copyList = [
             '/-/install/favicons' => '-/ewma/favicons'
