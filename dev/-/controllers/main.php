@@ -62,7 +62,7 @@ class Main extends \Controller
             }
 
             if ($this->dataHas('reset')) {
-                $report[] = $this->c('\ewma~cache~:reset');
+                $report[] = $this->c('\ewma~cache:reset');
             }
 
             return implode(PHP_EOL, $report);
