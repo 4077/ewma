@@ -13,6 +13,7 @@ class Router extends \Controller implements RouterInterface
         $this->route('dev/data-sets')->to('\ewma\dataSets~:view');
         $this->route('dev/access/*')->to('\ewma\access router:getResponse');
         $this->route('dev/handlers')->to('\ewma\handlers\ui~:view');
+        $this->route('dev/routers')->to('\ewma\handlers\ui~:view');
 
         $this->route('login')->to('\std\auth login:view');
 
