@@ -1037,7 +1037,7 @@ class Controller
      * @param bool          $pattern
      * @param bool|\Closure $matchCallback
      *
-     * @return ResolvedRoute|Void
+     * @return ResolvedRoute|\BlackHole
      */
     public function route($pattern = false, $matchCallback = false)
     {
