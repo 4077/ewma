@@ -65,7 +65,7 @@ class Main extends \Controller
                 $report[] = $this->c('\ewma~cache:reset');
             }
 
-            return implode(PHP_EOL, $report);
+            return $report;
         }
     }
 
