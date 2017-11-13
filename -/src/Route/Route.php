@@ -3,7 +3,9 @@
 class Route
 {
     private $baseRoute;
+
     private $route;
+
     private $pattern;
 
     public function __construct($baseRoute, $route, $pattern)
@@ -61,13 +63,17 @@ class Route
 
                     if ($routeMatch) {
                         if ($callback instanceof \Closure) {
-                            $resolved = call_user_func($callback, new RouteMatch($passData, $passRoute, $passBaseRouteArray));
+                            $resolved = call_user_func($callback, new RouteMatch($passData, $passRoute));
                         } else {
                             $resolved = true;
                         }
 
                         if ($resolved) {
-                            return ['data' => $passData, 'route' => $passRoute, 'base_route' => a2p($passBaseRouteArray)];
+                            return [
+                                'data'       => $passData,
+                                'route'      => $passRoute,
+                                'base_route' => a2p($passBaseRouteArray)
+                            ];
                         }
                     }
                 }
@@ -143,10 +149,10 @@ class Route
             $regexp .= ')' . ($quantifier[$segmentsData[$i]['type']][$segmentsData[$i]['required']]) . ')';
         }
 
-        $output['regexp'] = $regexp;
-        $output['segments'] = $segmentsData;
-        $output['max_segments_count'] = $maxSegmentsCount;
-
-        return $output;
+        return [
+            'regexp'             => $regexp,
+            'segments'           => $segmentsData,
+            'max_segments_count' => $maxSegmentsCount
+        ];
     }
 }

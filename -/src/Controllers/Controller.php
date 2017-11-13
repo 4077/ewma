@@ -1024,20 +1024,11 @@ class Controller
         }
     }
 
-    public function routeResponse()
-    {
-        $response = $this->__meta__->routeResponse;
-
-        $this->__meta__->routeResponse = null;
-
-        return $response;
-    }
-
     /**
      * @param bool          $pattern
      * @param bool|\Closure $matchCallback
      *
-     * @return ResolvedRoute|Void
+     * @return ResolvedRoute|\BlackHole
      */
     public function route($pattern = false, $matchCallback = false)
     {
@@ -1045,11 +1036,13 @@ class Controller
             return new \BlackHole;
         }
 
-        if (null === $this->__meta__->route) {
-            $this->__meta__->route = $this->app->route;
+        $meta = &$this->__meta__;
+
+        if (null === $meta->route) {
+            $meta->route = $this->app->route;
         }
 
-        $route = new Route($this->__meta__->baseRoute, $this->__meta__->route, $pattern);
+        $route = new Route($meta->baseRoute, $meta->route, $pattern);
 
         $resolved = $route->match($matchCallback);
 
@@ -1063,6 +1056,15 @@ class Controller
                 $resolved['base_route']
             );
         }
+    }
+
+    public function routeResponse()
+    {
+        $response = $this->__meta__->routeResponse;
+
+        $this->__meta__->routeResponse = null;
+
+        return $response;
     }
 
     public function _route($appendPath = false)
