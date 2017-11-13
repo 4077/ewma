@@ -77,4 +77,9 @@ class Transformer
     {
         return array_values(self::getCellsByField($rows, 'id', $valueFieldName));
     }
+
+    public static function getIds($rows)
+    {
+        return array_values(self::getColumn($rows, 'id'));
+    }
 }
