@@ -8,8 +8,11 @@ class ResolvedRoute
     private $app;
 
     private $controller;
+
     private $setData;
+
     private $setRoute;
+
     private $setBaseRoute;
 
     public function __construct(Controller $controller, $setData, $setRoute, $setBaseRoute)

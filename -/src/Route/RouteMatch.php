@@ -25,7 +25,7 @@ class RouteMatch
 
     public function route($index = null)
     {
-        if (null === $index) {
+        if (null !== $index) {
             if (isset($this->route[$index])) {
                 return $this->route[$index];
             }
