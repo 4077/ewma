@@ -47,7 +47,7 @@ var __nodeNs__ = "ewma";
             var $widget = this.element;
 
             if (name) {
-                return $(".ewma__html_container[instance='" + name + "']", $widget);
+                return $(".ewma__main_html_container[instance='" + name + "']", $widget);
             }
         }
     });
