@@ -148,8 +148,6 @@ class Controllers extends Service
 
                 $this->prototypes[$absPath] = $controller;
             } else {
-                $r=0;
-
                 throw new \Exception('Module ' . $modulePath . ' not found');
             }
         }
