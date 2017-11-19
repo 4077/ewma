@@ -128,6 +128,8 @@ class Controller
     public function lock()
     {
         $this->__meta__->locked = true;
+
+        $this->console('lock controller ' . $this->__meta__->absPath);
     }
 
     public function unlock()
