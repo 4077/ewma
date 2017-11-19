@@ -6,7 +6,7 @@ class Xhr extends \Controller
 
     public function increaseVersion()
     {
-        $this->c('^:increaseVersion');
+        $this->c('\ewma~css:increaseVersion');
 
         $this->reload();
     }
@@ -17,17 +17,18 @@ class Xhr extends \Controller
 
     public function toggleCompiler()
     {
-        $this->c('^:toggleCompiler');
+        $this->c('\ewma~css:toggleCompiler');
 
         $this->reload();
     }
 
     public function toggleCompilerDevMode()
     {
-        $compiler = &$this->d('^:compiler');
+        $compiler = &$this->d('\ewma~css:compiler');
+
         invert($compiler['dev_mode']);
 
-        $this->c('\ewma\cache~:reset', [
+        $this->c('\ewma~cache:reset', [
             'cssCompiler' => true
         ]);
 
@@ -36,7 +37,8 @@ class Xhr extends \Controller
 
     public function toggleCompilerMinify()
     {
-        $compiler = &$this->d('^:compiler');
+        $compiler = &$this->d('\ewma~css:compiler');
+
         invert($compiler['minify']);
 
         $this->reload();
@@ -44,7 +46,7 @@ class Xhr extends \Controller
 
     public function compilerDirSet()
     {
-        $compiler = &$this->d('^:compiler');
+        $compiler = &$this->d('\ewma~css:compiler');
 
         $txt = \std\ui\Txt::value($this);
 
@@ -58,7 +60,7 @@ class Xhr extends \Controller
 
     public function compilerDevModeDirSet()
     {
-        $compiler = &$this->d('^:compiler');
+        $compiler = &$this->d('\ewma~css:compiler');
 
         $txt = \std\ui\Txt::value($this);
 
@@ -76,14 +78,14 @@ class Xhr extends \Controller
 
     public function toggleCombiner()
     {
-        $this->c('^:toggleCombiner');
+        $this->c('\ewma~css:toggleCombiner');
 
         $this->reload();
     }
 
     public function toggleCombinerUse()
     {
-        $combiner = &$this->d('^:combiner');
+        $combiner = &$this->d('\ewma~css:combiner');
         invert($combiner['use']);
 
         $this->reload();
@@ -91,7 +93,7 @@ class Xhr extends \Controller
 
     public function toggleCombinerMinify()
     {
-        $combiner = &$this->d('^:combiner');
+        $combiner = &$this->d('\ewma~css:combiner');
         invert($combiner['minify']);
 
         $this->reload();
@@ -99,7 +101,7 @@ class Xhr extends \Controller
 
     public function combinerDirSet()
     {
-        $combiner = &$this->d('^:combiner');
+        $combiner = &$this->d('\ewma~css:combiner');
 
         $txt = \std\ui\Txt::value($this);
 

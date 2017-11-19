@@ -9,10 +9,10 @@ class Main extends \Controller
 
     public function view()
     {
-        $dJs = $this->d('^');
+        $d = $this->d('\ewma~js');
 
-        $compiler = $dJs['compiler'];
-        $combiner = $dJs['combiner'];
+        $compiler = $d['compiler'];
+        $combiner = $d['combiner'];
 
         $v = $this->v();
 
@@ -20,7 +20,7 @@ class Main extends \Controller
                        'INCREASE_VERSION_BUTTON'         => $this->c('\std\ui button:view', [
                            'path'    => '>xhr:increaseVersion',
                            'class'   => 'button increase_version',
-                           'content' => $dJs['version']
+                           'content' => $d['version']
                        ]),
                        //
                        // compiler
