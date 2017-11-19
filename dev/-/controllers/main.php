@@ -79,7 +79,7 @@ class Main extends \Controller
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
-        return 'grids reseted';
+        return 'grids reset';
     }
 
     public function resetTrees()
@@ -88,7 +88,7 @@ class Main extends \Controller
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
-        return 'trees reseted';
+        return 'trees reset';
     }
 
     public function resetDialogs()
@@ -97,7 +97,16 @@ class Main extends \Controller
         $builder = $this->sessionQueryConds($builder);
         $builder->delete();
 
-        return 'dialogs reseted';
+        return 'dialogs reset';
+    }
+
+    public function resetDataEditors()
+    {
+        $builder = \ewma\models\Session::where('module_namespace', 'std\ui\data');
+        $builder = $this->sessionQueryConds($builder);
+        $builder->delete();
+
+        return 'data editors reset';
     }
 
     private function sessionQueryConds($builder)
@@ -124,7 +133,7 @@ class Main extends \Controller
     {
         \ewma\models\Session::where('module_namespace', 'ewma\sessionEvents')->delete();
 
-        return 'session events reseted';
+        return 'session events reset';
     }
 
     public function emailmysqldump() ////
