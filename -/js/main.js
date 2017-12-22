@@ -6,7 +6,7 @@ var ewma = {
     cancelFollow: false,
 
     appData: {
-        host: false,
+        url: false,
 
         css: {
             version:             0,
@@ -23,8 +23,8 @@ var ewma = {
 
             reloadAll: function () {
                 for (var i in this.loaded) {
-                    var hrefBeforeChange = ewma.appData.host + this.loaded[i] + ".css?" + this.versionBeforeChange;
-                    var href = ewma.appData.host + this.loaded[i] + ".css?" + this.version;
+                    var hrefBeforeChange = ewma.appData.url + this.loaded[i] + ".css?" + this.versionBeforeChange;
+                    var href = ewma.appData.url + this.loaded[i] + ".css?" + this.version;
 
                     $("head").find("link[href='" + hrefBeforeChange + "']").attr("href", href);
                 }
@@ -46,8 +46,8 @@ var ewma = {
 
             reloadAll: function () {
                 for (var i in this.loaded) {
-                    var srcBeforeChange = ewma.appData.host + this.loaded[i] + ".js?" + this.versionBeforeChange;
-                    var src = ewma.appData.host + this.loaded[i] + ".js?" + this.version;
+                    var srcBeforeChange = ewma.appData.url + this.loaded[i] + ".js?" + this.versionBeforeChange;
+                    var src = ewma.appData.url + this.loaded[i] + ".js?" + this.version;
 
                     $("head").find("script[src='" + srcBeforeChange + "']").attr("src", src);
                 }
@@ -79,16 +79,7 @@ var ewma = {
 
         if (!quiet) {
             ewma.responseWaitingTimeout = setTimeout(function () {
-                $("body").prepend($("<div/>").attr("id", "ewma_response_waiting_overlay").css({
-                    'cursor':     'wait',
-                    'position':   'fixed',
-                    'width':      '100%',
-                    'margin':     '0 auto',
-                    'min-height': '100%',
-                    'height':     'auto !important',
-                    'height':     '100%',
-                    'z-index':    '33554432'
-                }));
+                ewma.showWaitingLayer();
             }, 400);
         }
 
@@ -96,7 +87,7 @@ var ewma = {
 
         $.ajax({
             type:    "POST",
-            url:     ewma.appData.host,
+            url:     ewma.appData.url,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             },
@@ -106,45 +97,76 @@ var ewma = {
             success: function (response) {
                 handler(response);
 
-                clearTimeout(ewma.responseWaitingTimeout);
-                $("#ewma_response_waiting_overlay").remove();
+                ewma.removeXHRError();
+                ewma.removeWaitingLayer();
 
                 ewma.trigger("after_request");
+            },
+            error:   function (jqXHR) {
+                if (jqXHR.responseJSON.error) {
+                    ewma.showXHRError(jqXHR.responseJSON.error);
+
+                    ewma.removeWaitingLayer();
+                    ewma.showWaitingLayer(true);
+                }
             }
         });
+    },
+
+    showXHRError: function (error) {
+        var ideUrl = "phpstorm://open/?file=" + error.file + "&line=" + error.line;
+
+        $("body").prepend($("<div/>")
+            .attr("id", "ewma__xhr_error")
+            .append($("<div>").html(error.message))
+            .append($("<div>").addClass("line").append(
+                $("<a>")
+                    .html(error.file + ':' + error.line)
+                    .attr("href", ideUrl)
+            ))
+            .click(function () {
+                window.location = ideUrl;
+            }));
+    },
+
+    showWaitingLayer: function (error) {
+        $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay"));
+
+        if (error) {
+            $("#ewma__waiting_overlay")
+                .addClass("error")
+                .click(function () {
+                    $(this).remove();
+                    ewma.removeXHRError();
+                });
+        }
+    },
+
+    removeWaitingLayer: function () {
+        clearTimeout(ewma.responseWaitingTimeout);
+
+        $("#ewma__waiting_overlay").remove();
+    },
+
+    removeXHRError: function () {
+        $("#ewma__xhr_error").remove();
     },
 
     processResponse: function (data) {
         if (data) {
             var i, url;
 
-            for (i in data.css.urls) {
-                if (!in_array(data.css.urls[i], ewma.appData.css.loaded)) {
-                    url = data.css.urls[i];
-                    $("head").append('<link rel="stylesheet" type="text/css" href="' + url + '"/>');
-                    ewma.appData.css.loaded.push(data.css.paths[i]);
-                }
-            }
-
             for (i in data.css.paths) {
                 if (!in_array(data.css.paths[i], ewma.appData.css.loaded)) {
-                    url = ewma.appData.host + data.css.paths[i] + ".css?" + ewma.appData.css.version;
+                    url = ewma.appData.url + data.css.paths[i] + ".css?" + ewma.appData.css.version;
                     $("head").append('<link rel="stylesheet" type="text/css" href="' + url + '"/>');
                     ewma.appData.css.loaded.push(data.css.paths[i]);
-                }
-            }
-
-            for (i in data.js.urls) {
-                if (!in_array(data.js.urls[i], ewma.appData.js.loaded)) {
-                    url = data.js.urls[i];
-                    $("head").append($('<script type="text/javascript" src="' + url + '"></script>')); // todo потестить без $()
-                    ewma.appData.js.loaded.push(data.js.paths[i]);
                 }
             }
 
             for (i in data.js.paths) {
                 if (!in_array(data.js.paths[i], ewma.appData.js.loaded)) {
-                    url = ewma.appData.host + data.js.paths[i] + ".js?" + ewma.appData.js.version;
+                    url = ewma.appData.url + data.js.paths[i] + ".js?" + ewma.appData.js.version;
                     $("head").append($('<script type="text/javascript" src="' + url + '"></script>')); // todo потестить без $()
                     ewma.appData.js.loaded.push(data.js.paths[i]);
                 }
@@ -165,35 +187,15 @@ var ewma = {
     processInstructions: function (instructions) {
         var i;
 
-        //for (i in instructions['json']) {
-        //    var json = instructions['json'][i];
-        //
-        //    if (typeof jsonHandler == 'function') {
-        //        jsonHandler(json);
-        //    }
-        //
-        //    if (typeof jsonHandler == 'string') {
-        //        call_user_func_array(jsonHandler, json); // todo test
-        //        //eval(jsonHandler + "(json);");
-        //    }
-        //}
-
         for (i in instructions['js']) {
             var instruction = instructions['js'][i];
 
             if (instruction.type == 'call') {
-                //if (ewma.nodes[instruction.data.method] != undefined) {
-                //    //p(ewma.nodes[instruction.data.method]);
-                //    call_user_func_array(ewma.nodes[instruction.data.method], instruction.data.args);
-                //} else {
                 call_user_func_array(instruction.data.method, instruction.data.args);
-                //}
             }
 
             if (instruction.type == 'raw') {
                 eval(instruction.code);
-
-                // p(instruction.code);
             }
         }
 
@@ -207,7 +209,29 @@ var ewma = {
         }
 
         for (i in instructions['console']) {
-            console.log(eval(instructions['console'][i]));
+            ewma.console(instructions['console'][i]);
+        }
+    },
+
+    console: function (data) {
+        ewma.addConsoleMessage(data);
+    },
+
+    addConsoleMessage: function (data) {
+        ewma.showConsoleLayer();
+
+        $("#ewma__console_layer").append($("<div>")
+            .addClass("message")
+            .html(data));
+    },
+
+    showConsoleLayer: function () {
+        if (!$("#ewma__console_layer").length) {
+            $("body").prepend($("<div/>")
+                .attr("id", "ewma__console_layer")
+                .click(function () {
+                    $("#ewma__console_layer").remove();
+                }));
         }
     },
 
@@ -237,7 +261,7 @@ $(document).ready(function () {
         cache: true
     });
 
-    ewma.appData.host = ewmaAppData.host;
+    ewma.appData.url = ewmaAppData.url;
     ewma.appData.css.version = ewmaAppData.css.version;
     ewma.appData.css.loaded = ewmaAppData.css.paths;
     ewma.appData.js.version = ewmaAppData.js.version;

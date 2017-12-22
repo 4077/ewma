@@ -48,7 +48,6 @@ class Data
 
     public static function tokenize($input, $replacements = [])
     {
-
         if (is_array($input)) {
             $replacementsKeys = array_keys($replacements);
             $inputFlat = a2f($input);

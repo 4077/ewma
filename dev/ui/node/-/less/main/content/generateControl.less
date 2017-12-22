@@ -1,0 +1,49 @@
+// head {
+@import "../../common.less";
+
+@__nodeId__: ~"ewma_dev_ui_node__main_content_generateControl";
+// }
+
+.@{__nodeId__} {
+
+    > .content {
+        background-color: #f0f0f0;
+        padding: 15px;
+
+        .create_template_button {
+            cursor: pointer;
+            float: left;
+            margin: 1px;
+            padding: 5px 15px;
+            font-size: 11px;
+
+            color: #ffffff;
+
+            &.controller {
+                background-color: @controllers_color;
+            }
+
+            &.js {
+                background-color: @js_color;
+            }
+
+            &.css {
+                background-color: @css_color;
+            }
+
+            &.less {
+                background-color: @less_color;
+            }
+
+            &.template {
+                background-color: @templates_color;
+                color: @templates_dark_color;
+            }
+
+            &.hover {
+                background-color: #404040;
+                color: #bdff00;
+            }
+        }
+    }
+}

@@ -64,7 +64,13 @@ class Node
                 return true;
             }
         } else {
-            throw new \Exception('Not found js source with path ' . $this->relativePath . '@' . $this->controller->__meta__->absPath);
+            $message = 'Not found js source with path ' . $jsFilePath;
+
+            if ($this->relativePath) {
+                $message .= ' (' . $this->relativePath . '@' . $this->controller->__meta__->absPath . ')';
+            }
+
+            throw new \Exception($message);
         }
     }
 }

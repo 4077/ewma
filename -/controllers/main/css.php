@@ -42,4 +42,11 @@ class Css extends \Controller
 
         return $this->d['combiner']['enabled'];
     }
+
+    public function toggleCombinerUse()
+    {
+        invert($this->d['combiner']['use']);
+
+        return $this->d['combiner']['use'];
+    }
 }

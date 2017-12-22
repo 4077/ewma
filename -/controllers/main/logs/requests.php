@@ -8,6 +8,10 @@ class Requests extends \Controller
             $line = 'XHR: ' . $this->data['call'][0] . ' ' . $this->plainData($this->data['call'][1]);
         }
 
+        if ($this->data['type'] == 'cli') {
+            $line = 'CLI: ' . $this->data['call'][0] . ' ' . $this->plainData($this->data['call'][1]);
+        }
+
         if ($this->data['type'] == 'route') {
             $line = 'ROUTE: ' . $this->data['route'];
         }
@@ -19,7 +23,7 @@ class Requests extends \Controller
         $user = $this->_user('login') or
         $user = '-';
 
-        return $_SERVER['REMOTE_ADDR'] . ' [' . dt(time()) . '] ' . $user . ' ' . $line . "\n";
+        return ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0') . ' ' . $this->app->host . ' [' . dt(time()) . '] ' . $user . ' ' . $line . "\n";
     }
 
     private function plainData($input)

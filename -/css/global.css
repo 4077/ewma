@@ -2,3 +2,62 @@ html {
     font-family: verdana, arial, sans-serif;
     font-size: 13px;
 }
+
+#ewma__waiting_overlay {
+    cursor: wait;
+    position: fixed;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    z-index: 33554432
+}
+
+#ewma__waiting_overlay.error {
+    cursor: default;
+    background-color: #000000;
+    opacity: 0.5;
+}
+
+#ewma__xhr_error {
+    cursor: pointer;
+    position: fixed;
+    z-index: 33554433;
+    width: 100%;
+    padding: 20px;
+    background-color: #3E0026;
+    color: #FF9C97;
+    font-size: 16px;
+}
+
+#ewma__xhr_error:hover {
+    background-color: #560037;
+    color: #FFCED1;
+}
+
+#ewma__xhr_error .line {
+    margin-top: 13px;
+}
+
+#ewma__xhr_error .line a {
+    color: #B189AC;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+#ewma__console_layer {
+    position: fixed;
+    bottom: 0;
+    z-index: 33554433;
+    width: 100%;
+    padding: 20px;
+    background-color: #091900;
+    color: #01ab00;
+    font-size: 16px;
+}
+
+
+#ewma__console_layer .message {
+    margin: 10px 0;
+}

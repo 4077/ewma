@@ -28,6 +28,8 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_CLI;
 
+        $this->app->ewmaController->c('~logs:write:requests', ['type' => 'cli', 'call' => $call]);
+
         $response = $this->app->requestHandlerController->_call($call)->perform();
 
         $this->app->response->sendAppResponse($response);
@@ -50,12 +52,24 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_XHR;
 
+        ///// todo если для текущего env/id включен вывод ошибок и есть права на просмотр
+        $whoops = new \Whoops\Run;
+        $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler());
+        $whoops->register();
+        ////
+
         $this->app->ewmaController->c('~logs:write:requests', [
             'type' => 'xhr',
             'call' => $call
         ]);
 
-        $this->app->requestHandlerController->_call($call)->perform(Controller::XHR);
+        if ('#' == substr($call[0], 0, 1)) {
+            $handlerSource = substr($call[0], 1);
+
+            handlers()->render($handlerSource, $call[1]);
+        } else {
+            $this->app->requestHandlerController->_call($call)->perform(Controller::XHR);
+        }
 
         $this->app->response->sendAppResponse();
     }
@@ -64,11 +78,23 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_ROUTE;
 
+        ///// todo если для текущего env/id включен вывод ошибок и есть права на просмотр
+        $whoops = new \Whoops\Run;
+        $handler = new \Whoops\Handler\PrettyPageHandler;
+
+        $handler->setEditor(function ($file, $line) {
+            return "phpstorm://open/?file=$file&line=$line";
+        });
+
+        $whoops->pushHandler($handler);
+        $whoops->register();
+        /////
+
         $this->setRoute();
         $this->setData();
 
         $this->app->ewmaController->c('~logs:write:requests', [
-            'type' => 'route',
+            'type'  => 'route',
             'route' => $this->app->route
         ]);
 
@@ -101,7 +127,7 @@ class Request extends Service
 
     /**
      * @param bool|false $path
-     * @param null $value
+     * @param null       $value
      *
      * @return $this|null
      */

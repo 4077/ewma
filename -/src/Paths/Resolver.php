@@ -122,32 +122,38 @@ class Resolver extends Service
     public function resolve($path, $basePath)
     {
         if (!isset($this->cache[(string)$basePath][(string)$path])) {
-            $pathOriginal = $path;
-
-            $path = $this->replaceShorts($path);
-            $path = $this->replaceTildes($path);
-
-            $firstSymbol = substr($path, 0, 1);
-
-            if ($path) {
-                if ('\\' == $firstSymbol || '/' == $firstSymbol) {
-                    $resolved = $this->resolveAbs($path, $firstSymbol, $pathOriginal);
-                } elseif ('^' == $firstSymbol) {
-                    $resolved = $this->resolveRelativeToMaster($path, $basePath, $pathOriginal);
-                } elseif ('@' == $firstSymbol) {
-                    $resolved = $this->resolveRelativeToParent($path, $basePath, $pathOriginal);
-                } elseif ('<' == $firstSymbol) {
-                    $resolved = $this->resolveRelativeToSomeParent($path, $basePath, $pathOriginal);
-                } elseif ('>' == $firstSymbol) {
-                    $resolved = $this->resolveNestedNode($path, $basePath, $pathOriginal);
-                } else {
-                    $resolved = $this->resolveRelativeToModule($path, $basePath, $pathOriginal);
-                }
+            if (substr($path, 0, 1) == '#') {
+                $resolved = $path;
             } else {
-                $resolved = $basePath;
+                $pathOriginal = $path;
+
+                $path = $this->replaceShorts($path);
+                $path = $this->replaceTildes($path);
+
+                $firstSymbol = substr($path, 0, 1);
+
+                if ($path) {
+                    if ('\\' == $firstSymbol || '/' == $firstSymbol) {
+                        $resolved = $this->resolveAbs($path, $firstSymbol, $pathOriginal);
+                    } elseif ('^' == $firstSymbol) {
+                        $resolved = $this->resolveRelativeToMaster($path, $basePath, $pathOriginal);
+                    } elseif ('@' == $firstSymbol) {
+                        $resolved = $this->resolveRelativeToParent($path, $basePath, $pathOriginal);
+                    } elseif ('<' == $firstSymbol) {
+                        $resolved = $this->resolveRelativeToSomeParent($path, $basePath, $pathOriginal);
+                    } elseif ('>' == $firstSymbol) {
+                        $resolved = $this->resolveNestedNode($path, $basePath, $pathOriginal);
+                    } else {
+                        $resolved = $this->resolveRelativeToModule($path, $basePath, $pathOriginal);
+                    }
+                } else {
+                    $resolved = $basePath;
+                }
+
+                $resolved = force_l_slash($resolved);
             }
 
-            $this->cache[(string)$basePath][(string)$path] = force_l_slash($resolved);
+            $this->cache[(string)$basePath][(string)$path] = $resolved;
             $this->cacheUpdated = true;
         }
 

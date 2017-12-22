@@ -553,44 +553,58 @@ class Controller
         return $node;
     }
 
-    public function dmap_($path, $mappings = '*')
+    public function &dmap_($path, $mappings = '*')
     {
         $d = &$this->d($path);
 
         remap($d, $this->data, $mappings);
+
+        return $d;
     }
 
-    public function _dmap($path, $mappings = '*')
-    {
-        $d = $this->d($path);
-
-        remap($this->data, $d, $mappings);
-    }
-
-    public function dmap($path, $mappings = '*') // todo если 1 аргумент, то считать что это mapping
-    {
-        $this->dmap_($path, $mappings);
-        $this->_dmap($path, $mappings);
-    }
-
-    public function smap_($path, $mappings)
+    public function &smap_($path, $mappings = '*')
     {
         $s = &$this->s($path);
 
         remap($s, $this->data, $mappings);
+
+        return $s;
     }
 
-    public function _smap($path, $mappings)
+    public function &_dmap($path, $mappings = '*')
     {
-        $s = $this->s($path);
+        $d = &$this->d($path);
+
+        remap($this->data, $d, $mappings);
+
+        return $d;
+    }
+
+    public function &_smap($path, $mappings = '*')
+    {
+        $s = &$this->s($path);
 
         remap($this->data, $s, $mappings);
+
+        return $s;
     }
 
-    public function smap($path, $mappings)
+    public function &dmap($path, $mappings = '*')
+    {
+        $this->dmap_($path, $mappings);
+
+        $d = &$this->_dmap($path, $mappings);
+
+        return $d;
+    }
+
+    public function &smap($path, $mappings = '*')
     {
         $this->smap_($path, $mappings);
-        $this->_smap($path, $mappings);
+
+        $s = &$this->_smap($path, $mappings);
+
+        return $s;
     }
 
     /**
@@ -670,6 +684,16 @@ class Controller
     public function packModel($path = 'model')
     {
         return pack_model($this->data($path));
+    }
+
+    public function packModels()
+    {
+        $this->data = pack_models($this->data);
+    }
+
+    public function unpackModels()
+    {
+        $this->data = unpack_models($this->data);
     }
 
     public function xpackModel($path = 'model')

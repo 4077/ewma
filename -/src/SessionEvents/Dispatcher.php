@@ -57,10 +57,9 @@ class Dispatcher
                 'event_path'     => $this->eventPath,
                 'event_name'     => $this->eventName,
                 'event_filter'   => $this->eventFilter,
+                'event_instance' => $this->eventInstance,
                 'path'           => $this->controller->_p($path),
                 'data'           => $data,
-                //                'trigger_data_ra' => $this->triggerDataRa
-                'event_instance' => $this->eventInstance,
             ]);
         }
 

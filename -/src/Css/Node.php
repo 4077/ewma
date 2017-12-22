@@ -104,7 +104,7 @@ class Node
         } else {
             $cssFilePath = $this->controller->_nodeFilePath($this->relativePath, 'css');
             $cssFileAbsPath = abs_path($cssFilePath . '.css');
-            if ($cssFileAbsPath) {
+            if (file_exists($cssFileAbsPath)) {
                 $cssFileMTime = filemtime($cssFileAbsPath);
                 if (!isset($this->app->css->cache['nodes_m_times'][$this->id]) || $this->app->css->cache['nodes_m_times'][$this->id] != $cssFileMTime) {
                     $compiler = new Compiler($targetDir, $targetFilePath, $compilerSettings);
@@ -116,7 +116,13 @@ class Node
                     return true;
                 }
             } else {
-                throw new \Exception('Not found less or css source with path ' . $this->relativePath . '@' . $this->controller->__meta__->absPath);
+                $message = 'Not found less or css source with path ' . $cssFilePath;
+
+                if ($this->relativePath) {
+                    $message .= ' (' . $this->relativePath . '@' . $this->controller->__meta__->absPath . ')';
+                }
+
+                throw new \Exception($message);
             }
         }
     }

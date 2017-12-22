@@ -108,7 +108,8 @@ class Flatten
     private $flattenData = [
         'nodes_by_id'   => [],
         'ids_by_parent' => [],
-        'parents_by_id' => []
+        'parents_by_id' => [],
+        'ids_by_order'  => []
     ];
 
     public function getFlattenData($id)
@@ -123,6 +124,7 @@ class Flatten
         $this->flattenData['nodes_by_id'][$id] = $this->getNode($id);
 
         foreach ($this->getSubnodes($id) as $subnode) {
+            $this->flattenData['ids_by_order'][] = $subnode->{$this->idFieldName};
             $this->flattenData['ids_by_parent'][$id][] = $subnode->{$this->idFieldName};
             $this->flattenData['parents_by_id'][$subnode->{$this->idFieldName}] = $id;
 

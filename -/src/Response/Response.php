@@ -70,7 +70,7 @@ class Response extends Service
 
                 // комбинатор должен работать если включена перекомпиляция
                 if ($hasRecompiledNodes && ($combinerSettings['enabled'] || $compilerSettings['enabled'])) {
-                    $this->app->css->combine($compilerTargetDir, $combinerSettings['dir'], $filesPaths);
+//                    $this->app->css->combine($compilerTargetDir, $combinerSettings['dir'], $filesPaths);
                 }
 
                 // режим разработки несовместим с использование скомбинированных файлов // todo подумать об этом
@@ -144,7 +144,7 @@ class Response extends Service
                 // комбинатор должен работать если включена перекомпиляция
                 // запускается только если был перекомпилирован хотя бы один узел
                 if ($hasRecompiledNodes && ($combiner['enabled'] || $compiler['enabled'])) {
-                    $this->app->js->combine($compilerTargetDir, $combiner['dir'], $filesPaths);
+//                    $this->app->js->combine($compilerTargetDir, $combiner['dir'], $filesPaths);
                 }
 
                 if ($combiner['use']) {
@@ -281,7 +281,7 @@ class Response extends Service
         }
 
         $appData = [
-            'host'         => $this->app->host,
+            'url'          => $this->app->url,
             'js'           => [
                 'version' => $this->app->js->settings['version'],
                 'urls'    => $this->app->js->getUrls(),
@@ -335,11 +335,11 @@ class Response extends Service
             $this->app->events->trigger('app/terminate');
 
             if ($this->app->mode == App::REQUEST_MODE_CLI) {
-                if (is_array($response)) {
-                    $response = implode(PHP_EOL, $response);
+                if (!is_scalar($response)) {
+                    $response = j_($response);
                 }
 
-                $response .= PHP_EOL;
+                $response = $response . PHP_EOL;
 
                 fwrite(STDOUT, $response);
                 fwrite(STDERR, false);

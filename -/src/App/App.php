@@ -185,8 +185,9 @@ class App extends Service
 
         #8 остальное
         if (isset($_SERVER['HTTP_HOST'])) {
-            $this->host = $this->protocol . '://' . force_r_slash($_SERVER['HTTP_HOST']);
-            $this->domain = $_SERVER['HTTP_HOST'];
+            $this->host = $this->request->getHost();
+            $this->scheme = $this->request->getScheme();
+            $this->url = force_r_slash($this->request->getSchemeAndHttpHost());
         }
 
         setlocale(LC_ALL, 'ru_RU.utf8'); // todo config
@@ -220,9 +221,9 @@ class App extends Service
 
     public $root;
     public $publicRoot;
-    public $protocol = 'http';
+    public $scheme;
+    public $url;
     public $host;
-    public $domain;
 
     public function getConfig($path)
     {
