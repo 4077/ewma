@@ -1,3 +1,4 @@
 <?php return [
-    'namespace' => 'ewma\ui\css'
+    'namespace' => 'ewma\ui\css',
+    'type'      => 'slave'
 ];
