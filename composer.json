@@ -12,6 +12,7 @@
     "require": {
         "fed/ewma-module-installer-plugin": "~0.0.1",
         "fed/jquery": "^0.0",
+        "fed/data-editor": "^0.0",
         "illuminate/filesystem": "^5.2",
         "illuminate/database": "5.*",
         "illuminate/cache": "*",
