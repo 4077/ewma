@@ -38,7 +38,7 @@ class Content extends \Controller
 
     private function editorView($code, $type)
     {
-        return $this->c('\ace2~:view', [
+        return $this->c('\ace~:view', [
             'path' => '>xhr:update|',
             'data' => [
                 'type' => $type

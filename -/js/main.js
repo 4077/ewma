@@ -181,6 +181,10 @@ var ewma = {
             if (data.href !== undefined) {
                 window.location.href = data.href;
             }
+
+            if (data.reload !== undefined) {
+                window.location.href = window.location.href;
+            }
         }
     },
 
