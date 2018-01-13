@@ -81,6 +81,11 @@ class Storage extends Service
 
             return $node;
         }
+
+        $null = null;
+        $node = &$null;
+
+        return $node;
     }
 
     /**
@@ -206,6 +211,7 @@ class Storage extends Service
     }
 
     // todo
+
     /**
      * Перезагрузка всех узлов, или только всех узлов модуля, или только определенного узла
      *
