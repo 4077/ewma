@@ -13,5 +13,7 @@ class Xhr extends \Controller
         $s = &$this->s('<|' . $instance);
 
         $s['node_instance'] = $this->data['node_instance'];
+
+        $this->c('~:reload|');
     }
 }

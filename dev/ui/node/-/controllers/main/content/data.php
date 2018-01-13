@@ -56,7 +56,7 @@ class Data extends \Controller
         $nodeInstances = [];
 
         if ($type == 'session') {
-            $nodeInstances = \ewma\models\session\Session::where('module_namespace', $moduleNamespace)
+            $nodeInstances = \ewma\models\Session::where('module_namespace', $moduleNamespace)
                 ->where('node_path', $this->data['node_path'])
                 ->where('key', $this->app->session->getKey())
                 ->orderBy('node_instance')
@@ -64,7 +64,7 @@ class Data extends \Controller
         }
 
         if ($type == 'storage') {
-            $nodeInstances = \ewma\models\storage\Storage::where('module_namespace', $moduleNamespace)
+            $nodeInstances = \ewma\models\Storage::where('module_namespace', $moduleNamespace)
                 ->where('node_path', $this->data['node_path'])
                 ->orderBy('node_instance')
                 ->get();

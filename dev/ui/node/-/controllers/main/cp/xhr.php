@@ -11,6 +11,10 @@ class Xhr extends \Controller
         $this->app->session->save($this->_module()->namespace);
 
         $this->e('ewma/dev/nodeEditor/typeSet/' . $this->_instance())->trigger();
+
+        $this->c('~|')->performCallback('typeSelect', [
+            'type' => $this->data('type')
+        ]);
     }
 
     public function save()
