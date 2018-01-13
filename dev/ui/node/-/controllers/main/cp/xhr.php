@@ -32,13 +32,13 @@ class Xhr extends \Controller
                 $this->d('~:cache/' . $type . '|', null, RR);
 
                 if ($type == 'js') {
-                    $this->c('\ewma\cache~:reset', ['jsCompiler' => true]);
-                    $this->c('\ewma\js~:increaseVersion');
+                    $this->c('\ewma~cache:reset', ['jsCompiler' => true]);
+                    $this->c('\ewma~js:increaseVersion');
                 }
 
                 if ($type == 'less') {
-                    $this->c('\ewma\cache~:reset', ['cssCompiler' => true]);
-                    $this->c('\ewma\css~:increaseVersion');
+                    $this->c('\ewma~cache:reset', ['cssCompiler' => true]);
+                    $this->c('\ewma~css:increaseVersion');
                 }
             }
         }
