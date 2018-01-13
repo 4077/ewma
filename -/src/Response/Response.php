@@ -246,6 +246,13 @@ class Response extends Service
         $this->href = null === $url ? '/' : $url;
     }
 
+    public $reload;
+
+    public function reload() // xhr only
+    {
+        $this->reload = true;
+    }
+
     private function getInstructions()
     {
         return [
