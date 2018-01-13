@@ -331,7 +331,7 @@ class Controller
         return $user = $this->_user() and $user->hasPermission($this, $permissionPattern);
     }
 
-    public function _nodeFilePath($path, $nodeType = false)
+    public function _nodeFilePath($path = false, $nodeType = false)
     {
         return $this->app->paths->getNodeFilePath($path, $nodeType, $this);
     }
