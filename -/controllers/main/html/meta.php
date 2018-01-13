@@ -4,9 +4,9 @@ class Meta extends \Controller
 {
     public $singleton = true;
 
-    public function set($name, $content, $httpEquiv = false)
+    public function set()
     {
-        $this->app->html->meta->set($name, $content, $httpEquiv);
+        $this->app->html->meta->set($this->data('name'), $this->data('content'), $this->data('http_equiv') ?? false);
 
         return $this;
     }
