@@ -34,7 +34,7 @@ class Controllers extends Service
 
         $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
 
-        if ($prototype = $this->getPrototype($absPath)){
+        if ($prototype = $this->getPrototype($absPath)) {
             $controller = clone $prototype;
 
             $controllerId = ++$this->increment;
@@ -50,68 +50,74 @@ class Controllers extends Service
 
     public function call($callPath, $data, Controller $caller)
     {
-        list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);
-        list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+        if ('#' == substr($callPath, 0, 1)) {
+            $handlerSource = substr($callPath, 1);
 
-        $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
-
-        if (isset($this->singletonesByPath[$absPath])) {
-            /**
-             * @var $controller \ewma\Controllers\Controller
-             */
-            $controller = $this->singletonesByPath[$absPath];
-
-            $controller->__meta__->callerId = $caller->__meta__->id;
-            $controller->__meta__->calledMethod = $method;
-
-            $controller->__meta__->setArgs($args);
-            $controller->__meta__->setData($data);
-            $controller->__meta__->instance = $instance;
-
-            $controller->__meta__->route = $caller->__meta__->route;
-            $controller->__meta__->baseRoute = $caller->__meta__->baseRoute;
-
-            $controller->__recreate();
-
-            if ($method) {
-                return $controller->__run__($method);
-            } else {
-                return $controller;
-            }
-        } elseif ($prototype = $this->getPrototype($absPath)) {
-            /**
-             * @var $controller \ewma\Controllers\Controller
-             */
-            $controller = clone $prototype;
-
-            $controllerId = ++$this->increment;
-            $this->controllersById[$controllerId] = $controller;
-
-            $controller->__meta__->id = $controllerId;
-
-            $controller->__meta__->callerId = $caller->__meta__->id;
-            $controller->__meta__->calledMethod = $method;
-
-            $controller->__meta__->setArgs($args);
-            $controller->__meta__->setData($data);
-            $controller->__meta__->instance = $instance;
-
-            $controller->__meta__->route = $caller->__meta__->route;
-            $controller->__meta__->baseRoute = $caller->__meta__->baseRoute;
-
-            $controller->__create();
-
-            if ($prototype->singleton) {
-                $this->singletonesByPath[$absPath] = $controller;
-            }
-
-            if ($method) {
-                return $controller->__run__($method);
-            } else {
-                return $controller;
-            }
+            return handlers()->render($handlerSource, $data);
         } else {
-            throw new \Exception('Controller ' . $absPath . ' not exists');
+            list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);
+            list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+
+            $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
+
+            if (isset($this->singletonesByPath[$absPath])) {
+                /**
+                 * @var $controller \ewma\Controllers\Controller
+                 */
+                $controller = $this->singletonesByPath[$absPath];
+
+                $controller->__meta__->callerId = $caller->__meta__->id;
+                $controller->__meta__->calledMethod = $method;
+
+                $controller->__meta__->setArgs($args);
+                $controller->__meta__->setData($data);
+                $controller->__meta__->instance = $instance;
+
+                $controller->__meta__->route = $caller->__meta__->route;
+                $controller->__meta__->baseRoute = $caller->__meta__->baseRoute;
+
+                $controller->__recreate();
+
+                if ($method) {
+                    return $controller->__run__($method);
+                } else {
+                    return $controller;
+                }
+            } elseif ($prototype = $this->getPrototype($absPath)) {
+                /**
+                 * @var $controller \ewma\Controllers\Controller
+                 */
+                $controller = clone $prototype;
+
+                $controllerId = ++$this->increment;
+                $this->controllersById[$controllerId] = $controller;
+
+                $controller->__meta__->id = $controllerId;
+
+                $controller->__meta__->callerId = $caller->__meta__->id;
+                $controller->__meta__->calledMethod = $method;
+
+                $controller->__meta__->setArgs($args);
+                $controller->__meta__->setData($data);
+                $controller->__meta__->instance = $instance;
+
+                $controller->__meta__->route = $caller->__meta__->route;
+                $controller->__meta__->baseRoute = $caller->__meta__->baseRoute;
+
+                $controller->__create();
+
+                if ($prototype->singleton) {
+                    $this->singletonesByPath[$absPath] = $controller;
+                }
+
+                if ($method) {
+                    return $controller->__run__($method);
+                } else {
+                    return $controller;
+                }
+            } else {
+                throw new \Exception('Controller ' . $absPath . ' not exists');
+            }
         }
     }
 
