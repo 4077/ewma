@@ -60,6 +60,7 @@ class Modules extends Service
     {
         $this->localModulesRegisterRecursion();
         $this->vendorModulesRegisterRecursion();
+        $this->externalModulesRegister();
     }
 
     private function saveToCache()
@@ -80,7 +81,7 @@ class Modules extends Service
      *          если файла нет, то регистрируется этот модуль
      *          если файл есть, то:
      *              если type=local, то регистрируется этот модуль,
-     *              если type=external, то запускается рекурсия регистрации на пути external_path
+     *              если type=external, то запускается рекурсия регистрации на пути external_path // todo del
      *              если type=vendor, то ничего не происходит
      *
      *      неймспейс зарегистрированного модуля добавляется в список зарегистрированных модулей
@@ -156,7 +157,7 @@ class Modules extends Service
             if (isset($locationSettings['external_path'])) {
                 $basePath = $locationSettings['external_path'];
 
-                $this->externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '');
+                $this->externalModuleRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '');
             }
         }
     }
@@ -215,9 +216,73 @@ class Modules extends Service
         }
     }
 
-    private function externalModulesRegisterRecursion($basePath, $modulePathArray = [], $masterModulePath = '')
+    private function externalModulesRegister()
     {
+        $rootModule = $this->getRootModule();
 
+        $externalModules = ap($rootModule->config, 'external_modules');
+
+        if ($externalModules) {
+            foreach ($externalModules as $localPath => $externalModulePath) {
+                if (!isset($this->modulesByPath[$localPath])) {
+                    $this->externalModuleRegisterRecursion($localPath, $externalModulePath);
+                }
+            }
+        }
+    }
+
+    private function externalModuleRegisterRecursion($localPath, $externalPath, $modulePathArray = [], $masterModulePath = '', $parentId = 0)
+    {
+        $modulePath = a2p($modulePathArray);
+
+        $moduleDir = $externalPath . ($modulePath ? '/' . $modulePath : '');
+
+        $settingsFilePath = $moduleDir . '/settings.php';
+        if (file_exists($settingsFilePath)) {
+            $settings = require $settingsFilePath;
+        } else {
+            $settings = [
+                'namespace' => implode('\\', $modulePathArray)
+            ];
+        }
+
+        $hasLocated = isset($this->modulesByNamespace[$settings['namespace']]);
+        $isRootLevel = !$modulePathArray;
+
+        if (!$hasLocated) {
+            ra($settings, [
+                'location'           => 'external',
+                'id'                 => ++$this->currentModuleId,
+                'parent_id'          => $parentId,
+                'path'               => path($localPath, $modulePath),
+                'dir'                => $moduleDir,
+                'master_module_path' => ($settings['type'] ?? 'master') == 'master'
+                    ? a2p($modulePathArray)
+                    : $masterModulePath
+            ]);
+
+            $module = $this->registerModule($settings);
+        }
+
+        if (!$hasLocated || $isRootLevel) {
+            foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
+                if ($fileInfo->isDot()) {
+                    continue;
+                }
+
+                if ($fileInfo->isDir()) {
+                    $fileName = $fileInfo->getFilename();
+
+                    if ($fileName != '-') {
+                        $modulePathArray[] = $fileName;
+
+                        $this->externalModuleRegisterRecursion($localPath, $externalPath, $modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
+
+                        array_pop($modulePathArray);
+                    }
+                }
+            }
+        }
     }
 
     /**

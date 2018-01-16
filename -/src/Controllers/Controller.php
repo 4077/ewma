@@ -336,6 +336,11 @@ class Controller
         return $this->app->paths->getNodeFilePath($path, $nodeType, $this);
     }
 
+    public function _nodeFileAbsPath($path = false, $nodeType = false) ////
+    {
+        return $this->app->paths->getNodeFilePath($path, $nodeType, $this);
+    }
+
     /**
      * @param bool|array $input
      *
