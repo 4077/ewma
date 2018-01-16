@@ -369,6 +369,12 @@ class Response extends Service
                     ]);
                 }
 
+                if (null !== $this->reload) { // xhr only
+                    ra($appData, [
+                        'reload' => $this->reload
+                    ]);
+                }
+
                 $this->proxy->headers->set('Content-Type', 'application/json');
                 $this->proxy->setContent(json_encode($appData));
                 $this->proxy->send();
