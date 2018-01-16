@@ -72,8 +72,6 @@ class Paths extends Service
                 ? 'modules'
                 : 'modules-vendor';
 
-            // todo хранить прямо в модуле путь к его папке
-
             $moduleNodesDirPath = $modulePath ? '/' . $modulesDir . '/' . $modulePath . '/-' : '';
             $nodeFilePath = ($nodeType ? '/' . $nodeType : '') . '/' . $nodePath;
 
