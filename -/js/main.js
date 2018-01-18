@@ -102,9 +102,9 @@ var ewma = {
 
                 ewma.trigger("after_request");
             },
-            error:   function (jqXHR) {
-                if (jqXHR.responseJSON.error) {
-                    ewma.showXHRError(jqXHR.responseJSON.error);
+            error:   function (response) {
+                if (response.responseJSON.error) {
+                    ewma.showXHRError(response.responseJSON.error);
 
                     ewma.removeWaitingLayer();
                     ewma.showWaitingLayer(true);
