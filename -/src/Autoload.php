@@ -30,7 +30,7 @@ class Autoload
         static::loadCache();
 
         // временный хардкод. если есть локальный модуль? то используется он, невзирая на location
-        if (file_exists(abs_path($appRoot . '/modules/ewma/settings.php'))) {
+        if (file_exists($appRoot . '/modules/ewma/settings.php')) {
             static::registerModule('ewma', 'ewma', $appRoot . '/modules/ewma');
         } else {
             static::registerModule('ewma', 'ewma', $appRoot . '/modules-vendor/fed/ewma');
