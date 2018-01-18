@@ -1,45 +1,41 @@
 <?php namespace ewma\Route;
 
-use ewma\App\App;
 use ewma\Controllers\Controller;
 
 class ResolvedRoute
 {
-    private $app;
-
     private $controller;
 
-    private $setData;
+    private $data;
 
-    private $setRoute;
+    public $routeTail;
 
-    private $setBaseRoute;
+    public $baseRoute;
 
-    public function __construct(Controller $controller, $setData, $setRoute, $setBaseRoute)
+    public function __construct(Controller $controller, $data, $routeTail, $baseRoute)
     {
-        $this->app = App::getInstance();
-
         $this->controller = $controller;
-        $this->setData = $setData;
-        $this->setRoute = $setRoute;
-        $this->setBaseRoute = $setBaseRoute;
+        $this->data = $data;
+        $this->routeTail = $routeTail;
+        $this->baseRoute = $baseRoute;
     }
 
     public function to($callPath, $data = [], $responseCallback = null)
     {
         list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
 
-        $setData = $this->setData;
-        ra($setData, $data);
+        $callData = $this->data;
 
-        $controller = $this->controller->c($path, $setData);
+        ra($callData, $data);
+
+        $controller = $this->controller->c($path, $callData);
 
         if (null !== $args) {
             $controller->__meta__->setArgs($args);
         }
 
-        $controller->__meta__->route = $this->setRoute;
-        $controller->__meta__->baseRoute = $this->setBaseRoute;
+        $controller->__meta__->route = $this->routeTail;
+        $controller->__meta__->baseRoute = $this->baseRoute;
 
         if ($method) {
             $response = $controller->__run__($method);
