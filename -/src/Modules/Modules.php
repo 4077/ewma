@@ -6,20 +6,21 @@ use ewma\Autoload;
 
 class Modules extends Service
 {
-    protected $services = ['app'];
+    protected $services = ['app', 'dev'];
 
     /**
      * @var App
      */
     public $app = App::class;
 
-    //
-    //
-    //
+    /**
+     * @var \ewma\Modules\Dev
+     */
+    public $dev = \ewma\Modules\Dev::class;
 
-    private $modulesByPath = [];
-
-    private $modulesByNamespace = [];
+    //
+    //
+    //
 
     private $cache;
 
@@ -40,19 +41,39 @@ class Modules extends Service
 
                 $this->modulesByPath[$module->path] = $module;
                 $this->modulesByNamespace[$module->namespace] = $module;
-
-                if ($module->path && $module->helpers) {
-                    require abs_path($module->dir, '/-/src/helpers.php');
-                }
             }
         } else {
             $this->registerModules();
             $this->saveToCache();
         }
 
+        $this->load();
+    }
+
+    private $modulesByPath = [];
+
+    private $modulesByNamespace = [];
+
+    public function reload()
+    {
+        $this->modulesByPath = [];
+        $this->modulesByNamespace = [];
+
+        $this->registerModules();
+        $this->saveToCache();
+
+        $this->load();
+    }
+
+    private function load()
+    {
         foreach ($this->modulesByPath as $module) {
             /* @var $module Module */
             Autoload::registerModule($module->namespace, $module->path, $module->dir);
+
+            if ($module->path && $module->helpers) {
+                require_once abs_path($module->dir, '/-/src/helpers.php');
+            }
         }
     }
 
