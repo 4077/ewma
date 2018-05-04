@@ -54,15 +54,17 @@ class Flatten
 
     private function branchRecursion($id)
     {
-        $this->branch[$this->level] = $this->nodesById[$id];
+        if (isset($this->nodesById[$id])) { // добавил чтобы перебор обрывался когда узел отсутствует. на отфильтрованных деревьях случается ошибка
+            $this->branch[$this->level] = $this->nodesById[$id];
 
-        $this->level++;
+            $this->level++;
 
-        if ($this->nodesById[$id][$this->parentIdFieldName] > 0) {
-            $this->branchRecursion($this->nodesById[$id][$this->parentIdFieldName]);
+            if ($this->nodesById[$id][$this->parentIdFieldName] > 0) {
+                $this->branchRecursion($this->nodesById[$id][$this->parentIdFieldName]);
+            }
+
+            $this->level--;
         }
-
-        $this->level--;
     }
 
     private $ids;
