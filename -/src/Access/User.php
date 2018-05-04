@@ -127,7 +127,7 @@ class User
                     $allow = array_intersect($checkPermissionsList, $allowedPermissions) ? true : false;
 
                     if (!$allow) {
-                        $controller->console('access denied: ' . $path);
+//                        $controller->console('access denied: ' . $path);
                     }
                 }
 

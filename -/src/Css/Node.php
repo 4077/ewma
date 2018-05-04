@@ -33,7 +33,7 @@ class Node
         ksort($varsFlat);
 
         foreach ($varsFlat as $path => $value) {
-            $this->vars[str_replace('/', '__', $path)] = empty($value) ? '' : $value;
+            $this->vars[str_replace('/', '__', $path)] = $value ?? '';
         }
 
         return $this;

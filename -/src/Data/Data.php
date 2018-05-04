@@ -46,7 +46,7 @@ class Data
         }
     }
 
-    public static function tokenize($input, $replacements = [])
+    public static function tokenize($input, $replacements = []) // похоже это был корявый костыль
     {
         if (is_array($input)) {
             $replacementsKeys = array_keys($replacements);
