@@ -59,9 +59,9 @@ class Html extends \Controller
         return $this;
     }
 
-    public function setFavicon($href)
+    public function setFavicon()
     {
-        $this->app->html->setFavicon($href);
+        $this->app->html->setFavicon($this->data('url'));
 
         return $this;
     }
