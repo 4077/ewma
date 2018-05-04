@@ -62,6 +62,19 @@ function call_user_func_array(cb, parameters) {
     //func.apply(func, parameters);
 }
 
+// https://stackoverflow.com/a/359910
+function execute_function_by_name(functionName, context /*, args */) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    var namespaces = functionName.split(".");
+    var func = namespaces.pop();
+
+    for (var i = 0; i < namespaces.length; i++) {
+        context = context[namespaces[i]];
+    }
+
+    return context[func].apply(context, args);
+}
+
 //function in_array(needle, haystack) {
 //    for (var key in haystack) {
 //        if (haystack[key] === needle) {
@@ -259,6 +272,17 @@ function constrains(value, min, max) {
     }
     if (value > max) {
         value = max;
+    }
+
+    return value;
+}
+
+function constrains_loop(value, min, max) {
+    if (value < min) {
+        value = max;
+    }
+    if (value > max) {
+        value = min;
     }
 
     return value;
