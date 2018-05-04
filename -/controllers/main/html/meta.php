@@ -11,6 +11,17 @@ class Meta extends \Controller
         return $this;
     }
 
+    public function setList()
+    {
+        $list = map($this->data('list'), 'keywords, description');
+
+        foreach ($list as $name => $content) {
+            $this->app->html->meta->set($name, $content, $this->data('http_equiv') ?? false);
+        }
+
+        return $this;
+    }
+
     public function view()
     {
         $tags = [];
