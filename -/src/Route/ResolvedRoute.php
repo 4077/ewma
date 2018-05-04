@@ -20,6 +20,17 @@ class ResolvedRoute
         $this->baseRoute = $baseRoute;
     }
 
+    public function data($path = false, $value = null)
+    {
+        if (null !== $value) {
+            ap($this->data, $path, $value);
+
+            return $this;
+        } else {
+            return ap($this->data, $path);
+        }
+    }
+
     public function to($callPath, $data = [], $responseCallback = null)
     {
         list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
