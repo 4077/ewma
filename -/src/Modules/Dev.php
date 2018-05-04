@@ -79,6 +79,39 @@ class Dev extends Service
         }
     }
 
+    public function renderNamespace($path)
+    {
+        if ($path = trim($path)) {
+            $pathArray = p2a($path);
+            $newPathArray = $pathArray;
+
+            $baseModule = $this->app->modules->getRootModule();
+
+            $baseModulePathArray = [];
+            foreach ($pathArray as $name) {
+                $baseModulePathArray[] = $name;
+
+                if ($module = $this->app->modules->getByPath(a2p($baseModulePathArray))) {
+                    $baseModule = $module;
+
+                    array_shift($newPathArray);
+                }
+            }
+
+            $newModuleNamespace = $baseModule->namespace;
+
+            foreach ($newPathArray as $newModuleName) {
+                if (is_numeric(substr($newModuleName, 0, 1))) {
+                    $newModuleName = '_' . $newModuleName;
+                }
+
+                $newModuleNamespace .= '\\' . $newModuleName;
+            }
+
+            return $newModuleNamespace;
+        }
+    }
+
     public function delete($path)
     {
         if ($module = $this->app->modules->getByPath($path)) {
