@@ -125,11 +125,13 @@ class Controller
         return true;
     }
 
-    public function lock()
+    public function lock($console = true)
     {
         $this->__meta__->locked = true;
 
-        $this->console('lock controller ' . $this->__meta__->absPath);
+        if ($console) { // todo сделать чтобы зависело от какой-то настройки и доступа
+            $this->console('lock controller ' . $this->__meta__->absPath);
+        }
     }
 
     public function unlock()
@@ -150,6 +152,14 @@ class Controller
         if (false === $path) {
             return $this->__meta__->nodeId;
         } else {
+            if (false !== strpos($path, '|')) {
+                list($path,) = explode('|', $path);
+            }
+
+            if (false !== strpos($path, ':')) {
+                list($path,) = explode(':', $path);
+            }
+
             list($modulePath, $nodePath) = $this->app->paths->separateAbsPath(
                 $this->app->paths->resolve($path, $this->__meta__->absPath)
             );
@@ -456,11 +466,17 @@ class Controller
     {
         list($rightPath, $leftPath) = array_pad(array_reverse(func_get_args()), 2, null);
 
+        $nodePath = false;
+
+        if (false !== strpos($rightPath, ':')) {
+            list($nodePath, $rightPath) = explode(':', $rightPath);
+        }
+
         if (null === $leftPath) {
             $leftPath = 'files';
         }
 
-        $nodeFilePath = $this->_nodeId();
+        $nodeFilePath = $this->_nodeId($nodePath);
 
         return abs_url($leftPath, $nodeFilePath, $rightPath);
     }
@@ -487,6 +503,11 @@ class Controller
         return $this->app->controllers->call($path, $data, $this);
     }
 
+    /**
+     * @param $path
+     *
+     * @return Controller
+     */
     public function n($path)
     {
         return $this->app->controllers->getNodeController($path, $this);
@@ -948,6 +969,11 @@ class Controller
 
         // добавил ретурн но не проверял
         return call_user_func_array([$jqueryBuilder, 'widget'], array_slice($args, 1));
+    }
+
+    public function _w($path)
+    {
+        return $this->_selector($path) . '|' . $this->_nodeId($path);
     }
 
     /**
