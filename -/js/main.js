@@ -255,8 +255,14 @@ var ewma = {
         this.eventsContainer.trigger(eventName, args); // todo test args
     },
 
-    callWidget: function (selector, nodeId) {
+    getWidget: function (selector, nodeId) {
+        execute_function_by_name(selector, nodeId);
+    },
 
+    w: function (path) {
+        var parts = path.split("|");
+
+        return execute_function_by_name(parts[1], $(parts[0]), "instance");
     }
 };
 
