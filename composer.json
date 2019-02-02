@@ -26,6 +26,7 @@
         "fed/ewma-remote-call": "*",
         "fed/ewma-routers": "*",
         "fed/std": "*",
+        "fed/std-ui": "*",
         "fed/std-layouts": "*",
         "fed/std-mailer": "*",
         "fed/std-queue": "*",
