@@ -6,7 +6,7 @@ class Backup extends \Controller
     {
         $envId = $this->data('env_id');
 
-        if (!$envId || $envId == $this->_appConfig('env/id')) {
+        if (!$envId || $this->_env($envId)) {
             $this->cleanOld();
 
             $targetDir = $this->getTargetDir();
@@ -30,7 +30,7 @@ class Backup extends \Controller
 
         $mntPath = dataSets()->get('ewma/backup::mnt_path');
 
-        return path('mnt/', $mntPath, $this->_appConfig('env/id'), $type);
+        return path('mnt/', $mntPath, $this->_env(), $type);
     }
 
     private function getTargetDir()

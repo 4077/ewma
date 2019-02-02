@@ -81,33 +81,9 @@ class Resolver extends Service
             $f = fopen('../tmp/pathResolverScalarBug/' . date('Ymd-His') . '-write', 'a+');
             fwrite($f, print_r($report, true));
             fclose($f);
-
-            $this->sendSms('on save');
         }
 
         $this->app->cache->write('pathResolver', $this->cache);
-    }
-
-    public function sendSms($msg)
-    {
-        $ch = curl_init('https://sms.ru/sms/send');
-
-        $data = [
-            'api_id' => 'D3E13884-0B18-5BFD-8E46-E80A1667B7E4',
-            'to'     => '+79099242827',
-            'text'   => $msg,
-            'from'   => false
-        ];
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-
-        $body = curl_exec($ch);
-
-        curl_close($ch);
-
-        return $body;
     }
 
     /**
@@ -260,7 +236,7 @@ class Resolver extends Service
             if ($pathInfo = $this->matchAbsByModuleNamespace($path)) {
                 list($moduleNamespace, $nodePath) = $pathInfo;
 
-                if (null !== $module = $this->app->modules->getByNamespace($moduleNamespace)) {
+                if ($module = $this->app->modules->getByNamespace($moduleNamespace)) {
                     $modulePath = $module->path;
 
                     return $modulePath . ' ' . $nodePath;
@@ -270,7 +246,7 @@ class Resolver extends Service
             } elseif ($pathInfo = $this->matchAbsByModuleNamespaceAndPath($path)) {
                 list($moduleNamespace, $modulePath, $nodePath) = $pathInfo;
 
-                if (null !== $module = $this->app->modules->getByNamespace($moduleNamespace)) {
+                if ($module = $this->app->modules->getByNamespace($moduleNamespace)) {
                     $modulePathByNamespace = $module->path;
                     $modulePathByNamespaceAndPath = $modulePathByNamespace . '/' . $modulePath;
 

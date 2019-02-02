@@ -88,15 +88,15 @@ class Main extends \Controller
                    ]);
 
         $this->css(':themes/default', [
-            'label'    => [
-//                'color' => '#ff0000'
-            ],
-            'compiler' => [
-                'enabled' => [
-//                    'backgroundColor' => '#ff50ff',
-//                    'color'           => '#440000'
-                ]
-            ]
+//             'label'    => [
+// //                'color' => '#ff0000'
+//             ],
+//             'compiler' => [
+//                 'enabled' => [
+// //                    'backgroundColor' => '#ff50ff',
+// //                    'color'           => '#440000'
+//                 ]
+//             ]
         ]);
 
         return $v;

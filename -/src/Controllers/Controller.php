@@ -11,6 +11,8 @@ class Controller
 
     public $__meta__;
 
+    public $__logger__;
+
     public function __construct()
     {
         $this->app = App::getInstance();
@@ -140,6 +142,23 @@ class Controller
     }
 
     /**
+     * @param      $content
+     * @param bool $path
+     */
+    public function log($content, $path = false)
+    {
+        if (null === $this->__logger__) {
+            $this->__logger__ = new \ewma\Controllers\Controller\Logger($this);
+        }
+
+        if ($path) {
+            $this->__logger__->setPath($path);
+        }
+
+        $this->__logger__->write($content);
+    }
+
+    /**
      * Уникальный идентификатор узла, расположенного по пути $path относительно текущего контроллера
      * ...
      *
@@ -185,7 +204,7 @@ class Controller
     public function _nodeNs($path = false)
     {
         if (false === $path) {
-            return $this->__meta__->nodeId;
+            return $this->__meta__->nodeNs;
         } else {
             list($modulePath,) = $this->app->paths->separateAbsPath(
                 $this->app->paths->resolve($path, $this->__meta__->absPath)
@@ -200,7 +219,11 @@ class Controller
     public function _instance($force = false)
     {
         if ($force && !$this->__meta__->instance) {
-            $this->__meta__->instance = k(8);
+            if ($force === true) {
+                $this->__meta__->instance = k(8);
+            } else {
+                $this->__meta__->instance = $force;
+            }
         }
 
         return $this->__meta__->instance;
@@ -316,6 +339,17 @@ class Controller
     public function _appConfig($path = false)
     {
         return $this->app->getConfig($path);
+    }
+
+    public function _env($in = null)
+    {
+        $env = $this->app->getEnv();
+
+        if (empty($in)) {
+            return $env;
+        } else {
+            return in($env, $in);
+        }
     }
 
     public function _user($field = false)
@@ -503,6 +537,65 @@ class Controller
         return $this->app->controllers->call($path, $data, $this);
     }
 
+    public function async($path = false, $data = [], $dataMappings = null)
+    {
+        if (null !== $dataMappings) {
+            if (true === $dataMappings) {
+                aa($data, $this->data);
+            } else {
+                remap($data, $this->data, $dataMappings);
+            }
+        }
+
+        if ('#' == substr($path, 0, 1)) {
+            $callPath = '\ewma\handlers~:render';
+            $callData = [
+                'source' => substr($path, 1),
+                'data'   => $data
+            ];
+        } else {
+            $callPath = $this->_p($path);
+            $callData = $data;
+        }
+
+        $command = 'nohup ./cli -j \'' . str_replace("'", "'\''", j_([$callPath, $callData])) . '\' >> ~/async.log 2>&1 &'; // todo /dev/null
+
+        $this->log('ASYNC ' . $command);
+
+        $cwd = getcwd();
+        chdir($this->app->root);
+        exec($command, $output);
+        chdir($cwd);
+
+        return $output;
+    }
+
+    function proc($path = false, $data = [], $dataMappings = null)
+    {
+        if (null !== $dataMappings) {
+            if (true === $dataMappings) {
+                aa($data, $this->data);
+            } else {
+                remap($data, $this->data, $dataMappings);
+            }
+        }
+
+        if ('#' == substr($path, 0, 1)) {
+            $callPath = '\ewma\handlers~:render';
+            $callData = [
+                'source' => substr($path, 1),
+                'data'   => $data
+            ];
+        } else {
+            $callPath = $this->_p($path);
+            $callData = $data;
+        }
+
+        $process = $this->app->processDispatcher->create($callPath, $callData);
+
+        return $process;
+    }
+
     /**
      * @param $path
      *
@@ -552,8 +645,18 @@ class Controller
     }
 
     /**
+     * @param $path
+     *
+     * @return \ewma\storageEvents\Dispatcher
+     */
+    public function se($path, $filter = null)
+    {
+        return $this->app->storageEvents->getDispatcher($path, $filter, $this);
+    }
+
+    /**
      * @param bool|string $path
-     * @param bool|array  $data
+     * @param mixed       $data
      * @param int         $mergeMode
      *
      * @return mixed|null
@@ -567,7 +670,7 @@ class Controller
 
     /**
      * @param bool|string $path
-     * @param bool|array  $data
+     * @param mixed       $data
      * @param int         $mergeMode
      *
      * @return mixed
@@ -575,6 +678,21 @@ class Controller
     public function &s($path = false, $data = [], $mergeMode = AA) // todo сделать так же как у цсс
     {
         $node = &$this->_dataNode($path, $data, $mergeMode, 'session');
+
+        return $node;
+    }
+
+    /**
+     * @param             $key
+     * @param bool|string $path
+     * @param mixed       $data
+     * @param int         $mergeMode
+     *
+     * @return mixed|null
+     */
+    public function &otherS($key, $path = false, $data = [], $mergeMode = AA) // todo сделать так же как у цсс
+    {
+        $node = &$this->_dataNode($path, $data, $mergeMode, 'other_session', $key);
 
         return $node;
     }
@@ -610,7 +728,7 @@ class Controller
     {
         $s = &$this->s($path);
 
-        remap($this->data, $s, $mappings);
+        remap($this->data, $s, $mappings, true);
 
         return $s;
     }
@@ -641,7 +759,7 @@ class Controller
      *
      * @return mixed|null
      */
-    private function &_dataNode($path, $data, $mergeMode, $storageType)
+    private function &_dataNode($path, $data, $mergeMode, $storageType, $otherSessionKey = false)
     {
         list($path, $instance) = $this->app->controllers->explodeToPathAndInstance($path, $this);
         list($nodeFullPath, $dataPath) = array_pad(explode(':', $path), 2, '');
@@ -652,6 +770,10 @@ class Controller
 
         if ($storageType == 'session') {
             $node = &$this->app->session->getNode($modulePath, $nodePath, $instance);
+        }
+
+        if ($storageType == 'other_session') {
+            $node = &$this->app->session->other($otherSessionKey)->getNode($modulePath, $nodePath, $instance);
         }
 
         if ($storageType == 'storage') {

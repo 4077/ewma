@@ -113,7 +113,7 @@ class Css extends Service
 
         $combinedCss = '';
         foreach ($filesPaths as $filePath) {
-            $combinedCss .= read(abs_path($sourceDir, $filePath . '.css'));
+            $combinedCss .= read(public_path($sourceDir, $filePath . '.css'));
         }
 
         $targetFilePath = public_path($targetDir, $this->getCombinedPath($filesPaths) . '.css');

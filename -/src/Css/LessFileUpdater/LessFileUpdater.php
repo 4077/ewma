@@ -36,7 +36,7 @@ class LessFileUpdater
         }
     }
 
-    private $headPattern = '/(\/\/ head \{.*\/\/\ })/s';
+    private $headPattern = '/(\/\/ head \{.*\/\/\ \})/Us';
 
     private $head;
 

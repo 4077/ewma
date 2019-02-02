@@ -35,4 +35,9 @@ class Cell
     {
         return underscore_cell($this->model, $this->field);
     }
+
+    public function underscoreField()
+    {
+        return underscore_field($this->model, $this->field);
+    }
 }

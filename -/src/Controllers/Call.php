@@ -49,6 +49,11 @@ class Call
         ];
     }
 
+    /**
+     * @param null $value
+     *
+     * @return mixed
+     */
     public function path($value = null)
     {
         if (null === $value) {
@@ -92,6 +97,19 @@ class Call
         $this->controller->__meta__->allowForCallPerform = $allowForCallPerform;
 
         $callResponse = $this->controller->c($this->path, $this->data);
+
+        $this->controller->__meta__->allowForCallPerform = $backup;
+
+        return $callResponse;
+    }
+
+    public function async($allowForCallPerform = Controller::APP)
+    {
+        $backup = $this->controller->__meta__->allowForCallPerform;
+
+        $this->controller->__meta__->allowForCallPerform = $allowForCallPerform;
+
+        $callResponse = $this->controller->async($this->path, $this->data);
 
         $this->controller->__meta__->allowForCallPerform = $backup;
 

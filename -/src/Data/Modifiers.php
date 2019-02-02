@@ -103,7 +103,7 @@ class Modifiers
      * @param       $target
      * @param array $mappingsList
      */
-    public static function remap(&$target, &$source, $mappingsList = [])
+    public static function remap(&$target, &$source, $mappingsList = [], $flipMappings = false)
     {
         if ($mappingsList == '*') {
             $mappingsList = [];
@@ -122,8 +122,13 @@ class Modifiers
 
                 $mappingPaths = explode(' ', $mapping);
 
-                $sourcePath = isset($mappingPaths[1]) ? $mappingPaths[1] : $mappingPaths[0];
-                $targetPath = $mappingPaths[0];
+                if ($flipMappings) {
+                    $sourcePath = $mappingPaths[0];
+                    $targetPath = isset($mappingPaths[1]) ? $mappingPaths[1] : $mappingPaths[0];
+                } else {
+                    $sourcePath = isset($mappingPaths[1]) ? $mappingPaths[1] : $mappingPaths[0];
+                    $targetPath = $mappingPaths[0];
+                }
 
                 $sourceValue = self::arrayNodeAccess($source, $sourcePath);
 

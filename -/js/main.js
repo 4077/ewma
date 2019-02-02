@@ -1,12 +1,26 @@
-function request(path, data, handler, background) {
-    ewma.request(path, data, handler, background);
+function request(path, data, handler, quiet) {
+    ewma.request(path, data, handler, quiet);
 };
+
+function multirequest(path, data) {
+    ewma.multirequest.add(path, data);
+}
 
 var ewma = {
     cancelFollow: false,
 
+    log: {
+        pusher: 0,
+        events: {
+            bind:    0,
+            trigger: 0
+        }
+    },
+
     appData: {
         url: false,
+
+        tab: Math.random().toString(36).substring(2),
 
         css: {
             version:             0,
@@ -14,7 +28,7 @@ var ewma = {
             loaded:              [],
 
             checkVersion: function (version) {
-                if (version != this.version) {
+                if (version !== this.version) {
                     this.versionBeforeChange = this.version;
                     this.version = version;
                     this.reloadAll();
@@ -37,7 +51,7 @@ var ewma = {
             loaded:              [],
 
             checkVersion: function (version) {
-                if (version != this.version) {
+                if (version !== this.version) {
                     this.versionBeforeChange = this.version;
                     this.version = version;
                     this.reloadAll();
@@ -92,7 +106,8 @@ var ewma = {
                 'X-Requested-With': 'XMLHttpRequest'
             },
             data:    {
-                call: JSON.stringify([path, data])
+                call: JSON.stringify([path, data]),
+                tab:  ewma.appData.tab
             },
             success: function (response) {
                 handler(response);
@@ -111,6 +126,31 @@ var ewma = {
                 }
             }
         });
+    },
+
+    multirequest: {
+        sendTimeout:         0,
+        stack:               [],
+        doublesControlStack: [],
+
+        add: function (path, data) {
+            var multirequest = this;
+
+            var callJson = JSON.stringify([path, data]);
+
+            if (!this.doublesControlStack[callJson]) {
+                this.stack.push([path, data]);
+                this.doublesControlStack[callJson] = true;
+
+                clearTimeout(multirequest.sendTimeout);
+                this.sendTimeout = setTimeout(function () {
+                    ewma.request('\\ewma~multirequest:handle', {calls: multirequest.stack}, false, true);
+
+                    multirequest.stack = [];
+                    multirequest.doublesControlStack = [];
+                }, 200);
+            }
+        }
     },
 
     showXHRError: function (error) {
@@ -183,7 +223,7 @@ var ewma = {
             }
 
             if (data.reload !== undefined) {
-                window.location.href = window.location.href;
+                location.reload();
             }
         }
     },
@@ -194,11 +234,11 @@ var ewma = {
         for (i in instructions['js']) {
             var instruction = instructions['js'][i];
 
-            if (instruction.type == 'call') {
+            if (instruction.type === 'call') {
                 call_user_func_array(instruction.data.method, instruction.data.args);
             }
 
-            if (instruction.type == 'raw') {
+            if (instruction.type === 'raw') {
                 eval(instruction.code);
             }
         }
@@ -245,14 +285,48 @@ var ewma = {
 
     nodes: {},
 
-    eventsContainer: $("<div></div>"),
+    eventContainers: [],
 
-    bind: function (eventName, callback) {
-        this.eventsContainer.bind(eventName, callback);
+    commonEventsContainer: $('<div class="common_events_container"></div>'),
+
+    bind: function (eventName, callback, $container) {
+        if (this.log.events.bind) {
+            p('bind:   ' + eventName);
+        }
+
+        $container = $container || this.commonEventsContainer;
+
+        if (!$container.data("isEventListener")) {
+            ewma.eventContainers.push($container);
+
+            $container.data("isEventListener", true);
+        }
+
+        $container.bind(eventName, function (e, data) {
+            callback(data, e);
+        });
+    },
+
+    rebind: function (eventName, callback, $container) {
+        if (this.log.events.bind) {
+            p('unbind:   ' + eventName);
+        }
+
+        $container = $container || this.commonEventsContainer;
+
+        $container.unbind(eventName);
+
+        ewma.bind(eventName, callback, $container);
     },
 
     trigger: function (eventName, args) {
-        this.eventsContainer.trigger(eventName, args); // todo test args
+        if (this.log.events.trigger) {
+            p('trigger:   ' + eventName);
+        }
+
+        $.each(ewma.eventContainers, function (n, $eventContainer) {
+            $eventContainer.trigger(eventName, args)
+        });
     },
 
     getWidget: function (selector, nodeId) {
@@ -266,6 +340,105 @@ var ewma = {
     }
 };
 
+$.widget("ewma.node", {
+    _create: function () {
+        var w = this;
+
+        var events = this.options['.e'];
+
+        if (events) {
+            for (var eventName in events) {
+                if (events.hasOwnProperty(eventName)) {
+                    var eventHandlerPath = events[eventName];
+
+                    if (eventHandlerPath.lastIndexOf('r.', 0) === 0) {
+                        (function () {
+                            var requestName = eventHandlerPath.substring(2);
+
+                            // p('event request: ' + requestName);
+
+                            w.e(eventName, function (data) {
+                                w.r(requestName, data);
+                            });
+                        })();
+                    } else if (eventHandlerPath.lastIndexOf('mr.', 0) === 0) {
+                        (function () {
+                            var requestName = eventHandlerPath.substring(3);
+
+                            // p('event multirequest: ' + requestName);
+
+                            w.e(eventName, function (data) {
+                                w.r(requestName, data, true);
+                            });
+                        })();
+                    } else {
+                        (function () {
+                            var eventHandlerPath = events[eventName];
+
+                            // p('event handler: ' + eventHandlerPath);
+
+                            w.e(eventName, function (data) {
+                                w[eventHandlerPath](data);
+                            });
+                        })();
+                    }
+                }
+            }
+        }
+
+        this.__create();
+    },
+
+    w: function (widgetName) {
+        return ewma.w(this.options['.w'][widgetName]);
+    },
+
+    e: function (event, handler) {
+        if (event.substr(0, 1) === '+') {
+            ewma.bind(event.substr(1) + '.' + this.widgetName, handler);
+            // ewma.bind(event.substr(1) + '.' + this.widgetName + '.' + this.uuid, handler); // reload problem
+        } else {
+            ewma.rebind(event + '.' + this.widgetName, handler);
+            // ewma.rebind(event + '.' + this.widgetName + '.' + this.uuid, handler);
+        }
+    },
+
+    r: function (requestName, data, multi, handler, quiet) {
+        var requests = this.options['.r'];
+        var request = requests[requestName];
+
+        if (request) {
+            var requestPath;
+            var requestData = this.options['.payload'] || {};
+
+            if (typeof request === 'string') {
+                requestPath = request;
+            }
+
+            if (request instanceof Array) {
+                requestPath = request[0];
+
+                $.extend(requestData, request[1] || {});
+            }
+
+            $.extend(requestData, data);
+
+            if (multi) {
+                ewma.multirequest.add(requestPath, requestData);
+            } else {
+                handler = handler || ewma.responseHandler;
+                quiet = quiet || false;
+
+                ewma.request(requestPath, requestData, handler, quiet);
+            }
+        }
+    },
+
+    mr: function (requestName, data) {
+        this.r(requestName, data, true);
+    }
+});
+
 $(document).ready(function () {
     $.ajaxSetup({
         cache: true
@@ -278,6 +451,8 @@ $(document).ready(function () {
     ewma.appData.js.loaded = ewmaAppData.js.paths;
 
     ewma.processInstructions(ewmaAppData.instructions);
+
+    ewma.commonEventsContainer.appendTo("body");
 });
 
 $.fn.getWidget = function (widgetName) {

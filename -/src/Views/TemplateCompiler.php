@@ -153,7 +153,7 @@ class TemplateCompiler
 
                 $this->addIteratorBranchNode(end($iterator));
             } else {
-                throw new \Exception('Wrong open iterator path '.a2p($iterator));
+                throw new \Exception('Wrong open iterator path ' . a2p($iterator));
             }
         }
 

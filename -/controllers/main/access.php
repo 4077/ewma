@@ -12,6 +12,21 @@ class Access extends \Controller
         return $this->_user() ? false : true;
     }
 
+    public function has()
+    {
+        if ($user = $this->_user()) {
+            $permissions = l2a($this->data('permissions'));
+
+            diff($permissions, '');
+
+            foreach ($permissions as $permission) {
+                if ($user->hasPermission($this, $permission)) {
+                    return true;
+                }
+            }
+        }
+    }
+
     public function hasPermission()
     {
         return $user = $this->_user() and $user->hasPermission($this, $this->data('path'));
@@ -35,6 +50,7 @@ class Access extends \Controller
 
         $this->app->response->redirect($this->data('redirect'));
     }
+
     public function createSystemGroups()
     {
         \ewma\access\Groups::createSystemGroups();

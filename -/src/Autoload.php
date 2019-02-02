@@ -18,7 +18,6 @@
  *
  * 5. Автозагрузка композера
  */
-
 class Autoload
 {
     private static $appRoot;
@@ -143,7 +142,6 @@ class Autoload
                     if (isset(static::$modulesPathsByNamespaces[$moduleNamespace])) {
                         $lastFoundModuleNamespace = $moduleNamespace;
 
-
                         array_shift($classPathTailArray);
                     }
                 }
@@ -151,6 +149,8 @@ class Autoload
                 $moduleDirPath = static::getModuleDirPath($lastFoundModuleNamespace);
 
                 $filePath = $moduleDirPath . '/-/src/' . implode('/', $classPathTailArray) . '.php';
+
+                // todo сделать виртуальные модули для модулей, у которых должны быть, но физически отсутствуют родительские
 
                 if (file_exists($filePath)) {
                     $found = true;
@@ -171,6 +171,6 @@ class Autoload
 
     private static function getModuleDirPath($moduleNamespace)
     {
-        return static::$modulesDirsByNamespaces[$moduleNamespace];;
+        return static::$modulesDirsByNamespaces[$moduleNamespace];
     }
 }

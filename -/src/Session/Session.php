@@ -20,6 +20,17 @@ class Session extends Service
         });
     }
 
+    private $others = [];
+
+    public function other($key)
+    {
+        if (!isset($this->others[$key])) {
+            $this->others[$key] = new Other($key);
+        }
+
+        return $this->others[$key];
+    }
+
     /**
      * Запрет сохранения
      */
@@ -169,7 +180,7 @@ class Session extends Service
      */
     private function moduleNodesSave($moduleNamespace)
     {
-        $moduleNodesInstances = $this->nodes[$moduleNamespace];
+        $moduleNodesInstances = $this->nodes[$moduleNamespace] ?? [];
 
         foreach ($moduleNodesInstances as $nodeInstance => $nodes) {
             foreach (array_keys($nodes) as $nodePath) {
@@ -258,6 +269,7 @@ class Session extends Service
     }
 
     // todo
+
     /**
      * Перезагрузка всех узлов, или только всех узлов модуля, или только определенного узла
      *

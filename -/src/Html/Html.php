@@ -19,7 +19,7 @@ class Html extends Service
     public $meta = \ewma\Html\Meta::class;
 
     /**
-     * @var $controller \ewma\controllers\Html
+     * @var $controller \ewma\controllers\main\Html
      */
     private $controller;
 
@@ -44,7 +44,7 @@ class Html extends Service
     public function setTitle($value)
     {
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_ROUTE) {
-            $this->title = str_replace('\"', '"', $value);
+            $this->title = $value;
         }
 
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_XHR) {
@@ -73,6 +73,56 @@ class Html extends Service
     public function getFavicon()
     {
         return $this->favicon;
+    }
+
+    // head
+
+    private $headPrepend = [];
+
+    public function headPrepend($content)
+    {
+        $this->headPrepend[] = $content;
+
+        return $this;
+    }
+
+    public function renderHeadPrepend()
+    {
+        $output = '';
+
+        foreach ($this->headPrepend as $content) {
+            if ($content instanceof \ewma\Views\View) {
+                $output .= $content->render();
+            } else {
+                $output .= $content;
+            }
+        }
+
+        return $output;
+    }
+
+    private $headAppend = [];
+
+    public function headAppend($content)
+    {
+        $this->headAppend[] = $content;
+
+        return $this;
+    }
+
+    public function renderHeadAppend()
+    {
+        $output = '';
+
+        foreach ($this->headAppend as $content) {
+            if ($content instanceof \ewma\Views\View) {
+                $output .= $content->render();
+            } else {
+                $output .= $content;
+            }
+        }
+
+        return $output;
     }
 
     // content

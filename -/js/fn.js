@@ -295,14 +295,12 @@ function ending(number, one, two, five) {
 
     if ((number > 4 && number < 21) || number == 0) {
         ending = five;
-    }
-    else {
+    } else {
         var last_digit = substr(number, -1);
 
         if (last_digit > 1 && last_digit < 5) {
             ending = two;
-        }
-        else {
+        } else {
             if (last_digit == 1) {
                 ending = one;
             } else {

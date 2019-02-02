@@ -5,13 +5,6 @@ use ewma\Service\Service;
 
 class SessionEvents extends Service
 {
-    protected $services = ['app'];
-
-    /**
-     * @var App
-     */
-    public $app = App::class;
-
     public function getDispatcher($eventPath, $eventFilter, Controller $controller)
     {
         return new Dispatcher($eventPath, $eventFilter, $controller);

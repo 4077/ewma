@@ -28,7 +28,7 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_CLI;
 
-        $this->app->ewmaController->c('~logs:write:requests', ['type' => 'cli', 'call' => $call]);
+        $this->log($call);
 
         $response = $this->app->requestHandlerController->_call($call)->perform();
 
@@ -37,31 +37,31 @@ class Request extends Service
 
     public function handle()
     {
-        if ($this->proxy->isXmlHttpRequest() && (
-                $call = $this->proxy->request->get('call') or
-                $call = $this->proxy->query->get('call')
-            )
-        ) {
-            $this->handleXmlHttpRequest(json_decode($call, true));
+        if ($this->proxy->isXmlHttpRequest()) {
+            $call = $this->proxy->request->get('call') or
+            $call = $this->proxy->query->get('call');
+
+            $tab = $this->proxy->request->get('tab') or
+            $tab = $this->proxy->query->get('tab');
+
+            $this->handleXmlHttpRequest(json_decode($call, true), $tab);
         } else {
             $this->handleRouteRequest();
         }
     }
 
-    private function handleXmlHttpRequest($call)
+    private function handleXmlHttpRequest($call, $tab)
     {
         $this->app->mode = App::REQUEST_MODE_XHR;
+        $this->app->tab = $tab;
 
-        ///// todo если для текущего env/id включен вывод ошибок и есть права на просмотр
-        $whoops = new \Whoops\Run;
-        $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler());
-        $whoops->register();
-        ////
+        if ($user = $this->app->access->getUser() and $user->isSuperuser()) {
+            $whoops = new \Whoops\Run;
+            $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler());
+            $whoops->register();
+        }
 
-        $this->app->ewmaController->c('~logs:write:requests', [
-            'type' => 'xhr',
-            'call' => $call
-        ]);
+        $this->log($call);
 
         if ('#' == substr($call[0], 0, 1)) {
             $handlerSource = substr($call[0], 1);
@@ -78,25 +78,22 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_ROUTE;
 
-        ///// todo если для текущего env/id включен вывод ошибок и есть права на просмотр
-        $whoops = new \Whoops\Run;
-        $handler = new \Whoops\Handler\PrettyPageHandler;
+        if ($user = $this->app->access->getUser() and $user->isSuperuser()) {
+            $whoops = new \Whoops\Run;
+            $handler = new \Whoops\Handler\PrettyPageHandler;
 
-        $handler->setEditor(function ($file, $line) {
-            return "phpstorm://open/?file=$file&line=$line";
-        });
+            $handler->setEditor(function ($file, $line) {
+                return "phpstorm://open/?file=$file&line=$line";
+            });
 
-        $whoops->pushHandler($handler);
-        $whoops->register();
-        /////
+            $whoops->pushHandler($handler);
+            $whoops->register();
+        }
 
         $this->setRoute();
         $this->setData();
 
-        $this->app->ewmaController->c('~logs:write:requests', [
-            'type'  => 'route',
-            'route' => $this->app->route
-        ]);
+        $this->log();
 
         $response = $this->app->ewmaController->c('~request:handle');
 
@@ -123,6 +120,32 @@ class Request extends Service
         foreach ($requestData as $path => $value) {
             $this->data($path, $value);
         }
+    }
+
+    private function log($data = false)
+    {
+        $clientName = $this->app->rootController->_user('login') or
+        $clientName = $this->app->session->getKey();
+
+        $output = [
+            $this->app->host,
+            $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '0.0.0.0',
+            '[' . $clientName . ']'
+        ];
+
+        if ($this->app->mode == App::REQUEST_MODE_XHR) {
+            $output[] = 'XHR: ' . $data[0] . ' ' . a2s($data[1], true);
+        }
+
+        if ($this->app->mode == App::REQUEST_MODE_CLI) {
+            $output[] = 'CLI: ' . $data[0] . ' ' . a2s($data[1], true);
+        }
+
+        if ($this->app->mode == App::REQUEST_MODE_ROUTE) {
+            $output[] = 'ROUTE: ' . $this->app->route;
+        }
+
+        $this->app->rootController->log(implode(' ', $output), 'requests');
     }
 
     /**

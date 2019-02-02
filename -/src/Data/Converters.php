@@ -4,7 +4,8 @@
  * P - path
  * A - array
  * F - flat array
- * L - list 
+ * L - list
+ * S - string
  */
 
 class Converters
@@ -141,5 +142,41 @@ class Converters
         }
 
         return $output;
+    }
+
+    /**
+     * A -> S
+     *
+     * @param $array
+     *
+     * @return string
+     */
+    public static function arrayToString($array, $cliFormat = false)
+    {
+        $output = [];
+
+        $flat = static::arrayToFlat($array);
+
+        foreach ($flat as $path => $value) {
+            if (empty($value)) {
+                $value = '';
+            }
+
+            $output[] = $path . '=' . ($cliFormat ? str_replace([' ', '|'], ['\ ', '\|'], $value) : $value);
+        }
+
+        return implode(' ', $output);
+    }
+
+    /**
+     * S -> A
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    public static function stringToArray($string)
+    {
+        return []; // todo
     }
 }

@@ -37,7 +37,7 @@ var ewma__common = function (context) {
             var hoverable = $(this);
 
             //setTimeout(function () {
-                hoverable.addClass(hoverClass);
+            hoverable.addClass(hoverClass);
             //});
 
         }).bind("mouseleave", function () {
@@ -50,7 +50,7 @@ var ewma__common = function (context) {
             //        hoverable.removeClass(hoverClass);
             //    });
             //} else {
-                hoverable.removeClass(hoverClass);
+            hoverable.removeClass(hoverClass);
             //}
         });
     });

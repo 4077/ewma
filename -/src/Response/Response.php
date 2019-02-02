@@ -196,7 +196,7 @@ class Response extends Service
 
     public function console($input)
     {
-        $this->console[] = (array)l2a(func_get_args());
+        $this->console[] = $input;
     }
 
     //
@@ -387,7 +387,6 @@ class Response extends Service
                     print $response;
 //                $this->proxy->setStatusCode($this->redirectCode);
                 } else {
-
                     $this->proxy->setContent($response);
                     $this->proxy->send();
                 }

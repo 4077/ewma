@@ -24,6 +24,10 @@ class Modules extends Service
 
     private $cache;
 
+    private $cacheByPath;
+
+    private $cacheByNamespace;
+
     public function getCache()
     {
         if (null === $this->cache) {
@@ -35,12 +39,23 @@ class Modules extends Service
 
     protected function boot()
     {
-        if (null !== $modulesCache = $this->getCache()) {
-            foreach ($modulesCache as $moduleCacheData) {
-                $module = Module::create($moduleCacheData);
+        $modulesCache = $this->getCache();
 
-                $this->modulesByPath[$module->path] = $module;
-                $this->modulesByNamespace[$module->namespace] = $module;
+        if (null !== $modulesCache) {
+            foreach ($modulesCache as $moduleCacheData) {
+                $path = $moduleCacheData['path'];
+                $namespace = $moduleCacheData['namespace'];
+                $dir = $moduleCacheData['dir'];
+                $helpers = $moduleCacheData['helpers'];
+
+                $this->cacheByPath[$path] = $moduleCacheData;
+                $this->cacheByNamespace[$namespace] = $moduleCacheData;
+
+                Autoload::registerModule($namespace, $path, $dir);
+
+                if ($path && $helpers) {
+                    require_once abs_path($dir, '/-/src/helpers.php');
+                }
             }
         } else {
             $this->registerModules();
@@ -50,8 +65,14 @@ class Modules extends Service
         $this->load();
     }
 
+    /**
+     * @var array Module[]
+     */
     private $modulesByPath = [];
 
+    /**
+     * @var array Module[]
+     */
     private $modulesByNamespace = [];
 
     public function reload()
@@ -68,7 +89,6 @@ class Modules extends Service
     private function load()
     {
         foreach ($this->modulesByPath as $module) {
-            /* @var $module Module */
             Autoload::registerModule($module->namespace, $module->path, $module->dir);
 
             if ($module->path && $module->helpers) {
@@ -89,7 +109,6 @@ class Modules extends Service
         $modulesCache = [];
 
         foreach ($this->modulesByPath as $module) {
-            /* @var $module Module */
             $modulesCache[$module->id] = $module->toCacheFormat();
         }
 
@@ -330,9 +349,7 @@ class Modules extends Service
      */
     public function getRootModule()
     {
-        if (isset($this->modulesByPath[''])) {
-            return $this->modulesByPath[''];
-        }
+        return $this->getByPath();
     }
 
     /**
@@ -342,9 +359,18 @@ class Modules extends Service
      */
     public function getByPath($path = '')
     {
-        if (isset($this->modulesByPath[$path])) {
-            return $this->modulesByPath[$path];
+        if (!isset($this->modulesByPath[$path])) {
+            if ($moduleCacheData = $this->cacheByPath[$path] ?? false) {
+                $module = Module::create($moduleCacheData);
+
+                $this->modulesByPath[$module->path] = $module;
+                $this->modulesByNamespace[$module->namespace] = $module;
+            } else {
+                $this->modulesByPath[$path] = false;
+            }
         }
+
+        return $this->modulesByPath[$path];
     }
 
     /**
@@ -354,9 +380,18 @@ class Modules extends Service
      */
     public function getByNamespace($namespace)
     {
-        if (isset($this->modulesByNamespace[$namespace])) {
-            return $this->modulesByNamespace[$namespace];
+        if (!isset($this->modulesByNamespace[$namespace])) {
+            if ($moduleCacheData = $this->cacheByNamespace[$namespace] ?? false) {
+                $module = Module::create($moduleCacheData);
+
+                $this->modulesByNamespace[$module->path] = $module;
+                $this->modulesByNamespace[$module->namespace] = $module;
+            } else {
+                $this->modulesByNamespace[$namespace] = false;
+            }
         }
+
+        return $this->modulesByNamespace[$namespace];
     }
 
     /**
@@ -364,6 +399,10 @@ class Modules extends Service
      */
     public function getAll()
     {
+        foreach ($this->cacheByPath as $path => $moduleCacheData) {
+            $this->getByPath($path);
+        }
+
         return $this->modulesByPath;
     }
 }

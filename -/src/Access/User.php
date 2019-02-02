@@ -13,6 +13,8 @@ class User
     {
         $this->model->pass = password_hash($pass, PASSWORD_DEFAULT);
         $this->model->save();
+
+        app()->access->auth->logoutOnOtherDevices();
     }
 
     public function setSessionKey($sessionKey)

@@ -48,13 +48,16 @@ class App extends Service
         'database',
         'events',
         'sessionEvents',
+        'storageEvents',
         'session',
         'storage',
         'paths',
         'modules',
         'configs',
         'controllers',
-        'views'
+        'views',
+        'process',
+        'processDispatcher'
     ];
 
     /**
@@ -108,6 +111,11 @@ class App extends Service
     public $sessionEvents = \ewma\SessionEvents\SessionEvents::class;
 
     /**
+     * @var \ewma\StorageEvents\StorageEvents
+     */
+    public $storageEvents = \ewma\StorageEvents\StorageEvents::class;
+
+    /**
      * @var \ewma\Session\Session
      */
     public $session = \ewma\Session\Session::class;
@@ -141,6 +149,16 @@ class App extends Service
      * @var \ewma\Views\Views
      */
     public $views = \ewma\Views\Views::class;
+
+    /**
+     * @var \ewma\Process\AppProcess
+     */
+    public $process = \ewma\Process\AppProcess::class;
+
+    /**
+     * @var \ewma\Process\ProcessDispatcher
+     */
+    public $processDispatcher = \ewma\Process\ProcessDispatcher::class;
 
     //
     //
@@ -184,13 +202,20 @@ class App extends Service
         $this->session->up();
 
         #8 остальное
-        if (isset($_SERVER['HTTP_HOST'])) {
-            $this->host = $this->request->getHost();
-            $this->scheme = $this->request->getScheme();
+        $this->setEnv();
+
+        $this->host = $this->request->getHost();
+        $this->scheme = $this->request->getScheme();
+
+        $sslHosts = l2a($this->getConfig('ssl_hosts'));
+
+        if (in_array($this->host, $sslHosts)) {
+            $this->url = force_r_slash('https://' . $this->host);
+        } else {
             $this->url = force_r_slash($this->request->getSchemeAndHttpHost());
         }
 
-        setlocale(LC_ALL, 'ru_RU.utf8'); // todo config
+        setlocale(LC_ALL, $this->getConfig('locale') ?? 'ru_RU.utf8');
 
         if (!headers_sent()) {
             header('Content-type: text/html; charset=utf-8'); // todo response
@@ -224,10 +249,45 @@ class App extends Service
     public $scheme;
     public $url;
     public $host;
+    public $tab;
 
-    public function getConfig($path)
+    public function getConfig($path = '')
     {
         return ap($this->config, $path);
+    }
+
+    // env
+
+    private $env;
+
+    public function setEnv()
+    {
+        if (null === $this->env) {
+            $this->env = $this->getConfig('env');
+        }
+
+        return $this->env;
+    }
+
+    public function getEnv()
+    {
+        return $this->env;
+    }
+
+    // pid
+
+    private $pid;
+
+    public function setPid($pid)
+    {
+        if (null === $this->pid) {
+            $this->pid = $pid;
+        }
+    }
+
+    public function getPid()
+    {
+        return $this->pid;
     }
 
     /**

@@ -10,8 +10,8 @@ class Html extends \Controller
         $this->css('presets');
         $this->css('global');
 
-        $this->c('\jquery~');
-        $this->c('\jquery\ui~', ['theme' => 'custom']);
+        $this->c('\js\jquery~');
+        $this->c('\js\jquery\ui~', ['theme' => 'custom']);
 
         $this->js('fn');
         $this->js('main');
@@ -26,10 +26,12 @@ class Html extends \Controller
         $this->widget(":body");
 
         $v->assign([
-                       'TITLE'   => $this->app->html->getTitle(),
-                       'META'    => $this->c('>meta:view'),
-                       'ASSETS'  => $this->c('>assets:view'),
-                       'CONTENT' => $this->app->html->getContent()
+                       'HEAD_PREPEND' => $this->app->html->renderHeadPrepend(),
+                       'HEAD_APPEND'  => $this->app->html->renderHeadAppend(),
+                       'TITLE'        => $this->app->html->getTitle(),
+                       'META'         => $this->c('>meta:view'),
+                       'ASSETS'       => $this->c('>assets:view'),
+                       'CONTENT'      => $this->app->html->getContent()
                    ]);
 
         if ($favicon = $this->app->html->getFavicon()) {
@@ -45,16 +47,16 @@ class Html extends \Controller
         return $v;
     }
 
-    public function setTitle($value)
+    public function setTitle()
     {
-        $this->app->html->setTitle($value);
+        $this->app->html->setTitle($this->data('content'));
 
         return $this;
     }
 
-    public function setContent($content)
+    public function setContent()
     {
-        $this->app->html->setContent($content);
+        $this->app->html->setContent($this->data('content'));
 
         return $this;
     }
@@ -62,6 +64,20 @@ class Html extends \Controller
     public function setFavicon()
     {
         $this->app->html->setFavicon($this->data('url'));
+
+        return $this;
+    }
+
+    public function headPrepend()
+    {
+        $this->app->html->headPrepend($this->data('content'));
+
+        return $this;
+    }
+
+    public function headAppend()
+    {
+        $this->app->html->headAppend($this->data('content'));
 
         return $this;
     }

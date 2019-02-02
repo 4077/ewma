@@ -178,6 +178,41 @@ class Tree
         return $ids;
     }
 
+    public function filterIds($filterIds, $rootNodeId)
+    {
+        if (is_array($filterIds)) {
+            $flatten = $this->getFlatten();
+
+            $nodesById = [];
+            $nodesByParent = [];
+
+            $recursion = function ($id, $parentId) use (&$recursion, $filterIds, $flatten, &$nodesById, &$nodesByParent) {
+                if (in_array($id, $filterIds)) {
+                    $nodesById[$id] = $flatten->getNode($id);
+
+                    $parentId = $id;
+                }
+
+                foreach ($flatten->getSubnodes($id) as $subnode) {
+                    if (in_array($subnode->id, $filterIds)) {
+                        $nodesByParent[$parentId][] = $subnode;
+                    }
+
+                    $recursion($subnode->id, $parentId);
+                }
+            };
+
+            $recursion($rootNodeId, $rootNodeId);
+
+            $this->flatten = new \ewma\Data\Tree\Flatten;
+
+            $this->flatten->idFieldName = $this->idFieldName;
+            $this->flatten->parentIdFieldName = $this->parentIdFieldName;
+            $this->flatten->nodesById = $nodesById;
+            $this->flatten->nodesByParent = $nodesByParent;
+        }
+    }
+
     private $flatten;
 
     private function getFlatten()

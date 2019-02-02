@@ -61,7 +61,7 @@ class Compiler
 
                 $css = $this->removeInstanceSpaces($css);
             } catch (\Less_Exception_Parser $e) {
-                throw new \Exception($e->getMessage() . ' (' . $this->sourceFilePath . ')');
+                appc()->console($e->getMessage() . ' (' . $this->sourceFilePath . ')');
             }
         }
 
