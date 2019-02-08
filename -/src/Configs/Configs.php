@@ -61,11 +61,11 @@ class Configs extends Service
 
         if ($profilesList = l2a(aread(abs_path('config/profiles.php')))) {
             foreach ($this->app->modules->getAll() as $module) {
-                $moduleDir = abs_path('config', $module->path, '-');
+                $moduleDir = abs_path('config', str_replace('\\', '/', $module->namespace), '-');
 
                 if (is_dir($moduleDir)) {
                     foreach ($profilesList as $profilesPath) {
-                        $profileFilePath = abs_path('config', $module->path, '-/profiles', $profilesPath . '.php');
+                        $profileFilePath = abs_path('config', str_replace('\\', '/', $module->namespace), '-/profiles', $profilesPath . '.php');
 
                         if (!file_exists($profileFilePath)) {
                             awrite($profileFilePath, []);
@@ -95,7 +95,7 @@ class Configs extends Service
         $output = [];
         foreach ($this->app->modules->getAll() as $module) {
             if ($config = $this->updateFromModule($module, $mergeMode)) {
-                $output[$module->path] = $config;
+                $output[str_replace('\\', '/', $module->namespace)] = $config;
             }
         }
 
