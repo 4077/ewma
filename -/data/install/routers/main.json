@@ -1,0 +1,789 @@
+{
+    "router": {
+        "id": 4,
+        "position": 10,
+        "enabled": 1,
+        "hosts": "",
+        "name": "~",
+        "data_cat": "",
+        "data": ""
+    },
+    "routes": {
+        "route_id": 5,
+        "routes": {
+            "nodes_by_id": {
+                "5": {
+                    "id": 5,
+                    "parent_id": 0,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 40,
+                    "enabled": 1,
+                    "listen": 0,
+                    "pattern": "",
+                    "name": "",
+                    "type": "",
+                    "data_source": "",
+                    "response_wrapper": "NONE"
+                },
+                "83": {
+                    "id": 83,
+                    "parent_id": 5,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 380,
+                    "enabled": 1,
+                    "listen": 1,
+                    "pattern": "login",
+                    "name": "login",
+                    "type": "",
+                    "data_source": "route_83",
+                    "response_wrapper": "NONE",
+                    "handler": {
+                        "id": 293,
+                        "target_type": "ewma\\routers\\models\\Route",
+                        "target_id": 83,
+                        "cat_position": 0,
+                        "position": 820,
+                        "instance": "",
+                        "name": "",
+                        "path": ""
+                    }
+                },
+                "84": {
+                    "id": 84,
+                    "parent_id": 83,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 390,
+                    "enabled": 1,
+                    "listen": 1,
+                    "pattern": "form_submit",
+                    "name": "form_submit",
+                    "type": "",
+                    "data_source": "route_84",
+                    "response_wrapper": "NONE",
+                    "handler": {
+                        "id": 294,
+                        "target_type": "ewma\\routers\\models\\Route",
+                        "target_id": 84,
+                        "cat_position": 0,
+                        "position": 830,
+                        "instance": "",
+                        "name": "",
+                        "path": ""
+                    }
+                },
+                "85": {
+                    "id": 85,
+                    "parent_id": 5,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 400,
+                    "enabled": 1,
+                    "listen": 1,
+                    "pattern": "logout",
+                    "name": "logout",
+                    "type": "",
+                    "data_source": "route_85",
+                    "response_wrapper": "NONE",
+                    "handler": {
+                        "id": 295,
+                        "target_type": "ewma\\routers\\models\\Route",
+                        "target_id": 85,
+                        "cat_position": 0,
+                        "position": 840,
+                        "instance": "",
+                        "name": "",
+                        "path": ""
+                    }
+                },
+                "86": {
+                    "id": 86,
+                    "parent_id": 5,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 410,
+                    "enabled": 0,
+                    "listen": 1,
+                    "pattern": "*",
+                    "name": "redirects",
+                    "type": "",
+                    "data_source": "route_86",
+                    "response_wrapper": "NONE",
+                    "handler": {
+                        "id": 296,
+                        "target_type": "ewma\\routers\\models\\Route",
+                        "target_id": 86,
+                        "cat_position": 0,
+                        "position": 850,
+                        "instance": "",
+                        "name": "",
+                        "path": ""
+                    }
+                },
+                "331": {
+                    "id": 331,
+                    "parent_id": 5,
+                    "router_id": 4,
+                    "wrapper_id": 0,
+                    "wrapper_enabled": 0,
+                    "position": 1260,
+                    "enabled": 1,
+                    "listen": 1,
+                    "pattern": "-\/{code}",
+                    "name": "shortcodes",
+                    "type": "",
+                    "data_source": "route_331",
+                    "response_wrapper": "NONE",
+                    "handler": {
+                        "id": 1169,
+                        "target_type": "ewma\\routers\\models\\Route",
+                        "target_id": 331,
+                        "cat_position": 0,
+                        "position": 6830,
+                        "instance": "",
+                        "name": "",
+                        "path": ""
+                    }
+                }
+            },
+            "ids_by_parent": {
+                "5": [
+                    83,
+                    85,
+                    86,
+                    331
+                ],
+                "83": [
+                    84
+                ]
+            },
+            "parents_by_id": {
+                "83": 5,
+                "84": 83,
+                "85": 5,
+                "86": 5,
+                "331": 5
+            },
+            "ids_by_order": [
+                83,
+                84,
+                85,
+                86,
+                331
+            ]
+        },
+        "handlers": {
+            "5": {
+                "handler": {
+                    "id": 245,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 5,
+                    "cat_position": 0,
+                    "position": 350,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 993,
+                    "handler_id": 245,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 993,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "993": {
+                                "id": 993,
+                                "handler_id": 245,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": [],
+                        "parents_by_id": [],
+                        "ids_by_order": []
+                    }
+                }
+            },
+            "83": {
+                "handler": {
+                    "id": 293,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 83,
+                    "cat_position": 0,
+                    "position": 820,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 1509,
+                    "handler_id": 293,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 1509,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "1509": {
+                                "id": 1509,
+                                "handler_id": 293,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1510": {
+                                "id": 1510,
+                                "handler_id": 293,
+                                "parent_id": 1509,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 20,
+                                "enabled": 1,
+                                "type": "CALL",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"\\\\std\\\\ui\\\\auth login:view\",\"desc\":\"\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1511": {
+                                "id": 1511,
+                                "handler_id": 293,
+                                "parent_id": 1510,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 30,
+                                "enabled": 1,
+                                "type": "INPUT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"form_submit_route\",\"desc\":\"\",\"combine_mode\":\"first\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1512": {
+                                "id": 1512,
+                                "handler_id": 293,
+                                "parent_id": 1511,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 40,
+                                "enabled": 1,
+                                "type": "VALUE",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"type\":\"string\",\"value\":{\"string\":\"\\\/login\\\/form_submit\",\"array\":[],\"bool\":false},\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1513": {
+                                "id": 1513,
+                                "handler_id": 293,
+                                "parent_id": 1510,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 50,
+                                "enabled": 1,
+                                "type": "INPUT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"user_redirect_route\",\"desc\":\"\",\"combine_mode\":\"first\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1514": {
+                                "id": 1514,
+                                "handler_id": 293,
+                                "parent_id": 1513,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 60,
+                                "enabled": 1,
+                                "type": "VALUE",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"type\":\"string\",\"value\":{\"string\":\"\\\/cp\",\"array\":[],\"bool\":false},\"mappings\":\"*\"}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": {
+                            "1509": [
+                                1510
+                            ],
+                            "1510": [
+                                1511,
+                                1513
+                            ],
+                            "1511": [
+                                1512
+                            ],
+                            "1513": [
+                                1514
+                            ]
+                        },
+                        "parents_by_id": {
+                            "1510": 1509,
+                            "1511": 1510,
+                            "1512": 1511,
+                            "1513": 1510,
+                            "1514": 1513
+                        },
+                        "ids_by_order": [
+                            1510,
+                            1511,
+                            1512,
+                            1513,
+                            1514
+                        ]
+                    }
+                }
+            },
+            "84": {
+                "handler": {
+                    "id": 294,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 84,
+                    "cat_position": 0,
+                    "position": 830,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 1515,
+                    "handler_id": 294,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 1515,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "1515": {
+                                "id": 1515,
+                                "handler_id": 294,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1516": {
+                                "id": 1516,
+                                "handler_id": 294,
+                                "parent_id": 1515,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 20,
+                                "enabled": 1,
+                                "type": "CALL",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"\\\\std\\\\ui\\\\auth login:formSubmit\",\"desc\":\"\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1517": {
+                                "id": 1517,
+                                "handler_id": 294,
+                                "parent_id": 1516,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 30,
+                                "enabled": 1,
+                                "type": "INPUT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"redirect\",\"desc\":\"\",\"combine_mode\":\"first\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1518": {
+                                "id": 1518,
+                                "handler_id": 294,
+                                "parent_id": 1517,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 40,
+                                "enabled": 1,
+                                "type": "VALUE",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"type\":\"string\",\"value\":{\"string\":\"\\\/cp\",\"array\":[],\"bool\":false},\"mappings\":\"*\"}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": {
+                            "1515": [
+                                1516
+                            ],
+                            "1516": [
+                                1517
+                            ],
+                            "1517": [
+                                1518
+                            ]
+                        },
+                        "parents_by_id": {
+                            "1516": 1515,
+                            "1517": 1516,
+                            "1518": 1517
+                        },
+                        "ids_by_order": [
+                            1516,
+                            1517,
+                            1518
+                        ]
+                    }
+                }
+            },
+            "85": {
+                "handler": {
+                    "id": 295,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 85,
+                    "cat_position": 0,
+                    "position": 840,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 1519,
+                    "handler_id": 295,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 1519,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "1519": {
+                                "id": 1519,
+                                "handler_id": 295,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1520": {
+                                "id": 1520,
+                                "handler_id": 295,
+                                "parent_id": 1519,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 20,
+                                "enabled": 1,
+                                "type": "CALL",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"\\\\ewma~access:logout\",\"desc\":\"\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1521": {
+                                "id": 1521,
+                                "handler_id": 295,
+                                "parent_id": 1520,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 30,
+                                "enabled": 1,
+                                "type": "INPUT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"redirect\",\"desc\":\"\",\"combine_mode\":\"first\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1522": {
+                                "id": 1522,
+                                "handler_id": 295,
+                                "parent_id": 1521,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 40,
+                                "enabled": 1,
+                                "type": "VALUE",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"type\":\"string\",\"value\":{\"string\":\"\\\/\",\"array\":[],\"bool\":false},\"mappings\":\"*\"}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": {
+                            "1519": [
+                                1520
+                            ],
+                            "1520": [
+                                1521
+                            ],
+                            "1521": [
+                                1522
+                            ]
+                        },
+                        "parents_by_id": {
+                            "1520": 1519,
+                            "1521": 1520,
+                            "1522": 1521
+                        },
+                        "ids_by_order": [
+                            1520,
+                            1521,
+                            1522
+                        ]
+                    }
+                }
+            },
+            "86": {
+                "handler": {
+                    "id": 296,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 86,
+                    "cat_position": 0,
+                    "position": 850,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 1523,
+                    "handler_id": 296,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 1523,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "1523": {
+                                "id": 1523,
+                                "handler_id": 296,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            },
+                            "1524": {
+                                "id": 1524,
+                                "handler_id": 296,
+                                "parent_id": 1523,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 20,
+                                "enabled": 1,
+                                "type": "CALL",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"\\\\std\\\\redirects~:redirect\",\"desc\":\"\",\"mappings\":\"*\"}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": {
+                            "1523": [
+                                1524
+                            ]
+                        },
+                        "parents_by_id": {
+                            "1524": 1523
+                        },
+                        "ids_by_order": [
+                            1524
+                        ]
+                    }
+                }
+            },
+            "331": {
+                "handler": {
+                    "id": 1169,
+                    "target_type": "ewma\\routers\\models\\Route",
+                    "target_id": 331,
+                    "cat_position": 0,
+                    "position": 6830,
+                    "instance": "",
+                    "name": "",
+                    "path": ""
+                },
+                "root_node": {
+                    "id": 8875,
+                    "handler_id": 1169,
+                    "parent_id": 0,
+                    "name": "",
+                    "source_handler_id": 0,
+                    "position": 10,
+                    "enabled": 1,
+                    "type": "ROOT",
+                    "required": 0,
+                    "cache_enabled": 0,
+                    "data": "{\"combine_mode\":\"concat\"}",
+                    "mappings": ""
+                },
+                "nodes": {
+                    "node_id": 8875,
+                    "node_type": "ROOT",
+                    "nodes": {
+                        "nodes_by_id": {
+                            "8875": {
+                                "id": 8875,
+                                "handler_id": 1169,
+                                "parent_id": 0,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 10,
+                                "enabled": 1,
+                                "type": "ROOT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"combine_mode\":\"concat\"}",
+                                "mappings": ""
+                            },
+                            "8876": {
+                                "id": 8876,
+                                "handler_id": 1169,
+                                "parent_id": 8875,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 20,
+                                "enabled": 1,
+                                "type": "CALL",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"\\\\std\\\\shortcodes~:handle\",\"desc\":\"\"}",
+                                "mappings": ""
+                            },
+                            "8877": {
+                                "id": 8877,
+                                "handler_id": 1169,
+                                "parent_id": 8876,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 30,
+                                "enabled": 1,
+                                "type": "INPUT",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"path\":\"code\",\"desc\":\"\",\"combine_mode\":\"first\"}",
+                                "mappings": ""
+                            },
+                            "8878": {
+                                "id": 8878,
+                                "handler_id": 1169,
+                                "parent_id": 8877,
+                                "name": "",
+                                "source_handler_id": 0,
+                                "position": 40,
+                                "enabled": 1,
+                                "type": "VALUE",
+                                "required": 0,
+                                "cache_enabled": 0,
+                                "data": "{\"name\":\"\",\"type\":\"string\",\"value\":{\"string\":\"{code}\",\"array\":[],\"bool\":false}}",
+                                "mappings": ""
+                            }
+                        },
+                        "ids_by_parent": {
+                            "8875": [
+                                8876
+                            ],
+                            "8876": [
+                                8877
+                            ],
+                            "8877": [
+                                8878
+                            ]
+                        },
+                        "parents_by_id": {
+                            "8876": 8875,
+                            "8877": 8876,
+                            "8878": 8877
+                        },
+                        "ids_by_order": [
+                            8876,
+                            8877,
+                            8878
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

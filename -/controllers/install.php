@@ -7,7 +7,7 @@ class Install extends \Controller
         $dir = $this->_module()->dir;
 
         $copyList = [
-            '/-/install/favicons' => '-/ewma/favicons'
+            '/-/data/install/favicons' => '-/ewma/favicons'
         ];
 
         foreach ($copyList as $source => $target) {
