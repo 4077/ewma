@@ -29,7 +29,7 @@ class Configs extends Service
 
     private function getConfigDir(\ewma\Modules\Module $module)
     {
-        return abs_path('config', $module->path, '-');
+        return abs_path('config', str_replace('\\', '/', $module->namespace), '-');
     }
 
     public function load(\ewma\Modules\Module $module)
