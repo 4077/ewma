@@ -23,7 +23,8 @@ class App extends Service
             } else {
                 $app = new self;
 
-                $app->root = force_r_slash($root);
+                $app->root = force_r_slash($root); // todo rm slash
+                $app->publicRoot = $app->root . 'public_html';
 
                 if (null !== $mode) {
                     $app->mode = $mode;
