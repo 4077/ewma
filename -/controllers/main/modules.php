@@ -24,4 +24,19 @@ class Modules extends \Controller
             return $report;
         }
     }
+
+    public function install()
+    {
+        if ($namespace = $this->data('namespace') ?: $this->data('ns')) {
+            $module = $this->app->modules->getByNamespace($namespace);
+
+            include $module->dir . '/-/data/install/main.php';
+
+            $installerClassName = '\\' . $namespace . '\installer\Main';
+
+            $installer = new $installerClassName;
+
+            $installer->install();
+        }
+    }
 }

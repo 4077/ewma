@@ -2,5 +2,5 @@
 
 interface ModuleInstallerInterface
 {
-    public function getSchemas();
+    public function install();
 }
