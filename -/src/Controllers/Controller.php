@@ -345,7 +345,7 @@ class Controller
     {
         $env = $this->app->getEnv();
 
-        if (empty($in)) {
+        if (null == $in) {
             return $env;
         } else {
             return in($env, $in);
