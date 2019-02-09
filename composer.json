@@ -15,6 +15,7 @@
         "fed/css-fontawesome": "*",
         "fed/clients-pusher": "*",
         "fed/ewma-access": "*",
+        "fed/ewma-apps": "*",
         "fed/ewma-call-center": "*",
         "fed/ewma-components": "*",
         "fed/ewma-data-sets": "*",
