@@ -25,9 +25,15 @@ class AppProcess extends Service
 
     private $pid;
 
-    private $callFilePath;
+    private $pidDir;
 
-    private $signalDataFilePath;
+    private $xpid;
+
+    private $configFilePath;
+
+    private $xpidFilePath;
+
+    private $callFilePath;
 
     private $signalFilePath;
 
@@ -35,29 +41,43 @@ class AppProcess extends Service
 
     private $outputFilePath;
 
+    private $errorsFilePath;
+
     private $progressFilePath;
 
     public function boot()
     {
         if ($pid = $this->app->getPid()) {
-            $this->pid = $pid;
+            $this->pidDir = $this->dispatcher->getPidDir($pid);
 
-            $this->init();
+            $this->pid = $pid;
+            $this->xpid = read($this->pidDir . '/xpid');
+
+            $this->initFiles();
         }
     }
 
-    public function get()
+    private function initFiles()
     {
-        return $this;
+        $pidDir = $this->pidDir;
+
+        $this->xpidFilePath = $this->dispatcher->getXPidFilePath($this->xpid);
+
+        $this->callFilePath = $pidDir . '/call.json';
+        $this->configFilePath = $pidDir . '/config.json';
+        $this->inputFilePath = $pidDir . '/input.json';
+        $this->outputFilePath = $pidDir . '/output.json';
+        $this->errorsFilePath = $pidDir . '/errors.json';
+        $this->progressFilePath = $pidDir . '/progress.json';
+        $this->signalFilePath = $pidDir . '/signal';
     }
 
     public function run()
     {
-        $this->updateInput();
+        $this->readInput();
 
         pcntl_signal(SIGTERM, function () {
             $this->dispatcher->open($this->pid)->break();
-
             $this->dispatcher->log('SIGTERM');
         });
 
@@ -69,35 +89,37 @@ class AppProcess extends Service
         return jread($this->callFilePath);
     }
 
-    private function init()
-    {
-        $this->initFiles();
-    }
-
-    private function initFiles()
-    {
-        $pidDir = $this->dispatcher->getPidDir($this->pid);
-
-        $this->callFilePath = $pidDir . '/call.json';
-        $this->inputFilePath = $pidDir . '/input.json';
-        $this->signalFilePath = $pidDir . '/signal';
-        $this->signalDataFilePath = $pidDir . '/signal-data.json';
-        $this->outputFilePath = $pidDir . '/output.json';
-        $this->progressFilePath = $pidDir . '/progress.json';
-    }
-
-    private $outputs = [];
-
-    private function addOutput($filePath)
-    {
-        $this->dispatcher->log('ADD OUTPUT ' . $filePath);
-
-        merge($this->outputs, $filePath);
-    }
-
     public function getPid()
     {
         return $this->pid;
+    }
+
+    public function getXPid()
+    {
+        return $this->xpid;
+    }
+
+    //
+    // read config/signal
+    //
+
+    private $configFileMTime;
+
+    private $config;
+
+    private function getConfig($path = false)
+    {
+        if (file_exists($this->configFilePath)) {
+            clearstatcache(true, $this->configFilePath);
+
+            if ($this->configFileMTime != filemtime($this->configFilePath)) {
+                $this->config = jread($this->configFilePath);
+
+                $this->configFileMTime = filemtime($this->configFileMTime);
+            }
+        }
+
+        return ap($this->config, $path);
     }
 
     private $signalFileMTime;
@@ -119,10 +141,9 @@ class AppProcess extends Service
         return $this->signal;
     }
 
-    private function getSignalData()
-    {
-        return jread($this->signalDataFilePath);
-    }
+    //
+    // handle/terminate
+    //
 
     public function handleIteration($sleepMs = false)
     {
@@ -133,8 +154,8 @@ class AppProcess extends Service
                 while (true) {
                     $onPauseSignal = $this->getSignal();
 
-                    if ($onPauseSignal == Signals::UPDATE) {
-                        $this->updateInput();
+                    if ($onPauseSignal == Signals::UPDATE_INPUT) {
+                        $this->readInput();
                     }
 
                     if ($onPauseSignal == Signals::RESUME) {
@@ -145,28 +166,16 @@ class AppProcess extends Service
                         return true;
                     }
 
-                    if ($onPauseSignal == Signals::ADD_OUTPUT) {
-                        $signalData = $this->getSignalData();
-
-                        $this->addOutput($signalData);
-                    }
-
                     usleep(500000);
                 }
             }
 
-            if ($signal == Signals::UPDATE) {
-                $this->updateInput();
+            if ($signal == Signals::UPDATE_INPUT) {
+                $this->readInput();
             }
 
             if ($signal == Signals::BREAK) {
                 return true;
-            }
-
-            if ($signal == Signals::ADD_OUTPUT) {
-                $signalData = $this->getSignalData();
-
-                $this->addOutput($signalData);
             }
 
             $this->signal = Signals::NONE;
@@ -177,20 +186,14 @@ class AppProcess extends Service
         }
     }
 
-    public function progress($current, $total = null, $comment = false)
-    {
-        jwrite($this->progressFilePath, [
-            'current' => $current,
-            'total'   => $total,
-            'comment' => $comment
-        ]);
-    }
-
     public function terminate()
     {
-        $pidDir = $this->dispatcher->getPidDir($this->pid);
+        $xpidData = jread($this->xpidFilePath);
+        $xpidData['terminated'] = time();
+        jwrite($this->xpidFilePath, $xpidData);
 
-        delete_dir($pidDir);
+//        $this->dispatcher->removeXPid($this->xpid);
+        delete_dir($this->pidDir);
 
         $this->dispatcher->log('terminate pid=' . $this->pid);
     }
@@ -201,7 +204,7 @@ class AppProcess extends Service
 
     private $input;
 
-    private function updateInput()
+    private function readInput()
     {
         $this->input = jread($this->inputFilePath);
     }
@@ -217,20 +220,26 @@ class AppProcess extends Service
 
     private $output;
 
-    private function updateOutput()
+    private function writeOutput()
     {
         jwrite($this->outputFilePath, $this->output);
 
-        foreach ($this->outputs as $output) {
+        $outputs = $this->getConfig('outputs');
+
+        foreach ($outputs as $output) {
             jwrite($output, $this->output);
         }
+
+        $xpidData = jread($this->xpidFilePath);
+        $xpidData['output'] = $this->output;
+        jwrite($this->xpidFilePath, $xpidData);
     }
 
     public function output($data)
     {
         $this->output = $data;
 
-        $this->updateOutput();
+        $this->writeOutput();
     }
 
     public function aa($path, $value)
@@ -239,7 +248,7 @@ class AppProcess extends Service
 
         aa($node, $value);
 
-        $this->updateOutput();
+        $this->writeOutput();
     }
 
     public function ra($path, $value)
@@ -248,7 +257,7 @@ class AppProcess extends Service
 
         ra($node, $value);
 
-        $this->updateOutput();
+        $this->writeOutput();
     }
 
     public function rr($path, $value)
@@ -257,6 +266,64 @@ class AppProcess extends Service
 
         $node = $value;
 
-        $this->updateOutput();
+        $this->writeOutput();
+    }
+
+    //
+    // WRITE errors
+    //
+
+    private $errors;
+
+    private function writeErrors()
+    {
+        jwrite($this->outputFilePath, $this->output);
+
+        $errors = $this->getConfig('errors');
+
+        foreach ($errors as $error) {
+            jwrite($error, $this->errors);
+        }
+
+        $xpidData = jread($this->xpidFilePath);
+        $xpidData['errors'] = $this->errors;
+        jwrite($this->xpidFilePath, $xpidData);
+    }
+
+    public function error($message)
+    {
+        $this->errors[] = $message;
+
+        $this->dispatcher->log('ADD ERROR: ' . $message);
+
+        $this->writeErrors();
+    }
+
+    //
+    // WRITE progress
+    //
+
+    public function progress($current, $total = null, $comment = false, $data = [])
+    {
+        if ($total > 0) {
+            $percent = $current / $total * 100;
+        } else {
+            $percent = 0;
+        }
+
+        $progressData = [
+            'current'      => $current,
+            'total'        => $total,
+            'percent'      => $percent,
+            'percent_ceil' => ceil($percent),
+            'comment'      => $comment,
+            'data'         => $data
+        ];
+
+        jwrite($this->progressFilePath, $progressData);
+
+        $xpidData = jread($this->xpidFilePath);
+        $xpidData['progress'] = $progressData;
+        jwrite($this->xpidFilePath, $xpidData);
     }
 }

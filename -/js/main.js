@@ -337,6 +337,55 @@ var ewma = {
         var parts = path.split("|");
 
         return execute_function_by_name(parts[1], $(parts[0]), "instance");
+    },
+
+    proc: function (xpid) {
+        return {
+            xpid: xpid,
+
+            loopInterval: 0,
+
+            loop: function (handler, interval) {
+                interval = interval || 1000;
+
+                var proc = this;
+
+                clearInterval(proc.loopInterval);
+                proc.loopInterval = setInterval(function () {
+                    $.getJSON('/proc/' + proc.xpid + '.json', {}, function (data) {
+                        if (data.terminated) {
+                            proc.terminateHandler(data.output, data.errors);
+
+                            clearInterval(proc.loopInterval);
+                        }
+
+                        if (data.progress || data.output || data.errors) {
+                            handler(data.progress, data.output, data.errors);
+                        }
+                    });
+                }, interval);
+            },
+
+            terminateHandler: function () {
+
+            },
+
+            terminate: function (handler) {
+                this.terminateHandler = handler;
+            },
+
+            pause: function () {
+                ewma.request('\ewma~process/xhr:pause:' + this.xpid);
+            },
+
+            resume: function () {
+                ewma.request('\ewma~process/xhr:resume:' + this.xpid);
+            },
+
+            break: function () {
+                ewma.request('\ewma~process/xhr:break:' + this.xpid);
+            }
+        };
     }
 };
 
@@ -434,8 +483,8 @@ $.widget("ewma.node", {
         }
     },
 
-    mr: function (requestName, data) {
-        this.r(requestName, data, true);
+    mr: function (requestName, data, handler) {
+        this.r(requestName, data, true, handler);
     }
 });
 
@@ -453,6 +502,20 @@ $(document).ready(function () {
     ewma.processInstructions(ewmaAppData.instructions);
 
     ewma.commonEventsContainer.appendTo("body");
+
+    /*ewma.bind('ewma/css/update', function (data) {
+        var path = data.path;
+
+        $('link[rel="stylesheet"]').each(function () {
+            var pos = this.href.indexOf(path);
+
+            if (pos !== -1) {
+                var tail = this.href.substr(pos + path.length);
+
+                this.href = ewma.appData.url + path + tail + Date.now();
+            }
+        });
+    });*/
 });
 
 $.fn.getWidget = function (widgetName) {

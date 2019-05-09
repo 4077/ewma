@@ -6,13 +6,10 @@ class Cell
 
     public $field;
 
-    public $pack;
-
-    public function __construct($model, $field, $pack)
+    public function __construct($model, $field)
     {
         $this->model = $model;
         $this->field = $field;
-        $this->pack = $pack;
     }
 
     public function value($set = null)
@@ -31,13 +28,47 @@ class Cell
         $this->model->save();
     }
 
+    private $underscore;
+
     public function underscore()
     {
-        return underscore_cell($this->model, $this->field);
+        if (null === $this->underscore) {
+            $this->underscore = underscore_cell($this->model, $this->field);
+        }
+
+        return $this->underscore;
     }
+
+    private $underscoreField;
 
     public function underscoreField()
     {
-        return underscore_field($this->model, $this->field);
+        if (null === $this->underscoreField) {
+            $this->underscoreField = underscore_field($this->model, $this->field);
+        }
+
+        return $this->underscoreField;
+    }
+
+    private $pack;
+
+    public function pack()
+    {
+        if (null == $this->pack) {
+            $this->pack = pack_cell($this->model, $this->field);
+        }
+
+        return $this->pack;
+    }
+
+    private $xpack;
+
+    public function xpack()
+    {
+        if (null == $this->xpack) {
+            $this->xpack = pack_cell($this->model, $this->field, true);
+        }
+
+        return $this->xpack;
     }
 }

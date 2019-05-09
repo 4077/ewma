@@ -200,17 +200,6 @@ class Response extends Service
     }
 
     //
-    // json
-    //
-
-    private $json = [];
-
-    public function json($input)
-    {
-        $this->json[] = $input;
-    }
-
-    //
     // debug
     //
 
@@ -257,7 +246,6 @@ class Response extends Service
     {
         return [
             'js'      => $this->app->js->getInstructions(),
-            'json'    => $this->json,
             'cookies' => $this->cookies,
             'console' => $this->console
         ];
@@ -325,7 +313,7 @@ class Response extends Service
         }
     }
 
-    public function sendJson($response)
+    public function json($response)
     {
         if (is_array($response)) {
             $response = json_encode($response);

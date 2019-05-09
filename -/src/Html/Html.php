@@ -145,6 +145,11 @@ class Html extends Service
 
     private $containers = [];
 
+    public function containerAdded($name = '')
+    {
+        return isset($this->containers[$name]);
+    }
+
     public function addContainer($name = '', $content = '')
     {
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_ROUTE) {

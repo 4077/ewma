@@ -49,4 +49,19 @@ class Css extends \Controller
 
         return $this->d['combiner']['use'];
     }
+
+    //
+
+    public function reload()
+    {
+        $path = $this->data('path');
+
+        $path = 'css/dev/' . str_replace(['.less', '/less'], '', $path) . '.';
+
+//        $this->log($path);
+
+        pusher()->trigger('ewma/css/update', [
+            'path' => $path
+        ]);
+    }
 }

@@ -99,9 +99,11 @@ class Modules extends Service
 
     private function registerModules()
     {
-        $this->localModulesRegisterRecursion();
-        $this->vendorModulesRegisterRecursion();
-        $this->externalModulesRegister();
+        $this->registerLocalModulesRecursion();
+        $this->registerVendorModulesRecursion();
+//        $this->registerExternalModules();
+
+        $this->registerVirtualModules();
     }
 
     private function saveToCache()
@@ -131,7 +133,7 @@ class Modules extends Service
 
     private $currentModuleId = 0;
 
-    private function localModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
+    private function registerLocalModulesRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
     {
         $modulePath = a2p($modulePathArray);
 
@@ -151,43 +153,40 @@ class Modules extends Service
 
         if ($location == 'local') {
             $settingsFilePath = $moduleDir . '/settings.php';
+
             if (file_exists($settingsFilePath)) {
                 $settings = require $settingsFilePath;
-            } else {
-                $settings = [
-                    'namespace' => implode('\\', $modulePathArray)
-                ];
-            }
 
-            aa($settings, ['namespace' => '']);
+                aa($settings, ['namespace' => '']);
 
-            ra($settings, [
-                'location'           => $location,
-                'id'                 => ++$this->currentModuleId,
-                'parent_id'          => $parentId,
-                'path'               => $modulePath,
-                'dir'                => $moduleDir,
-                'master_module_path' => ($settings['type'] ?? 'master') == 'master'
-                    ? a2p($modulePathArray)
-                    : $masterModulePath
-            ]);
+                ra($settings, [
+                    'location'           => $location,
+                    'id'                 => ++$this->currentModuleId,
+                    'parent_id'          => $parentId,
+                    'path'               => $modulePath,
+                    'dir'                => $moduleDir,
+                    'master_module_path' => ($settings['type'] ?? 'master') == 'master'
+                        ? a2p($modulePathArray)
+                        : $masterModulePath
+                ]);
 
-            $module = $this->registerModule($settings);
+                $module = $this->registerModule($settings);
 
-            foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
-                if ($fileInfo->isDot()) {
-                    continue;
-                }
+                foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
+                    if ($fileInfo->isDot()) {
+                        continue;
+                    }
 
-                if ($fileInfo->isDir()) {
-                    $fileName = $fileInfo->getFilename();
+                    if ($fileInfo->isDir()) {
+                        $fileName = $fileInfo->getFilename();
 
-                    if ($fileName != '-') {
-                        $modulePathArray[] = $fileName;
+                        if ($fileName != '-') {
+                            $modulePathArray[] = $fileName;
 
-                        $this->localModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id);
+                            $this->registerLocalModulesRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id);
 
-                        array_pop($modulePathArray);
+                            array_pop($modulePathArray);
+                        }
                     }
                 }
             }
@@ -202,40 +201,55 @@ class Modules extends Service
         }
     }
 
-    private function vendorModulesRegisterRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
+    private function registerVendorModulesRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
     {
         $modulePath = a2p($modulePathArray);
+        $isRootLevel = !$modulePathArray;
 
         $moduleDir = abs_path('modules-vendor', $modulePath);
 
         $settingsFilePath = $moduleDir . '/settings.php';
+
         if (file_exists($settingsFilePath)) {
             $settings = require $settingsFilePath;
+
+            $hasLocated = isset($this->modulesByNamespace[$settings['namespace']]);
+
+            if (!$hasLocated) {
+                ra($settings, [
+                    'location'           => 'vendor',
+                    'id'                 => ++$this->currentModuleId,
+                    'parent_id'          => $parentId,
+                    'path'               => $modulePath,
+                    'dir'                => $moduleDir,
+                    'master_module_path' => ($settings['type'] ?? 'master') == 'master'
+                        ? a2p($modulePathArray)
+                        : $masterModulePath
+                ]);
+
+                $module = $this->registerModule($settings);
+            }
+
+            if (!$hasLocated || $isRootLevel) {
+                foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
+                    if ($fileInfo->isDot()) {
+                        continue;
+                    }
+
+                    if ($fileInfo->isDir()) {
+                        $fileName = $fileInfo->getFilename();
+
+                        if ($fileName != '-') {
+                            $modulePathArray[] = $fileName;
+
+                            $this->registerVendorModulesRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
+
+                            array_pop($modulePathArray);
+                        }
+                    }
+                }
+            }
         } else {
-            $settings = [
-                'namespace' => implode('\\', $modulePathArray)
-            ];
-        }
-
-        $hasLocated = isset($this->modulesByNamespace[$settings['namespace']]);
-        $isRootLevel = !$modulePathArray;
-
-        if (!$hasLocated) {
-            ra($settings, [
-                'location'           => 'vendor',
-                'id'                 => ++$this->currentModuleId,
-                'parent_id'          => $parentId,
-                'path'               => $modulePath,
-                'dir'                => $moduleDir,
-                'master_module_path' => ($settings['type'] ?? 'master') == 'master'
-                    ? a2p($modulePathArray)
-                    : $masterModulePath
-            ]);
-
-            $module = $this->registerModule($settings);
-        }
-
-        if (!$hasLocated || $isRootLevel) {
             foreach (new \DirectoryIterator($moduleDir) as $fileInfo) {
                 if ($fileInfo->isDot()) {
                     continue;
@@ -247,7 +261,7 @@ class Modules extends Service
                     if ($fileName != '-') {
                         $modulePathArray[] = $fileName;
 
-                        $this->vendorModulesRegisterRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
+                        $this->registerVendorModulesRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
 
                         array_pop($modulePathArray);
                     }
@@ -256,7 +270,7 @@ class Modules extends Service
         }
     }
 
-    private function externalModulesRegister()
+    private function registerExternalModules()
     {
         $rootModule = $this->getRootModule();
 
@@ -322,6 +336,44 @@ class Modules extends Service
                     }
                 }
             }
+        }
+    }
+
+    private function registerVirtualModules()
+    {
+        $namespaces = array_keys($this->modulesByNamespace);
+
+        $notExistsNamespaces = [];
+
+        foreach ($namespaces as $namespace) {
+            $namespaceArray = explode('\\', $namespace);
+
+            $parentNamespace = implode('\\', array_slice($namespaceArray, 0, -1));
+
+            if (!isset($this->modulesByNamespace[$parentNamespace])) {
+                $notExistsNamespaces[] = $parentNamespace;
+            }
+        }
+
+        $notExistsNamespaces = merge($notExistsNamespaces);
+
+        foreach ($notExistsNamespaces as $notExistsNamespace) {
+            $modulePath = str_replace('\\', '/', $notExistsNamespace);
+            $moduleDir = abs_path('modules/virtualModules', $modulePath);
+
+            mdir($moduleDir);
+
+            $settings = [
+                'location'           => 'local',
+                'id'                 => ++$this->currentModuleId,
+                'parent_id'          => 0,
+                'path'               => $modulePath,
+                'dir'                => $moduleDir,
+                'master_module_path' => $modulePath,
+                'namespace'          => $notExistsNamespace
+            ];
+
+            $this->registerModule($settings);
         }
     }
 
@@ -395,7 +447,7 @@ class Modules extends Service
     }
 
     /**
-     * @return array
+     * @return Module[]
      */
     public function getAll()
     {

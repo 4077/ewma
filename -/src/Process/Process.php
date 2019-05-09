@@ -6,13 +6,17 @@ class Process
 
     private $pid;
 
+    private $pidDir;
+
+    private $xpid;
+
     private $call;
+
+    private $configFilePath;
 
     private $callFilePath;
 
     private $signalFilePath;
-
-    private $signalDataFilePath;
 
     private $inputFilePath;
 
@@ -30,7 +34,20 @@ class Process
         $process = new self($dispatcher);
 
         $process->setPid($dispatcher->getNewPid());
-        $process->init();
+        $process->setXPid($dispatcher->getNewXPid());
+
+        $process->pidDir = $dispatcher->getPidDir($process->pid);
+
+        write($process->pidDir . '/xpid', $process->xpid);
+
+        jwrite($dispatcher->getXPidFilePath($process->xpid), [
+            'output'   => false,
+            'progress' => false
+        ]);
+
+        $dispatcher->xpidsMapAdd($process->pid, $process->xpid);
+
+        $process->initFiles($process->pidDir);
 
         return $process;
     }
@@ -39,10 +56,34 @@ class Process
     {
         $process = new self($dispatcher);
 
+        $process->pidDir = $dispatcher->getPidDir($pid);
+
         $process->setPid($pid);
-        $process->init();
+        $process->setXPid(read($process->pidDir . '/xpid'));
+
+        $process->initFiles($process->pidDir);
 
         return $process;
+    }
+
+    private function initFiles($pidDir)
+    {
+        $this->configFilePath = $pidDir . '/config.json';
+        $this->callFilePath = $pidDir . '/call.json';
+        $this->inputFilePath = $pidDir . '/input.json';
+        $this->outputFilePath = $pidDir . '/output.json';
+        $this->signalFilePath = $pidDir . '/signal';
+        $this->progressFilePath = $pidDir . '/progress.json';
+
+        if (!file_exists($this->signalFilePath)) {
+            write($this->signalFilePath, Signals::NONE);
+        }
+
+        if (!file_exists($this->configFilePath)) {
+            jwrite($this->configFilePath, [
+                'outputs' => []
+            ]);
+        }
     }
 
     public function setCall($call)
@@ -51,6 +92,10 @@ class Process
             $this->call = $call;
         }
     }
+
+    //
+    // locks
+    //
 
     private $lockName;
 
@@ -75,6 +120,10 @@ class Process
         return !flock($lockFile, LOCK_EX | LOCK_NB);
     }
 
+    //
+    // run/wait
+    //
+
     private $run;
 
     public function run($input = [])
@@ -91,11 +140,10 @@ class Process
             }
 
             if ($locked) {
-                $pidDir = $this->dispatcher->getPidDir($this->pid);
+                $this->dispatcher->removeXPid($this->xpid);
+                delete_dir($this->pidDir);
 
-                delete_dir($pidDir);
-
-                $this->dispatcher->log('lock ' . $this->lockName);
+                $this->dispatcher->log('LOCK ' . $this->lockName);
 
                 return false;
             } else {
@@ -125,58 +173,30 @@ class Process
 
     public function wait()
     {
-        $outputFilePath = $this->dispatcher->getOutputFilePath(k());
+        $tmpOutputFilePath = $this->dispatcher->getTmpOutputFilePath(k());
 
-        $this->addOutput($outputFilePath);
-
-        $pidDir = $this->dispatcher->getPidDir($this->pid);
+        $this->addOutput($tmpOutputFilePath);
 
         $this->dispatcher->log('WAIT BEGIN pid=' . $this->pid);
 
-        while (file_exists($pidDir)) {
+        while (file_exists($this->pidDir)) {
             usleep(100000);
         }
 
         $this->dispatcher->log('WAIT END pid=' . $this->pid);
 
-        $output = jread($outputFilePath);
+        $output = jread($tmpOutputFilePath);
 
-        if (file_exists($outputFilePath)) {
-            unlink($outputFilePath);
+        if (file_exists($tmpOutputFilePath)) {
+            unlink($tmpOutputFilePath);
         }
 
-        return $output; // todo test
+        return $output;
     }
 
-    public function init()
-    {
-        $this->initFiles();
-    }
-
-    private function initFiles()
-    {
-        $processDir = $this->getProcessDir();
-
-        $this->callFilePath = $processDir . '/call.json';
-        $this->signalFilePath = $processDir . '/signal';
-        $this->signalDataFilePath = $processDir . '/signal-data.json';
-        $this->inputFilePath = $processDir . '/input.json';
-        $this->outputFilePath = $processDir . '/output.json';
-        $this->progressFilePath = $processDir . '/progress.json';
-
-        if (!file_exists($this->signalFilePath)) {
-            write($this->signalFilePath);
-        }
-
-        if (!file_exists($this->signalDataFilePath)) {
-            write($this->signalDataFilePath);
-        }
-    }
-
-    private function getProcessDir()
-    {
-        return $this->dispatcher->getPidDir($this->pid);
-    }
+    //
+    // pids
+    //
 
     public function setPid($pid)
     {
@@ -185,10 +205,26 @@ class Process
         }
     }
 
+    public function setXPid($xpid)
+    {
+        if (null === $this->xpid) {
+            $this->xpid = $xpid;
+        }
+    }
+
     public function getPid()
     {
         return $this->pid;
     }
+
+    public function getXPid()
+    {
+        return $this->xpid;
+    }
+
+    //
+    // signals
+    //
 
     public function pause()
     {
@@ -205,15 +241,24 @@ class Process
         $this->signal(Signals::BREAK);
     }
 
-    public function addOutput($outputFilePath)
+    private function signal($signal)
     {
-        $this->signal(Signals::ADD_OUTPUT, $outputFilePath);
+        $this->dispatcher->log('SIGNAL ' . $signal);
+
+        write($this->signalFilePath, $signal);
     }
 
-    private function signal($signal, $data = null)
+    //
+    // add output
+    //
+
+    public function addOutput($outputFilePath)
     {
-        write($this->signalFilePath, $signal);
-        jwrite($this->signalDataFilePath, $data);
+        $config = jread($this->configFilePath);
+
+        merge($config['outputs'], $outputFilePath);
+
+        jwrite($this->configFilePath, $config);
     }
 
     //
@@ -222,14 +267,14 @@ class Process
 
     private $output;
 
-    private function updateOutput()
+    private function readOutput()
     {
         $this->output = jread($this->outputFilePath);
     }
 
     public function output($path = false)
     {
-        $this->updateOutput();
+        $this->readOutput();
 
         return ap($this->output, $path);
     }
@@ -244,7 +289,7 @@ class Process
     {
         jwrite($this->inputFilePath, $this->input);
 
-        $this->signal(Signals::UPDATE);
+        $this->signal(Signals::UPDATE_INPUT);
     }
 
     public function input($data)
@@ -279,19 +324,5 @@ class Process
         $node = $value;
 
         $this->updateInput();
-    }
-
-    //
-    //
-    //
-
-    public function getProgressUrl()
-    {
-
-    }
-
-    public function getOutputUrl()
-    {
-
     }
 }

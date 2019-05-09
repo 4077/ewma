@@ -58,7 +58,8 @@ class App extends Service
         'controllers',
         'views',
         'process',
-        'processDispatcher'
+        'processDispatcher',
+        'openssl'
     ];
 
     /**
@@ -161,6 +162,11 @@ class App extends Service
      */
     public $processDispatcher = \ewma\Process\ProcessDispatcher::class;
 
+    /**
+     * @var \ewma\Openssl\Openssl
+     */
+    public $openssl = \ewma\Openssl\Openssl::class;
+
     //
     //
     //
@@ -203,6 +209,8 @@ class App extends Service
         $this->session->up();
 
         #8 остальное
+        $this->openssl->up();
+
         $this->setEnv();
 
         $this->host = $this->request->getHost();

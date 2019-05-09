@@ -145,7 +145,7 @@ class Controller
      * @param      $content
      * @param bool $path
      */
-    public function log($content, $path = false)
+    public function log($content = '', $path = false)
     {
         if (null === $this->__logger__) {
             $this->__logger__ = new \ewma\Controllers\Controller\Logger($this);
@@ -868,7 +868,7 @@ class Controller
         }
 
         if ($cell instanceof \ewma\Data\Cell) {
-            return $cell->pack;
+            return $cell->pack();
         }
     }
 
@@ -1106,17 +1106,6 @@ class Controller
     public function console($input) // todo app->response
     {
         $this->app->response->console($input);
-    }
-
-    /**
-     * Передает json. Используется при обработке ответа обратной функцией.
-     * Обратная функция будет вызвана столько же раз, сколько вызван этот метод
-     *
-     * @param $input
-     */
-    public function json($input) // todo app->response
-    {
-        $this->app->response->json($input);
     }
 
     public function _cookie($name) // todo app->request

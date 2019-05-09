@@ -88,4 +88,21 @@ class Cache extends \Controller
     {
         return $this->app->cache->reset('templates');
     }
+
+    // show
+
+    public function showModules()
+    {
+        $cache = $this->app->modules->getCache();
+
+        $output = [];
+
+        foreach ($cache as $moduleCache) {
+            $output[$moduleCache['namespace'] ?: '-'] = $moduleCache;
+        }
+
+        ksort($output);
+
+        return [$output]; // todo -[] when data-editor pagination
+    }
 }
