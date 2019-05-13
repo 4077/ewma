@@ -283,6 +283,17 @@ class App extends Service
         return $this->env;
     }
 
+    private $envModel;
+
+    public function getEnvModel()
+    {
+        if (null === $this->envModel) {
+            $this->envModel = \ewma\apps\models\Env::where('app_id', 0)->where('name', $this->getEnv())->first();
+        }
+
+        return $this->envModel;
+    }
+
     // pid
 
     private $pid;
