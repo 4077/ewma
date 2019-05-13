@@ -18,6 +18,10 @@ class Module
 
     public $location;
 
+    public $vendor;
+
+    public $virtual;
+
     public $externalPath;
 
     public $masterModulePath = false;
@@ -42,6 +46,8 @@ class Module
             dir                 dir,
             type                type,
             location            location,
+            vendor              vendor,
+            virtual             virtual,
             externalPath        external_path,
             masterModulePath    master_module_path,
             lessAutoImport      less_auto_import,
@@ -62,6 +68,8 @@ class Module
             'dir'                => $this->dir,
             'type'               => $this->type,
             'location'           => $this->location,
+            'vendor'             => $this->vendor,
+            'virtual'            => $this->virtual,
             'external_path'      => $this->externalPath,
             'master_module_path' => $this->masterModulePath,
             'less_auto_import'   => $this->lessAutoImport,

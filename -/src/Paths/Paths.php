@@ -70,7 +70,7 @@ class Paths extends Service
 
             $modulesDir = $node->__meta__->module->location == 'local'
                 ? 'modules'
-                : 'modules-vendor';
+                : 'modules-vendor/' . $node->__meta__->module->vendor;
 
             $moduleNodesDirPath = $modulePath ? '/' . $modulesDir . '/' . $modulePath . '/-' : '';
             $nodeFilePath = ($nodeType ? '/' . $nodeType : '') . '/' . $nodePath;

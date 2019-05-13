@@ -100,7 +100,7 @@ class Modules extends Service
     private function registerModules()
     {
         $this->registerLocalModulesRecursion();
-        $this->registerVendorModulesRecursion();
+        $this->registerVendorModules();
 //        $this->registerExternalModules();
 
         $this->registerVirtualModules();
@@ -201,12 +201,29 @@ class Modules extends Service
         }
     }
 
-    private function registerVendorModulesRecursion($modulePathArray = [], $masterModulePath = '', $parentId = 0)
+    private function registerVendorModules()
+    {
+        $vendorDir = abs_path('modules-vendor');
+
+        foreach (new \DirectoryIterator($vendorDir) as $fileInfo) {
+            if ($fileInfo->isDot()) {
+                continue;
+            }
+
+            if ($fileInfo->isDir()) {
+                $vendor = $fileInfo->getFilename();
+
+                $this->registerVendorModulesRecursion($vendor);
+            }
+        }
+    }
+
+    private function registerVendorModulesRecursion($vendor, $modulePathArray = [], $masterModulePath = '', $parentId = 0)
     {
         $modulePath = a2p($modulePathArray);
         $isRootLevel = !$modulePathArray;
 
-        $moduleDir = abs_path('modules-vendor', $modulePath);
+        $moduleDir = abs_path('modules-vendor', $vendor, $modulePath);
 
         $settingsFilePath = $moduleDir . '/settings.php';
 
@@ -218,6 +235,7 @@ class Modules extends Service
             if (!$hasLocated) {
                 ra($settings, [
                     'location'           => 'vendor',
+                    'vendor'             => $vendor,
                     'id'                 => ++$this->currentModuleId,
                     'parent_id'          => $parentId,
                     'path'               => $modulePath,
@@ -242,7 +260,7 @@ class Modules extends Service
                         if ($fileName != '-') {
                             $modulePathArray[] = $fileName;
 
-                            $this->registerVendorModulesRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
+                            $this->registerVendorModulesRecursion($vendor, $modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
 
                             array_pop($modulePathArray);
                         }
@@ -261,7 +279,7 @@ class Modules extends Service
                     if ($fileName != '-') {
                         $modulePathArray[] = $fileName;
 
-                        $this->registerVendorModulesRecursion($modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
+                        $this->registerVendorModulesRecursion($vendor, $modulePathArray, $module->masterModulePath ?? '', $module->id ?? 1);
 
                         array_pop($modulePathArray);
                     }
@@ -365,6 +383,7 @@ class Modules extends Service
 
             $settings = [
                 'location'           => 'local',
+                'virtual'            => true,
                 'id'                 => ++$this->currentModuleId,
                 'parent_id'          => 0,
                 'path'               => $modulePath,
