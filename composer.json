@@ -32,6 +32,7 @@
         "fed/std-ui": "*",
         "fed/std-layouts": "*",
         "fed/std-mailer": "*",
+        "fed/std-files-transfer": "*",
         "fed/std-tables-transfer": "*",
         "fed/std-queue": "*",
         "fed/std-ui-auth": "*",
