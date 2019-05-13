@@ -10,7 +10,6 @@ var ewma = {
     cancelFollow: false,
 
     log: {
-        pusher: 0,
         events: {
             bind:    0,
             trigger: 0
