@@ -156,6 +156,8 @@ class AppProcess extends Service
 
                     if ($onPauseSignal == Signals::UPDATE_INPUT) {
                         $this->readInput();
+
+                        $this->signal = Signals::PAUSE;
                     }
 
                     if ($onPauseSignal == Signals::RESUME) {
@@ -192,7 +194,6 @@ class AppProcess extends Service
         $xpidData['terminated'] = time();
         jwrite($this->xpidFilePath, $xpidData);
 
-//        $this->dispatcher->removeXPid($this->xpid);
         delete_dir($this->pidDir);
 
         $this->dispatcher->log('terminate pid=' . $this->pid);
@@ -215,58 +216,59 @@ class AppProcess extends Service
     }
 
     //
-    // WRITE output
+    // READ/WRITE output
     //
 
     private $output;
 
-    private function writeOutput()
+    private function writeOutput($data)
     {
-        jwrite($this->outputFilePath, $this->output);
+        jwrite($this->outputFilePath, $data);
 
         $outputs = $this->getConfig('outputs');
 
         foreach ($outputs as $output) {
-            jwrite($output, $this->output);
+            jwrite($output, $data);
         }
 
         $xpidData = jread($this->xpidFilePath);
-        $xpidData['output'] = $this->output;
+        $xpidData['output'] = $data;
         jwrite($this->xpidFilePath, $xpidData);
+    }
+
+    public function readOutput($path = false)
+    {
+        $output = jread($this->outputFilePath);
+
+        return ap($output, $path);
     }
 
     public function output($data)
     {
-        $this->output = $data;
-
-        $this->writeOutput();
+        $this->writeOutput($data);
     }
 
-    public function aa($path, $value)
+    public function aa($data)
     {
-        $node = &ap($this->output, $path);
+        $output = $this->readOutput();
 
-        aa($node, $value);
+        aa($output, $data);
 
-        $this->writeOutput();
+        $this->writeOutput($output);
     }
 
-    public function ra($path, $value)
+    public function ra($data)
     {
-        $node = &ap($this->output, $path);
+        $output = $this->readOutput();
 
-        ra($node, $value);
+        ra($output, $data);
 
-        $this->writeOutput();
+        $this->writeOutput($output);
     }
 
-    public function rr($path, $value)
+    public function rr($data)
     {
-        $node = &ap($this->output, $path);
-
-        $node = $value;
-
-        $this->writeOutput();
+        $this->writeOutput($data);
     }
 
     //

@@ -151,8 +151,8 @@ class Process
                 jwrite($this->inputFilePath, $input);
 
                 $processHandlerData = [
-                    'pid'  => $this->pid,
-                    'call' => $this->call
+                    app()->getConfig('name') => $this->pid,
+                    'call'                   => $this->call
                 ];
 
                 $command = 'nohup ./cli -j \'' . str_replace("'", "'\''", j_(['processHandler:handle', $processHandlerData])) . '\' >> ~/proc.log 2>&1 &';
@@ -236,6 +236,19 @@ class Process
         $this->signal(Signals::RESUME);
     }
 
+    public function togglePause()
+    {
+        if ($this->isPaused()) {
+            $this->resume();
+
+            return false;
+        } else {
+            $this->pause();
+
+            return true;
+        }
+    }
+
     public function break()
     {
         $this->signal(Signals::BREAK);
@@ -246,6 +259,13 @@ class Process
         $this->dispatcher->log('SIGNAL ' . $signal);
 
         write($this->signalFilePath, $signal);
+    }
+
+    public function isPaused()
+    {
+        $signal = read($this->signalFilePath);
+
+        return $signal == Signals::PAUSE;
     }
 
     //
