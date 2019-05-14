@@ -175,6 +175,8 @@ class App extends Service
 
     protected function boot()
     {
+        chdir($this->root);
+
         mb_internal_encoding("UTF-8");
 
         #1 настройки кеша (обязательно перед #2)
