@@ -11,7 +11,7 @@ html {
     min-height: 100%;
     height: auto !important;
     height: 100%;
-    z-index: 33554432
+    z-index: 33554432;
 }
 
 #ewma__waiting_overlay.error {

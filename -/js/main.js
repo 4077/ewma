@@ -70,10 +70,7 @@ var ewma = {
         nodes: []
     },
 
-    responseWaitingTimeout: 0,
-
     responseHandler: function (response) {
-        clearTimeout(ewma.responseWaitingTimeout);
 
         if (response) {
             ewma.appData.css.checkVersion(response.css.version);
@@ -88,12 +85,10 @@ var ewma = {
         handler = handler || ewma.responseHandler;
         quiet = quiet || false;
 
-        clearTimeout(ewma.responseWaitingTimeout);
+        var waitingNumber = Math.random() * 1000;
 
         if (!quiet) {
-            ewma.responseWaitingTimeout = setTimeout(function () {
-                ewma.showWaitingLayer();
-            }, 400);
+            ewma.showWaitingLayer(waitingNumber);
         }
 
         ewma.trigger("before_request");
@@ -112,7 +107,7 @@ var ewma = {
                 handler(response);
 
                 ewma.removeXHRError();
-                ewma.removeWaitingLayer();
+                ewma.removeWaitingLayer(waitingNumber);
 
                 ewma.trigger("after_request");
             },
@@ -120,8 +115,8 @@ var ewma = {
                 if (response.responseJSON.error) {
                     ewma.showXHRError(response.responseJSON.error);
 
-                    ewma.removeWaitingLayer();
-                    ewma.showWaitingLayer(true);
+                    ewma.removeWaitingLayer(waitingNumber);
+                    ewma.showWaitingLayer(waitingNumber, true);
                 }
             }
         });
@@ -168,8 +163,8 @@ var ewma = {
             }));
     },
 
-    showWaitingLayer: function (error) {
-        $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay"));
+    showWaitingLayer: function (waitingNumber, error) {
+        $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay").data("waiting_number", waitingNumber));
 
         if (error) {
             $("#ewma__waiting_overlay")
@@ -181,10 +176,12 @@ var ewma = {
         }
     },
 
-    removeWaitingLayer: function () {
-        clearTimeout(ewma.responseWaitingTimeout);
+    removeWaitingLayer: function (waitingNumber) {
+        var $overlay = $("#ewma__waiting_overlay");
 
-        $("#ewma__waiting_overlay").remove();
+        if ($overlay.data("waiting_number") === waitingNumber) {
+            $overlay.remove();
+        }
     },
 
     removeXHRError: function () {
