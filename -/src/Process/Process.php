@@ -143,7 +143,7 @@ class Process
                 $this->dispatcher->removeXPid($this->xpid);
                 delete_dir($this->pidDir);
 
-                $this->dispatcher->log('LOCK ' . $this->lockName);
+//                $this->dispatcher->log('LOCK ' . $this->lockName);
 
                 return false;
             } else {
