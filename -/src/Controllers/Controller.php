@@ -1179,7 +1179,7 @@ class Controller
                 $message .= ' "' . $this->__meta__->absPath . '"';
                 $message .= ' does not have method "' . $method . '"';
 
-                throw new \Exception($message);
+                $this->app->rootController->console($message);
             }
 
             if ($this->app->events->hasOnceCallBinding) {

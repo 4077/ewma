@@ -197,7 +197,7 @@ class View
 
                 $this->app->views->compiledByFilePath[$this->templatePath] = $compiledTemplatePath;
             } else {
-                throw new \Exception('Not found template ' . $templatePath);
+                $this->app->rootController->console('Not found template ' . $templatePath);
             }
         }
 
