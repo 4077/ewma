@@ -70,7 +70,7 @@ class Node
                 $message .= ' (' . $this->relativePath . '@' . $this->controller->__meta__->absPath . ')';
             }
 
-            throw new \Exception($message);
+            $this->app->rootController->console($message);
         }
     }
 }
