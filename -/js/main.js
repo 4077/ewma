@@ -80,15 +80,21 @@ var ewma = {
         }
     },
 
+    requests: 0,
+
     request: function (path, data, handler, quiet) {
         data = data || {};
         handler = handler || ewma.responseHandler;
         quiet = quiet || false;
 
-        var waitingNumber = Math.random() * 1000;
+        ewma.requests++;
 
         if (!quiet) {
-            ewma.showWaitingLayer(waitingNumber);
+            ewma.showWaitingLayer();
+
+            setTimeout(function () {
+                $("#ewma__waiting_overlay").addClass("lock");
+            }, 400);
         }
 
         ewma.trigger("before_request");
@@ -104,19 +110,23 @@ var ewma = {
                 tab:  ewma.appData.tab
             },
             success: function (response) {
+                ewma.requests--;
+
                 handler(response);
 
                 ewma.removeXHRError();
-                ewma.removeWaitingLayer(waitingNumber);
+                ewma.removeWaitingLayer();
 
                 ewma.trigger("after_request");
             },
             error:   function (response) {
+                ewma.requests--;
+
                 if (response.responseJSON.error) {
                     ewma.showXHRError(response.responseJSON.error);
 
-                    ewma.removeWaitingLayer(waitingNumber);
-                    ewma.showWaitingLayer(waitingNumber, true);
+                    ewma.removeWaitingLayer();
+                    ewma.showWaitingLayer(true);
                 }
             }
         });
@@ -163,8 +173,12 @@ var ewma = {
             }));
     },
 
-    showWaitingLayer: function (waitingNumber, error) {
-        $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay").data("waiting_number", waitingNumber));
+    showWaitingLayer: function (error) {
+        var $overlay = $("#ewma__waiting_overlay");
+
+        if (!$overlay.length) {
+            $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay"));
+        }
 
         if (error) {
             $("#ewma__waiting_overlay")
@@ -176,11 +190,13 @@ var ewma = {
         }
     },
 
-    removeWaitingLayer: function (waitingNumber) {
+    removeWaitingLayer: function () {
         var $overlay = $("#ewma__waiting_overlay");
 
-        if ($overlay.data("waiting_number") === waitingNumber) {
+        if (ewma.requests <= 0) {
             $overlay.remove();
+
+            ewma.requests = 0;
         }
     },
 

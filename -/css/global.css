@@ -4,14 +4,19 @@ html {
 }
 
 #ewma__waiting_overlay {
-    cursor: wait;
     position: fixed;
+    pointer-events: none;
     width: 100%;
     margin: 0 auto;
     min-height: 100%;
     height: auto !important;
     height: 100%;
     z-index: 33554432;
+}
+
+#ewma__waiting_overlay.lock {
+    cursor: wait;
+    pointer-events: all;
 }
 
 #ewma__waiting_overlay.error {
