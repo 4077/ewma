@@ -201,6 +201,8 @@ class View
             }
         }
 
-        return $this->app->views->compiledByFilePath[$this->templatePath];
+        if (isset($this->app->views->compiledByFilePath[$this->templatePath])) {
+            return $this->app->views->compiledByFilePath[$this->templatePath];
+        }
     }
 }
