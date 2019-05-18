@@ -150,29 +150,29 @@ class Html extends Service
         return isset($this->containers[$name]);
     }
 
-    public function addContainer($name = '', $content = '')
+    public function addContainer($name = '', $content = '', $class = false)
     {
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_ROUTE) {
             if (!isset($this->containers[$name])) {
-                $this->containers[$name] = $this->containerView($name, $content);
+                $this->containers[$name] = $this->containerView($name, $content, $class);
             }
         }
 
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_XHR) {
-            $this->controller->widget(":body", "addContainer", $name, $this->containerView($name, $content));
+            $this->controller->widget(":body", "addContainer", $name, $this->containerView($name, $content, $class));
         }
 
         return $this;
     }
 
-    public function replaceContainer($name = '', $content = '')
+    public function replaceContainer($name = '', $content = '', $class = false)
     {
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_ROUTE) {
-            $this->containers[$name] = $this->containerView($name, $content);
+            $this->containers[$name] = $this->containerView($name, $content, $class);
         }
 
         if ($this->app->mode == \ewma\App\App::REQUEST_MODE_XHR) {
-            $this->controller->widget(":body", "replaceContainer", $name, $this->containerView($name, $content));
+            $this->controller->widget(":body", "replaceContainer", $name, $this->containerView($name, $content, $class));
         }
 
         return $this;
@@ -192,10 +192,11 @@ class Html extends Service
         return $this->containers;
     }
 
-    private function containerView($name, $content)
+    private function containerView($name, $content, $class)
     {
         return $this->controller->c('>container:view|' . $name, [
-            'content' => $content
+            'content' => $content,
+            'class'   => $class
         ]);
     }
 

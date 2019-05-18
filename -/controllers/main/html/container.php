@@ -7,7 +7,8 @@ class Container extends \Controller
         $v = $this->v('|');
 
         $v->assign([
-                       'CONTENT' => $this->data('content')
+                       'CONTENT' => $this->data('content'),
+                       'CLASS'   => $this->data('class')
                    ]);
 
         return $v;

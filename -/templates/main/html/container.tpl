@@ -1,4 +1,4 @@
-<div class="{__NODE_ID__}" instance="{__INSTANCE__}">
+<div class="{__NODE_ID__} {CLASS}" instance="{__INSTANCE__}">
 
     {CONTENT}
 
