@@ -12,15 +12,21 @@ class Composer extends \Controller
             $pipes
         );
 
+        $out = [];
+
         if (is_resource($process)) {
             $this->log('>>> ' . $command);
 
             while ($line = fgets($pipes[2]) or $line = fgets($pipes[1])) {
                 $this->log('    ' . rtrim($line));
+
+                $out[] = rtrim($line);
             }
 
             proc_close($process);
         }
+
+        return $out;
     }
 
     public function update()
@@ -33,15 +39,21 @@ class Composer extends \Controller
             $pipes
         );
 
+        $out = [];
+
         if (is_resource($process)) {
             $this->log('>>> ' . $command);
 
             while ($line = fgets($pipes[2]) or $line = fgets($pipes[1])) {
                 $this->log('    ' . rtrim($line));
+
+                $out[] = rtrim($line);
             }
 
             proc_close($process);
         }
+
+        return $out;
     }
 
     public function require()
@@ -54,14 +66,20 @@ class Composer extends \Controller
             $pipes
         );
 
+        $out = [];
+
         if (is_resource($process)) {
             $this->log('>>> ' . $command);
 
             while ($line = fgets($pipes[2]) or $line = fgets($pipes[1])) {
                 $this->log('    ' . rtrim($line));
+
+                $out[] = rtrim($line);
             }
 
             proc_close($process);
         }
+
+        return $out;
     }
 }
