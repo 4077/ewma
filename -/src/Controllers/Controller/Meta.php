@@ -98,12 +98,10 @@ class Meta
     }
 
     /**
-     * @param array $input
+     * @param mixed $input
      */
     public function setData($input = [])
     {
-        if (is_array($input)) {
-            $this->controller->data = $input;
-        }
+        $this->controller->data = $input;
     }
 }
