@@ -58,7 +58,7 @@ class Composer extends \Controller
 
     public function require()
     {
-        $command = 'composer --ansi require ' . $this->data('package') . ':"' . $this->data('version') . "'";
+        $command = 'composer --ansi require ' . $this->data('package') . ':"' . $this->data('version') . '"';
 
         $process = proc_open(
             $command,
