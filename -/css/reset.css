@@ -13,7 +13,8 @@ input, textarea {
     outline: 0;
     font-weight: inherit;
     /*font-size: 100%;*/
-    font-family: arial, sans-serif;
+    /*font-family: arial, sans-serif;*/
+    /*font-family: inherit;*/
     vertical-align: top;
 }
 
