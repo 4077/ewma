@@ -10,7 +10,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "fed/ewma-module-installer-plugin": "~0.0.2",
+        "fed/ewma-module-installer-plugin": "~0.0.1",
         "fed/css": "*",
         "fed/css-fontawesome": "*",
         "fed/clients-pusher": "*",
