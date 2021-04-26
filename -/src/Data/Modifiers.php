@@ -37,6 +37,10 @@ class Modifiers
             } else {
                 foreach ($pathArray as $segment) {
                     if (!isset($node[$segment])) {
+                        if (!is_array($node)) { // php 7.1 fix
+                            $node = [];
+                        }
+
                         $node[$segment] = null;
                     }
 

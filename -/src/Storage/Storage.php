@@ -58,6 +58,8 @@ class Storage extends Service
      */
     public function &getNode($modulePath, $nodePath, $nodeInstance = '')
     {
+        $nodeInstance = (string)$nodeInstance;
+
         $module = $this->app->modules->getByPath($modulePath);
 
         if ($module) {
@@ -146,6 +148,8 @@ class Storage extends Service
      */
     private function nodeSave($moduleNamespace, $nodePath, $nodeInstance = '')
     {
+        $nodeInstance = (string)$nodeInstance;
+
         $data = $this->nodes[$moduleNamespace][$nodeInstance][$nodePath];
 
         // если узел был создан (не существовал до этого)
@@ -207,7 +211,7 @@ class Storage extends Service
             return true;
         }
 
-        return $this->nodes[$moduleNamespace][$nodeInstance][$nodePath] != $this->nodesOriginal[$moduleNamespace][$nodeInstance][$nodePath];
+        return $this->nodes[$moduleNamespace][$nodeInstance][$nodePath] !== $this->nodesOriginal[$moduleNamespace][$nodeInstance][$nodePath];
     }
 
     // todo

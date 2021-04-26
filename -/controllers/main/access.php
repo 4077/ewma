@@ -44,6 +44,23 @@ class Access extends \Controller
         return \ewma\access\models\User::find($this->data('id'));
     }
 
+    public function loginAs()
+    {
+        if ($user = $this->unpackModel('user')) {
+            $cookiePrefix = $this->app->getConfig('cookies_prefix');
+            $tokenCookieName = $cookiePrefix . 't';
+
+            $this->app->access->setUser($user);
+
+            $this->app->response->cookie(
+                $tokenCookieName,
+                $this->_user()->model->token,
+                $this->app->getConfig('access/user_session_timeout'),
+                '/'
+            );
+        }
+    }
+
     public function logout()
     {
         $this->app->access->auth->logout();

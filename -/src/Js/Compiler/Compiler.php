@@ -5,7 +5,9 @@ use ewma\Js\Minifier\Minifier;
 class Compiler
 {
     private $targetDir;
+
     private $targetFilePath;
+
     private $settings;
 
     public function __construct($targetDir, $targetFilePath, $settings)
@@ -16,6 +18,7 @@ class Compiler
     }
 
     private $sourceFilePath;
+
     private $sourceType;
 
     public function setSource($filePath, $type)
@@ -45,6 +48,10 @@ class Compiler
             $js = Minifier::minify($js);
         }
 
-        write(public_path($this->targetDir, $this->targetFilePath . '.js'), $js);
+        $filePath = public_path($this->targetDir, $this->targetFilePath . '.js');
+
+        write($filePath, $js);
+
+        return $filePath;
     }
 }

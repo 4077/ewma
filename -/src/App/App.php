@@ -175,6 +175,8 @@ class App extends Service
 
     protected function boot()
     {
+        $this->instanceRandomCode = k(4);
+
         chdir($this->root);
 
         mb_internal_encoding("UTF-8");
@@ -252,6 +254,8 @@ class App extends Service
     const REQUEST_MODE_XHR = 1;
     const REQUEST_MODE_CLI = 2;
 
+    public $instanceRandomCode;
+
     public $mode;
     public $route;
 
@@ -271,10 +275,14 @@ class App extends Service
 
     private $env;
 
-    public function setEnv()
+    public function setEnv($forceEnv = null)
     {
-        if (null === $this->env) {
-            $this->env = $this->getConfig('env');
+        if (null !== $forceEnv) {
+            $this->env = $forceEnv;
+        } else {
+            if (null === $this->env) {
+                $this->env = $this->getConfig('env');
+            }
         }
 
         return $this->env;

@@ -16,7 +16,7 @@ class Dispatcher
 
     public function __construct($eventPath, $eventFilter, Controller $controller)
     {
-        list($path, $name, $instance) = $this->explodeToPathAndInstance($eventPath, $controller);
+        [$path, $name, $instance] = $this->explodeToPathAndInstance($eventPath, $controller);
 
         $this->eventPath = $path;
         $this->eventName = $name;
@@ -29,10 +29,10 @@ class Dispatcher
     private function explodeToPathAndInstance($path, Controller $caller)
     {
         if (false !== strpos($path, '|')) {
-            list($path, $eventInstance) = explode('|', $path);
+            [$path, $eventInstance] = explode('|', $path);
         }
 
-        list($eventPath, $eventName) = array_pad(explode(':', $path), 2, null);
+        [$eventPath, $eventName] = array_pad(explode(':', $path), 2, null);
 
         if (empty($eventInstance)) {
             $eventInstance = $caller->_nodeId();
@@ -50,7 +50,7 @@ class Dispatcher
 
     public function bind()
     {
-        list($path, $data) = array_pad(func_get_args(), 2, null);
+        [$path, $data] = array_pad(func_get_args(), 2, null);
 
         if (null !== $path) {
             $this->controller->c('\ewma~storageEvents:bind', [
@@ -68,7 +68,7 @@ class Dispatcher
 
     public function unbind()
     {
-        $this->controller->c('\ewma~storageEvents~:unbind', [
+        $this->controller->c('\ewma~storageEvents:unbind', [
             'event_path'     => $this->eventPath,
             'event_name'     => $this->eventName,
             'event_instance' => $this->eventInstance
@@ -79,7 +79,7 @@ class Dispatcher
 
     public function rebind()
     {
-        list($path, $data) = array_pad(func_get_args(), 2, null);
+        [$path, $data] = array_pad(func_get_args(), 2, null);
 
         if (null !== $path) {
             $this->controller->c('\ewma~storageEvents:rebind', [

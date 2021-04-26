@@ -3,7 +3,6 @@
 use ewma\App\App;
 use ewma\Service\Service;
 use ewma\Controllers\Controller;
-use ewma\Css\Minifier\Minifier;
 
 class Css extends Service
 {
@@ -26,12 +25,6 @@ class Css extends Service
                 'dev_mode'     => true,
                 'dev_mode_dir' => 'css/dev',
                 'minify'       => false
-            ],
-            'combiner' => [
-                'enabled' => true,
-                'use'     => false,
-                'dir'     => 'css/combined',
-                'minify'  => false
             ]
         ]);
 
@@ -45,11 +38,18 @@ class Css extends Service
     }
 
     public $cache;
+
     private $cacheUpdated;
 
-    public function cacheUpdateNodeMTime($nodeId, $mTime)
+    public function cacheUpdateNodeMTime($fullCode, $mTime)
     {
-        $this->cache['nodes_m_times'][$nodeId] = $mTime;
+        $this->cache['nodes_mtimes'][$fullCode] = $mTime;
+        $this->cacheUpdated = true;
+    }
+
+    public function cacheUpdateNodeMd5($fullCode, $md5)
+    {
+        $this->cache['nodes_md5'][$fullCode] = $md5;
         $this->cacheUpdated = true;
     }
 
@@ -58,33 +58,84 @@ class Css extends Service
         $this->app->cache->write('cssCompiler', $this->cache);
     }
 
-    private $nodes;
-
     /**
-     * Обеспечить загрузку css-файла в браузер.
-     * Css-файл будет сгенериван из less- или css-узла,
-     * располагающегося по адресу $relativePath относительно $controller.
-     * Less-узел обладает приоритетом при выборе компилятором.
-     *
-     * @param Controller $controller
-     * @param            $relativePath
-     *
-     * @return Node
+     * @var Node[]
      */
-    public function provide(Controller $controller, $relativePath, $instance)
-    {
-        $nodeId = $controller->_nodeId($relativePath);
+    private $nodes = [];
 
-        $nodeCode = $nodeId . ($instance ? '|' . $instance : '');
+    private $buffer = [];
+
+    private $bufferEnabled = false;
+
+    public function provide(Controller $nodeController, $relativePath, $instance)
+    {
+        $nodeCode = $nodeController->_nodeId($relativePath) . ($instance ? '|' . $instance : '');
 
         if (isset($this->nodes[$nodeCode])) {
             return $this->nodes[$nodeCode];
         } else {
-            $node = new Node($controller, $relativePath, $nodeId, $instance);
+            $node = new Node($nodeController, $relativePath, $instance);
 
             $this->nodes[$nodeCode] = $node;
 
+            if ($this->bufferEnabled) {
+                $this->buffer[$nodeCode] = $node;
+            }
+
             return $node;
+        }
+    }
+
+    public function startBuffer()
+    {
+        $this->bufferEnabled = true;
+    }
+
+    public function stopBuffer()
+    {
+        $output = [];
+
+        foreach ($this->buffer as $node) {
+            $output[] = $this->bufferNode($node);
+        }
+
+        $this->bufferEnabled = false;
+        $this->buffer = [];
+
+        return $output;
+    }
+
+    private function bufferNode(Node $node)
+    {
+        return [
+            'node_path'     => $node->controller->__meta__->absPath,
+            'relative_path' => $node->relativePath,
+            'instance'      => $node->instance,
+            'import_paths'  => $node->importPaths,
+            'import_ids'    => $node->importIds,
+            'vars'          => $node->vars
+        ];
+    }
+
+    public function unbuffer($buffer)
+    {
+        foreach ($buffer as $nodeBuffer) {
+            $this->unbufferNode($nodeBuffer);
+        }
+    }
+
+    private function unbufferNode($nodeBuffer)
+    {
+        $controller = $this->app->c()->n($nodeBuffer['node_path']);
+
+        $node = new Node($controller, $nodeBuffer['relative_path'], $nodeBuffer['instance']);
+
+        $node->importPaths = $nodeBuffer['import_paths'];
+        $node->importIds = $nodeBuffer['import_ids'];
+        $node->vars = $nodeBuffer['vars'];
+
+        if (!isset($this->nodes[$node->code])) {
+            $this->nodes[$node->code] = $node;
         }
     }
 
@@ -102,40 +153,46 @@ class Css extends Service
         return $this->urls;
     }
 
-    public function getNodes()
-    {
-        return $this->nodes;
-    }
+//    /**
+//     * @return Node[]
+//     */
+//    public function getNodes()
+//    {
+//        return $this->nodes;
+//    }
 
-    public function combine($sourceDir, $targetDir, $filesPaths)
+    public function getHrefs()
     {
-        $combiner = $this->settings['combiner'];
+        $output = [];
 
-        $combinedCss = '';
-        foreach ($filesPaths as $filePath) {
-            $combinedCss .= read(public_path($sourceDir, $filePath . '.css'));
+        $compilerSettings = $this->settings['compiler'];
+
+        $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
+
+        $addedFilesPaths = [];
+
+        foreach ($this->nodes as $nodeCode => $node) {
+            $nodeFullCode = $node->getFullCode();
+
+            if ($compilerSettings['dev_mode']) {
+                $targetFilePath = $node->getDevModeFilePath();
+            } else {
+                $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
+            }
+
+            if ($compilerSettings['enabled']) {
+                $node->compile($compilerTargetDir, $targetFilePath, $compilerSettings);
+            }
+
+            if (!in_array($targetFilePath, $addedFilesPaths)) {
+                $addedFilesPaths[] = $targetFilePath;
+
+                $md5 = $this->cache['nodes_md5'][$nodeFullCode] ?? false;
+
+                $output[] = '/' . $compilerTargetDir . '/' . $targetFilePath . '.css' . ($md5 ? '?' . $md5 : '');
+            }
         }
 
-        $targetFilePath = public_path($targetDir, $this->getCombinedPath($filesPaths) . '.css');
-
-        if ($combiner['minify']) {
-            $combinedCss = Minifier::minify($combinedCss);
-        }
-
-        // файл перезаписывается только если изменилось содержание (иначе браузер будет качать его каждый раз)
-        $currentFileContent = read($targetFilePath);
-        if ($currentFileContent !== $combinedCss) {
-            write($targetFilePath, $combinedCss);
-        }
-    }
-
-    public function getCombinedPath($filesPaths)
-    {
-        $fingerprint = md5(implode(',', $filesPaths));
-
-        $dirPath = implode('/', str_split(substr($fingerprint, 0, 8), 2));
-        $fileName = substr($fingerprint, 7, 8);
-
-        return $dirPath . '/' . $fileName;
+        return $output;
     }
 }

@@ -15,6 +15,10 @@ class Html extends \Controller
 
         $this->js('fn');
         $this->js('main');
+
+        if ($this->isSuperuser()) {
+            $this->js('dev');
+        }
     }
 
     public function view()

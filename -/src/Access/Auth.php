@@ -35,7 +35,7 @@ class Auth extends Service
                 $this->app->access->setUser($user);
 
                 $this->app->response->cookie(
-                    $cookiePrefix . 't',
+                    $tokenCookieName,
                     $userToken,
                     $this->app->getConfig('access/user_session_timeout'),
                     '/'
@@ -43,7 +43,7 @@ class Auth extends Service
 
                 return true;
             } else {
-                $this->app->response->cookie($cookiePrefix . 't');
+                $this->app->response->cookie($tokenCookieName);
             }
         }
     }
@@ -56,8 +56,9 @@ class Auth extends Service
         $sessionKey = $this->app->request->cookies->get($sessionKeyCookieName);
 
         if ($sessionKey) {
-            if (\ewma\models\Session::where('key', $sessionKey)->first()) {
+            if ($someSessionRecord = \ewma\models\Session::where('key', $sessionKey)->first()) {
                 $this->app->session->setKey($sessionKey);
+                $this->app->session->setPublicKey($someSessionRecord->public_key);
 
                 $this->app->rootController->cookie_(
                     $sessionKeyCookieName,

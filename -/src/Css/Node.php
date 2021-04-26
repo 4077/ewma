@@ -8,24 +8,29 @@ class Node
 {
     private $app;
 
-    private $controller;
+    public $controller;
 
-    private $relativePath;
+    public $relativePath;
 
     public $id;
 
     public $instance;
 
-    public function __construct(Controller $controller, $relativePath, $id, $instance)
+    public $code;
+
+    public function __construct(Controller $controller, $relativePath, $instance)
     {
         $this->app = $controller->app;
+
         $this->controller = $controller;
         $this->relativePath = $relativePath;
-        $this->id = $id;
         $this->instance = $instance;
+
+        $this->id = $controller->_nodeId($relativePath);
+        $this->code = $this->id . ($this->instance ? '|' . $this->instance : '');
     }
 
-    private $vars = [];
+    public $vars = [];
 
     public function setVars($varsArray)
     {
@@ -39,8 +44,9 @@ class Node
         return $this;
     }
 
-    private $importPaths = [];
-    private $importIds = [];
+    public $importPaths = [];
+
+    public $importIds = [];
 
     public function import($paths, $controller = null)
     {
@@ -64,56 +70,64 @@ class Node
     {
         $lessFilePath = $this->controller->_nodeFilePath($this->relativePath, 'less');
         $lessFileAbsPath = abs_path($lessFilePath . '.less');
+
         if (file_exists($lessFileAbsPath)) {
-            // проверка импортируемых файлов на измененность
             $hasUpdatedImportFiles = false;
+
             foreach ($this->importIds as $n => $importId) {
                 $importFileAbsPath = abs_path($this->importPaths[$n] . '.less');
                 $importFileMTime = filemtime($importFileAbsPath);
-                if (!isset($this->app->css->cache['nodes_m_times'][$importId]) || $this->app->css->cache['nodes_m_times'][$importId] != $importFileMTime) {
+
+                if (!isset($this->app->css->cache['nodes_mtimes'][$importId]) || $this->app->css->cache['nodes_mtimes'][$importId] != $importFileMTime) {
                     $this->app->css->cacheUpdateNodeMTime($importId, $importFileMTime);
+                    $this->app->css->cacheUpdateNodeMd5($importId, md5_file($importFileAbsPath));
+
                     $hasUpdatedImportFiles = true;
                 }
             }
 
-            $mtimeIndex = $this->id . ($this->instance ? '|' . $this->instance : '');
-
-            if ($this->vars) {
-                $varsFingerprint = md5(json_encode($this->vars));
-                $mtimeIndex .= ':' . $varsFingerprint;
-            }
+            $fullCode = $this->getFullCode();
 
             $lessFileMTime = filemtime($lessFileAbsPath);
-            $lessFileUpdated = !isset($this->app->css->cache['nodes_m_times'][$mtimeIndex]) || $this->app->css->cache['nodes_m_times'][$mtimeIndex] != $lessFileMTime;
+            $lessFileUpdated = !isset($this->app->css->cache['nodes_mtimes'][$fullCode]) || $this->app->css->cache['nodes_mtimes'][$fullCode] != $lessFileMTime;
+
             if ($hasUpdatedImportFiles || $lessFileUpdated) {
                 $lessFileUpdater = new LessFileUpdater($lessFilePath);
+
                 $lessFileUpdater->setNodeId($this->id);
                 $lessFileUpdater->setImportList($this->importPaths);
                 $lessFileUpdater->update();
 
                 $compiler = new Compiler($targetDir, $targetFilePath, $compilerSettings);
+
                 $compiler->setSource($lessFilePath, 'less');
                 $compiler->setLessVars($this->vars);
                 $compiler->setInstance($this->instance);
-                $compiler->compile();
 
-                $this->app->css->cacheUpdateNodeMTime($mtimeIndex, $lessFileMTime);
+                $compiledFilePath = $compiler->compile();
 
-                return true;
+                $this->app->css->cacheUpdateNodeMTime($fullCode, $lessFileMTime);
+                $this->app->css->cacheUpdateNodeMd5($fullCode, md5_file($compiledFilePath));
+
+                return $compiledFilePath;
             }
         } else {
             $cssFilePath = $this->controller->_nodeFilePath($this->relativePath, 'css');
             $cssFileAbsPath = abs_path($cssFilePath . '.css');
+
             if (file_exists($cssFileAbsPath)) {
                 $cssFileMTime = filemtime($cssFileAbsPath);
-                if (!isset($this->app->css->cache['nodes_m_times'][$this->id]) || $this->app->css->cache['nodes_m_times'][$this->id] != $cssFileMTime) {
+                if (!isset($this->app->css->cache['nodes_mtimes'][$this->id]) || $this->app->css->cache['nodes_mtimes'][$this->id] != $cssFileMTime) {
                     $compiler = new Compiler($targetDir, $targetFilePath, $compilerSettings);
+
                     $compiler->setSource($cssFilePath, 'css');
-                    $compiler->compile();
+
+                    $compiledFilePath = $compiler->compile();
 
                     $this->app->css->cacheUpdateNodeMTime($this->id, $cssFileMTime);
+                    $this->app->css->cacheUpdateNodeMd5($this->id, md5_file($compiledFilePath));
 
-                    return true;
+                    return $compiledFilePath;
                 }
             } else {
                 $message = 'Not found less or css source with path ' . $cssFilePath;
@@ -125,6 +139,25 @@ class Node
                 $this->app->rootController->console($message);
             }
         }
+    }
+
+    public function getFullCode()
+    {
+        $output = $this->code;
+
+        if ($this->importIds) {
+            $importsFingerprint = jmd5($this->importIds);
+
+            $output .= ':' . $importsFingerprint;
+        }
+
+        if ($this->vars) {
+            $varsFingerprint = jmd5($this->vars);
+
+            $output .= ':' . $varsFingerprint;
+        }
+
+        return $output;
     }
 
     public function getDevModeFilePath()

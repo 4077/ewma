@@ -4,10 +4,22 @@ class Phone
 {
     public static function parse($phone, $lead = 7)
     {
-        $integerPhone = preg_replace('/\D/', '', str_replace('+7', $lead, $phone));
+        $integerPhone = preg_replace('/\D/', '', $phone);
 
-        if (substr($integerPhone, 0, 1) != $lead) {
-            $integerPhone = $lead . substr($integerPhone, 1);
+        if ($integerPhone == $lead) {
+            $integerPhone = '';
+        }
+
+        if ($integerPhone && substr($integerPhone, 0, 1) != $lead) {
+            if (substr($integerPhone, 0, 1) == 8) {
+                $integerPhone = substr($integerPhone, 1);
+            }
+
+            $integerPhone = $lead . $integerPhone;
+        }
+
+        if (strlen($integerPhone) > 11) {
+            $integerPhone = substr($integerPhone, 0, 11);
         }
 
         return $integerPhone;
@@ -15,10 +27,10 @@ class Phone
 
     public static function format($phone, $lead = '+7')
     {
-        $formattedPhone = static::phoneFormat(substr($phone, -10), $lead . ' (###) ###-##-##');
+        $formattedPhone = static::phoneFormat(substr($phone, 1 - strlen($phone)), $lead . ' (###) ###-##-##');
 
         if (substr($formattedPhone, 0, strlen($lead)) != $lead) {
-            $formattedPhone = $lead . substr($formattedPhone, strlen($lead));
+            $formattedPhone = $formattedPhone ? $lead . substr($formattedPhone, strlen($lead)) : '';
         }
 
         return $formattedPhone;

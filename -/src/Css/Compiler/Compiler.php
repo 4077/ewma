@@ -21,6 +21,7 @@ class Compiler
     }
 
     private $sourceFilePath;
+
     private $sourceType;
 
     public function setSource($filePath, $type)
@@ -71,7 +72,11 @@ class Compiler
             $css = Minifier::minify($css);
         }
 
-        write(public_path($this->targetDir, $this->targetFilePath . '.css'), $css);
+        $filePath = public_path($this->targetDir, $this->targetFilePath . '.css');
+
+        write($filePath, $css);
+
+        return $filePath;
     }
 
     private function removeInstanceSpaces($css)
@@ -115,6 +120,7 @@ class Compiler
                             mdir($targetDirAbsPath);
 
                             $targetFileAbsPath = public_path($this->targetDir, $targetDirPath, $url);
+
                             copy($sourceFileAbsPath, $targetFileAbsPath);
                         } else {
                             $fingerprintPath = $app->paths->getFingerprintPath(
@@ -134,6 +140,7 @@ class Compiler
                             $pathInfo = pathinfo($sourceFileAbsPath);
 
                             $targetFilePath = path($this->targetDir, $dirPath, $fileName) . ($pathInfo['extension'] ? '.' . $pathInfo['extension'] : '');
+
                             $targetFileAbsPath = public_path($this->targetDir, $dirPath, $fileName) . ($pathInfo['extension'] ? '.' . $pathInfo['extension'] : '');
 
                             copy($sourceFileAbsPath, $targetFileAbsPath);

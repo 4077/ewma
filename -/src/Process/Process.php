@@ -12,6 +12,8 @@ class Process
 
     private $call;
 
+    private $user;
+
     private $configFilePath;
 
     private $callFilePath;
@@ -93,6 +95,15 @@ class Process
         }
     }
 
+    public function user(\ewma\access\models\User $user)
+    {
+        if (null === $this->user) {
+            $this->user = $user;
+        }
+
+        return $this;
+    }
+
     //
     // locks
     //
@@ -155,7 +166,12 @@ class Process
                     'call'                   => $this->call
                 ];
 
-                $command = 'nohup ./cli -j \'' . str_replace("'", "'\''", j_(['processHandler:handle', $processHandlerData])) . '\' >> ~/proc.log 2>&1 &';
+                $userArg = '';
+                if ($this->user) {
+                    $userArg = ' -u \'' . $this->user->login . '\'';
+                }
+
+                $command = 'nohup ./cli' . $userArg . ' -j \'' . str_replace("'", "'\''", j_(['processHandler:handle', $processHandlerData])) . '\' >> ' . app()->root . 'logs/proc.log 2>&1 &';
 
                 $this->dispatcher->log('PROC ' . $command);
 
@@ -292,7 +308,7 @@ class Process
         $this->output = jread($this->outputFilePath);
     }
 
-    public function output($path = false)
+    public function _output($path = false)
     {
         $this->readOutput();
 
@@ -305,44 +321,38 @@ class Process
 
     private $input;
 
-    private function updateInput()
+    private function writeInput()
     {
         jwrite($this->inputFilePath, $this->input);
 
         $this->signal(Signals::UPDATE_INPUT);
     }
 
-    public function input($data)
+    public function input_($path, $value)
+    {
+        ap($this->input, $path, $value);
+
+        $this->writeInput();
+    }
+
+    public function inputAA($data)
+    {
+        aa($this->input, $data);
+
+        $this->writeInput();
+    }
+
+    public function inputRA($data)
+    {
+        ra($this->input, $data);
+
+        $this->writeInput();
+    }
+
+    public function inputRR($data)
     {
         $this->input = $data;
 
-        $this->updateInput();
-    }
-
-    public function aa($path, $value)
-    {
-        $node = &ap($this->input, $path);
-
-        aa($node, $value);
-
-        $this->updateInput();
-    }
-
-    public function ra($path, $value)
-    {
-        $node = &ap($this->input, $path);
-
-        ra($node, $value);
-
-        $this->updateInput();
-    }
-
-    public function rr($path, $value)
-    {
-        $node = &ap($this->input, $path);
-
-        $node = $value;
-
-        $this->updateInput();
+        $this->writeInput();
     }
 }

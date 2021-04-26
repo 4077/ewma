@@ -28,7 +28,7 @@ class Request extends Service
     {
         $this->app->mode = App::REQUEST_MODE_CLI;
 
-        $this->log($call);
+        $this->renderLogString($call);
 
         $response = $this->app->requestHandlerController->_call($call)->perform();
 
@@ -57,11 +57,11 @@ class Request extends Service
 
         if ($user = $this->app->access->getUser() and $user->isSuperuser()) {
             $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\JsonResponseHandler());
+            $whoops->prependHandler(new \Whoops\Handler\JsonResponseHandler());
             $whoops->register();
         }
 
-        $this->log($call);
+        $this->renderLogString($call);
 
         if ('#' == substr($call[0], 0, 1)) {
             $handlerSource = substr($call[0], 1);
@@ -86,14 +86,14 @@ class Request extends Service
                 return "phpstorm://open/?file=$file&line=$line";
             });
 
-            $whoops->pushHandler($handler);
+            $whoops->prependHandler($handler);
             $whoops->register();
         }
 
         $this->setRoute();
         $this->setData();
 
-        $this->log();
+        $this->renderLogString();
 
         $response = $this->app->ewmaController->c('~request:handle');
 
@@ -122,10 +122,12 @@ class Request extends Service
         }
     }
 
-    private function log($data = false)
+    public $logString;
+
+    private function renderLogString($data = false)
     {
         $clientName = $this->app->rootController->_user('login') or
-        $clientName = $this->app->session->getKey();
+        $clientName = $this->app->session->getPublicKey();
 
         $output = [
             $this->app->host,
@@ -134,18 +136,18 @@ class Request extends Service
         ];
 
         if ($this->app->mode == App::REQUEST_MODE_XHR) {
-            $output[] = 'XHR: ' . $data[0] . ' ' . a2s($data[1], true);
+            $output[] = 'XHR: ' . $data[0] . ' ' . j_($data[1]);
         }
 
         if ($this->app->mode == App::REQUEST_MODE_CLI) {
-            $output[] = 'CLI: ' . $data[0] . ' ' . a2s($data[1], true);
+            $output[] = 'CLI: ' . $data[0] . ' ' . j_($data[1]);
         }
 
         if ($this->app->mode == App::REQUEST_MODE_ROUTE) {
-            $output[] = 'ROUTE: ' . $this->app->route;
+            $output[] = 'ROUTE: ' . $this->app->route . ($this->data ? ' DATA: ' . j_($this->data) : '');
         }
 
-        $this->app->rootController->log(implode(' ', $output), 'requests');
+        $this->logString = implode(' ', $output);
     }
 
     /**

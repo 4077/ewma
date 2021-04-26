@@ -93,6 +93,68 @@ class Controller
         }
     }
 
+    public $__input__ = [];
+
+    public function input_($path, $value)
+    {
+        ap($this->__input__, $path, $value);
+    }
+
+    public function inputAA($data = [])
+    {
+        aa($this->__input__, $data);
+    }
+
+    public function inputRA($data = [])
+    {
+        ra($this->__input__, $data);
+    }
+
+    public function inputRR($data = [])
+    {
+        rr($this->__input__, $data);
+    }
+
+    public function &_input($path = false)
+    {
+        $node = &ap($this->__input__, $path);
+
+        return $node;
+    }
+
+    public $__output__ = [];
+
+    public function output_($path, $value)
+    {
+        ap($this->__output__, $path, $value);
+    }
+
+    public function outputAA($data = [])
+    {
+        aa($this->__output__, $data);
+    }
+
+    public function outputRA($data = [])
+    {
+        ra($this->__output__, $data);
+    }
+
+    public function outputRR($data = [])
+    {
+        rr($this->__output__, $data);
+    }
+
+    public function &_output($path = false, $default = null)
+    {
+        $node = &ap($this->__output__, $path);
+
+        if (null !== $default) {
+            aa($node, $default);
+        }
+
+        return $node;
+    }
+
     protected function dataHas()
     {
         $rules = l2a(func_get_args());
@@ -102,13 +164,14 @@ class Controller
                 $rule = preg_replace('/\s{2,}/', ' ', $rule);
             }
 
-            list($path, $type) = array_pad(explode(' ', $rule), 2, null);
+            [$path, $type] = array_pad(explode(' ', $rule), 2, null);
 
             $value = ap($this->data, $path);
 
             if (null === $value) {
                 return false;
             } else {
+                // todo что за null !== $this
                 if (null !== $this && in($type, 'array, bool, float, int, numeric, object, resource, string, scalar')) {
                     if ($type == 'int') {
                         $is = ctype_digit($value);
@@ -127,12 +190,12 @@ class Controller
         return true;
     }
 
-    public function lock($console = true)
+    public function lock($message = false)
     {
         $this->__meta__->locked = true;
 
-        if ($console) { // todo сделать чтобы зависело от какой-то настройки и доступа
-            $this->console('lock controller ' . $this->__meta__->absPath);
+        if ($message && $this->isSuperuser()) {
+            $this->console('lock controller ' . $this->__meta__->absPath . ($message ? ': ' . $message : ''));
         }
     }
 
@@ -145,14 +208,10 @@ class Controller
      * @param      $content
      * @param bool $path
      */
-    public function log($content = '', $path = false)
+    public function log($content = '')
     {
         if (null === $this->__logger__) {
             $this->__logger__ = new \ewma\Controllers\Controller\Logger($this);
-        }
-
-        if ($path) {
-            $this->__logger__->setPath($path);
         }
 
         $this->__logger__->write($content);
@@ -172,14 +231,14 @@ class Controller
             return $this->__meta__->nodeId;
         } else {
             if (false !== strpos($path, '|')) {
-                list($path,) = explode('|', $path);
+                [$path,] = explode('|', $path);
             }
 
             if (false !== strpos($path, ':')) {
-                list($path,) = explode(':', $path);
+                [$path,] = explode(':', $path);
             }
 
-            list($modulePath, $nodePath) = $this->app->paths->separateAbsPath(
+            [$modulePath, $nodePath] = $this->app->paths->separateAbsPath(
                 $this->app->paths->resolve($path, $this->__meta__->absPath)
             );
 
@@ -206,7 +265,7 @@ class Controller
         if (false === $path) {
             return $this->__meta__->nodeNs;
         } else {
-            list($modulePath,) = $this->app->paths->separateAbsPath(
+            [$modulePath,] = $this->app->paths->separateAbsPath(
                 $this->app->paths->resolve($path, $this->__meta__->absPath)
             );
 
@@ -380,9 +439,9 @@ class Controller
         return $this->app->paths->getNodeFilePath($path, $nodeType, $this);
     }
 
-    public function _nodeFileAbsPath($path = false, $nodeType = false) ////
+    public function _nodeFileAbsPath($path = false, $nodeType = false)
     {
-        return $this->app->paths->getNodeFilePath($path, $nodeType, $this);
+        return abs_path($this->app->paths->getNodeFilePath($path, $nodeType, $this));
     }
 
     /**
@@ -460,12 +519,12 @@ class Controller
 
     public function _protected()
     {
-        list($rightPath, $leftPath) = array_pad(array_reverse(func_get_args()), 2, null);
+        [$rightPath, $leftPath] = array_pad(array_reverse(func_get_args()), 2, null);
 
         $nodePath = false;
 
         if (false !== strpos($rightPath, ':')) {
-            list($nodePath, $rightPath) = explode(':', $rightPath);
+            [$nodePath, $rightPath] = explode(':', $rightPath);
         }
 
         if (null === $leftPath) {
@@ -479,12 +538,12 @@ class Controller
 
     public function _public()
     {
-        list($rightPath, $leftPath) = array_pad(array_reverse(func_get_args()), 2, null);
+        [$rightPath, $leftPath] = array_pad(array_reverse(func_get_args()), 2, null);
 
         $nodePath = false;
 
         if (false !== strpos($rightPath, ':')) {
-            list($nodePath, $rightPath) = explode(':', $rightPath);
+            [$nodePath, $rightPath] = explode(':', $rightPath);
         }
 
         if (null === $leftPath) {
@@ -498,12 +557,12 @@ class Controller
 
     public function _publicUrl()
     {
-        list($rightPath, $leftPath) = array_pad(array_reverse(func_get_args()), 2, null);
+        [$rightPath, $leftPath] = array_pad(array_reverse(func_get_args()), 2, null);
 
         $nodePath = false;
 
         if (false !== strpos($rightPath, ':')) {
-            list($nodePath, $rightPath) = explode(':', $rightPath);
+            [$nodePath, $rightPath] = explode(':', $rightPath);
         }
 
         if (null === $leftPath) {
@@ -537,7 +596,44 @@ class Controller
         return $this->app->controllers->call($path, $data, $this);
     }
 
-    public function async($path = false, $data = [], $dataMappings = null)
+    /**
+     * @param self|false $caller
+     *
+     * @return static;
+     */
+    public static function _c($caller = false, $data = [], $instance = false)
+    {
+        if (!$caller) {
+            $caller = appc();
+        }
+
+        $class = static::class;
+
+        $pos = strpos($class, '\\controllers\\');
+
+        $moduleNamespace = '\\' . substr($class, 0, $pos);
+        $nodePath = str_replace('\\', '/', substr($class, $pos + 13));
+
+        $nodePathArray = explode('/', $nodePath);
+        $nodePathArray[count($nodePathArray) - 1] = lcfirst($nodePathArray[count($nodePathArray) - 1]);
+        $nodePath = implode('/', $nodePathArray);
+
+        $absPath = $moduleNamespace . ' ' . $nodePath;
+
+        if ($instance) {
+            if (true === $instance) {
+                $instanceStr = '|';
+            } else {
+                $instanceStr = '|' . $instance;
+            }
+
+            $absPath .= $instanceStr;
+        }
+
+        return $caller->c($absPath, $data);
+    }
+
+    public function async($path = false, $data = [], $dataMappings = null) // todo ничего не возвращает в $output
     {
         if (null !== $dataMappings) {
             if (true === $dataMappings) {
@@ -558,7 +654,7 @@ class Controller
             $callData = $data;
         }
 
-        $command = 'nohup ./cli -j \'' . str_replace("'", "'\''", j_([$callPath, $callData])) . '\' >> ~/async.log 2>&1 &'; // todo /dev/null
+        $command = 'nohup ./cli -j \'' . str_replace("'", "'\''", j_([$callPath, $callData])) . '\' >> ' . $this->app->root . 'logs/async.log 2>&1 &'; // todo /dev/null
 
         $this->log('ASYNC ' . $command);
 
@@ -601,7 +697,7 @@ class Controller
      *
      * @return Controller
      */
-    public function n($path)
+    public function n($path = false)
     {
         return $this->app->controllers->getNodeController($path, $this);
     }
@@ -761,12 +857,12 @@ class Controller
      */
     private function &_dataNode($path, $data, $mergeMode, $storageType, $otherSessionKey = false)
     {
-        list($path, $instance) = $this->app->controllers->explodeToPathAndInstance($path, $this);
-        list($nodeFullPath, $dataPath) = array_pad(explode(':', $path), 2, '');
+        [$path, $instance] = $this->app->controllers->explodeToPathAndInstance($path, $this);
+        [$nodeFullPath, $dataPath] = array_pad(explode(':', $path), 2, '');
 
         $absPath = $this->_p($nodeFullPath);
 
-        list($modulePath, $nodePath) = $this->app->paths->separateAbsPath($absPath);
+        [$modulePath, $nodePath] = $this->app->paths->separateAbsPath($absPath);
 
         if ($storageType == 'session') {
             $node = &$this->app->session->getNode($modulePath, $nodePath, $instance);
@@ -807,7 +903,7 @@ class Controller
      */
     public function v($path = false, $data = [])
     {
-        list($nodePath, $instance) = $this->app->controllers->explodeToPathAndInstance($path, $this);
+        [$nodePath, $instance] = $this->app->controllers->explodeToPathAndInstance($path, $this);
 
         $v = $this->app->views->create($this->_nodeFilePath($nodePath, 'templates'), $data);
 
@@ -944,11 +1040,11 @@ class Controller
             $vars = $args[1];
         }
 
-        list($callString, $instance) = $this->app->controllers->explodeToPathAndInstance($callString, $this);
+        [$callString, $instance] = $this->app->controllers->explodeToPathAndInstance($callString, $this);
 
-        list($relativeNodePath, $importPaths) = array_pad(explode(':', $callString), 2, null);
+        [$relativeNodePath, $importPaths] = array_pad(explode(':', $callString), 2, null);
 
-        $css = $this->app->css->provide($this, $relativeNodePath, $instance);
+        $css = $this->app->css->provide($this->n(), $relativeNodePath, $instance);
 
         if ($vars) {
             $css->setVars($vars);
@@ -977,9 +1073,9 @@ class Controller
             $callArgs = array_slice($args, 1);
 
             // todo js instance
-            list($path, $instance) = $this->app->controllers->explodeToPathAndInstance($path, $this);
+            [$path, $instance] = $this->app->controllers->explodeToPathAndInstance($path, $this);
 
-            list($relativeNodePath, $callString) = array_pad(explode(':', $path), 2, null);
+            [$relativeNodePath, $callString] = array_pad(explode(':', $path), 2, null);
 
             $this->app->js->provide($this, $relativeNodePath);
 
@@ -1025,7 +1121,7 @@ class Controller
         $relativeNodePath = false;
 
         if (false !== strpos($input, ':')) { // todo придумать какой-нибудь символ, который будет только менять базовый путь для селектора, но не загружать файл для этого пути
-            list($relativeNodePath,) = explode(':', $input);
+            [$relativeNodePath,] = explode(':', $input);
 
             $this->js($relativeNodePath);
         }
@@ -1051,12 +1147,12 @@ class Controller
             $selectorString = $part;
 
             if (false !== strpos($part, ':')) {
-                list($relativeNodePath, $selectorString) = explode(':', $selectorString);
+                [$relativeNodePath, $selectorString] = explode(':', $selectorString);
             }
 
             $nodeId = $this->_nodeId($relativeNodePath);
 
-            list($selector, $instance) = $this->app->controllers->explodeToPathAndInstance($selectorString, $this);
+            [$selector, $instance] = $this->app->controllers->explodeToPathAndInstance($selectorString, $this);
 
             if (!$selector) {
                 $selector = '.' . $nodeId;
@@ -1087,7 +1183,7 @@ class Controller
     {
         $args = func_get_args();
 
-        $jqueryBuilder = $this->jquery(isset($args[0]) ? $args[0] : false);
+        $jqueryBuilder = $this->jquery($args[0] ?? false);
 
         // добавил ретурн но не проверял
         return call_user_func_array([$jqueryBuilder, 'widget'], array_slice($args, 1));
@@ -1103,7 +1199,7 @@ class Controller
      *
      * @param $input
      */
-    public function console($input) // todo app->response
+    public function console($input = '&nbsp;') // todo app->response
     {
         $this->app->response->console($input);
     }
@@ -1154,7 +1250,7 @@ class Controller
             return true;
         }
 
-        $this->console('not allow ' . $this->_caller()->_nodeId() . ' from ' . ($this->__meta__->virtual ? 'virtual ' : '') . $this->_nodeId());
+        $this->console('not allow ' . $this->_caller()->_nodeId() . ' from ' . ($this->__meta__->virtual ? 'VIRTUAL ' : '') . $this->_nodeId());
     }
 
     public function bindCall($path, \Closure $callback) // todo подумать как применить, надо/ненадо, доделать/выбросить...
@@ -1175,7 +1271,7 @@ class Controller
             } else {
                 $output = null;
 
-                $message = $this->__meta__->virtual ? 'Virtual controller' : 'Controller';
+                $message = $this->__meta__->virtual ? 'VIRTUAL controller' : 'Controller';
                 $message .= ' "' . $this->__meta__->absPath . '"';
                 $message .= ' does not have method "' . $method . '"';
 

@@ -2,13 +2,15 @@
 
 class StorageEvents extends \Controller
 {
-    private $eventPath;
+//    private $eventPath;
+//
+//    private $eventName;
+//
+//    private $eventInstance;
+//
+//    private $eventFilter;
 
-    private $eventName;
-
-    private $eventInstance;
-
-    private $eventFilter;
+//    public $singleton = true;
 
     public function __create()
     {
@@ -20,37 +22,37 @@ class StorageEvents extends \Controller
 
     public function bind()
     {
-        $bindings = &$this->d(':' . $this->eventInstance . '|' . $this->eventPath);
+        $bindings = &$this->d(':' . $this->data('event_instance') . '|' . $this->data('event_path'));
 
         $eventData = [
             'call' => [$this->data('path'), $this->data('data')]
         ];
 
-        if ($this->eventFilter) {
+        if ($this->data('event_filter')) {
             aa($eventData, [
-                'filter' => $this->eventFilter
+                'filter' => $this->data('event_filter')
             ]);
         }
 
-        if ($this->eventName) {
-            $bindings['.'][$this->eventName] = $eventData;
+        if ($this->data('event_name')) {
+            $bindings['.'][$this->data('event_name')] = $eventData;
         } else {
             $bindings['.'][] = $eventData;
         }
 
-//        $this->app->storageEvents->addInstance($this->eventInstance);
+//        $this->app->storageEvents->addInstance($this->data('event_instance'));
     }
 
     public function unbind()
     {
-        $s = &$this->d(':|' . $this->eventPath);
+        $s = &$this->d(':|' . $this->data('event_path'));
 
-        if ($this->eventName) {
-            $binding = &ap($s, $this->eventInstance . '/./' . $this->eventName);
+        if ($this->data('event_name')) {
+            $binding = &ap($s, $this->data('event_instance') . '/./' . $this->data('event_name'));
 
             unset($binding);
         } else {
-            ap($s, $this->eventInstance . '/.', []);
+            ap($s, $this->data('event_instance') . '/.', []);
         }
     }
 
@@ -62,7 +64,7 @@ class StorageEvents extends \Controller
 
     public function unbindNested() // потестить, и нужна ли она вообще
     {
-        $bindings = &$this->d(':' . $this->eventInstance . '|' . $this->eventPath);
+        $bindings = &$this->d(':' . $this->data('event_instance') . '|' . $this->data('event_path'));
 
         if (isset($bindings['.'])) {
             $bindings = [
@@ -75,7 +77,7 @@ class StorageEvents extends \Controller
 
     public function trigger()
     {
-        $nodes = $this->d(':|' . $this->eventPath);
+        $nodes = $this->d(':|' . $this->data('event_path'));
 
         if ($nodes) {
             $this->triggerInstancesRecursion($nodes);
@@ -95,8 +97,8 @@ class StorageEvents extends \Controller
 
     private function triggerBindings($node)
     {
-        if ($this->eventName) {
-            if ($binding = ap($node, $this->eventName)) {
+        if ($this->data('event_name')) {
+            if ($binding = ap($node, $this->data('event_name'))) {
                 $this->triggerBinding($binding);
             }
         } else {
@@ -117,6 +119,14 @@ class StorageEvents extends \Controller
         if ($trigger) {
             $call = $this->_call($binding['call'])->aa($this->data('trigger_data'));
 
+//            $this->log('');
+//            $this->log('TRIGGER BINDING');
+//            $this->log('        event path: ' . $this->data('event_path'));
+//            $this->log('        event name: ' . $this->data('event_name'));
+//            $this->log('    event instance: ' . $this->data('event_instance'));
+//            $this->log('              call: ' . j_($binding['call']));
+//            $this->log('      trigger data: ' . j_(pack_models($this->data('trigger_data'))));
+
             $call->perform();
         }
     }
@@ -124,7 +134,7 @@ class StorageEvents extends \Controller
     private function triggerFilter($bindingsFilter)
     {
         $bindingsFilterFlat = a2f($bindingsFilter);
-        $eventFilterFlat = a2f($this->eventFilter);
+        $eventFilterFlat = a2f($this->data('event_filter'));
 
         $pass = true;
         foreach ($bindingsFilterFlat as $path => $value) {

@@ -28,20 +28,33 @@ class Access extends Service
 
     public function updateUserSession($sessionKey)
     {
-        if (!$sessionKey) {
+        if ($sessionKey) {
+            if ($someSessionRecord = \ewma\models\Session::where('key', $sessionKey)->first()) {
+                $sessionPublicKey = $someSessionRecord->public_key;
+            } else {
+                $sessionPublicKey = $this->generateSessionPublicKey();
+            }
+        } else {
             $sessionKey = $this->generateSessionKey();
+            $sessionPublicKey = $this->generateSessionPublicKey();
         }
 
         $this->getUser()->setSessionKey($sessionKey);
+
         $this->app->session->setKey($sessionKey);
+        $this->app->session->setPublicKey($sessionPublicKey);
+
         $this->app->session->setTimeout($this->app->getConfig('access/guest_session_timeout')); // todo сделать чтобы этот таймаут работал
     }
 
     public function createGuestSession()
     {
         $sessionKey = $this->generateSessionKey();
+        $sessionPublicKey = $this->generateSessionPublicKey();
 
         $this->app->session->setKey($sessionKey);
+        $this->app->session->setPublicKey($sessionPublicKey);
+
         $this->app->session->setTimeout($this->app->getConfig('access/guest_session_timeout'));
 
         $cookiePrefix = $this->app->getConfig('cookies_prefix');
@@ -59,6 +72,15 @@ class Access extends Service
         do {
             $key = k(32);
         } while (\ewma\models\Session::where('key', $key)->first());
+
+        return $key;
+    }
+
+    private function generateSessionPublicKey()
+    {
+        do {
+            $key = k(16);
+        } while (\ewma\models\Session::where('public_key', $key)->first());
 
         return $key;
     }

@@ -210,65 +210,58 @@ class AppProcess extends Service
         $this->input = jread($this->inputFilePath);
     }
 
-    public function input($path = false)
+    public function _input($path = false)
     {
         return ap($this->input, $path);
     }
 
     //
-    // READ/WRITE output
+    // WRITE output
     //
 
     private $output;
 
-    private function writeOutput($data)
+    private function writeOutput()
     {
-        jwrite($this->outputFilePath, $data);
+        jwrite($this->outputFilePath, $this->output);
 
-        $outputs = $this->getConfig('outputs');
+        $outputsFilesPaths = $this->getConfig('outputs');
 
-        foreach ($outputs as $output) {
-            jwrite($output, $data);
+        foreach ($outputsFilesPaths as $outputFilePath) {
+            jwrite($outputFilePath, $this->output);
         }
 
         $xpidData = jread($this->xpidFilePath);
-        $xpidData['output'] = $data;
+        $xpidData['output'] = $this->output;
         jwrite($this->xpidFilePath, $xpidData);
     }
 
-    public function readOutput($path = false)
+    public function output_($path, $value)
     {
-        $output = jread($this->outputFilePath);
+        ap($this->output, $path, $value);
 
-        return ap($output, $path);
+        $this->writeOutput();
     }
 
-    public function output($data)
+    public function outputAA($data)
     {
-        $this->writeOutput($data);
+        aa($this->output, $data);
+
+        $this->writeOutput();
     }
 
-    public function aa($data)
+    public function outputRA($data)
     {
-        $output = $this->readOutput();
+        ra($this->output, $data);
 
-        aa($output, $data);
-
-        $this->writeOutput($output);
+        $this->writeOutput();
     }
 
-    public function ra($data)
+    public function outputRR($data)
     {
-        $output = $this->readOutput();
+        $this->output = $data;
 
-        ra($output, $data);
-
-        $this->writeOutput($output);
-    }
-
-    public function rr($data)
-    {
-        $this->writeOutput($data);
+        $this->writeOutput();
     }
 
     //
@@ -279,12 +272,10 @@ class AppProcess extends Service
 
     private function writeErrors()
     {
-        jwrite($this->outputFilePath, $this->output);
+        $errorsFilesPaths = $this->getConfig('errors');
 
-        $errors = $this->getConfig('errors');
-
-        foreach ($errors as $error) {
-            jwrite($error, $this->errors);
+        foreach ($errorsFilesPaths as $errorFilePath) {
+            jwrite($errorFilePath, $this->errors);
         }
 
         $xpidData = jread($this->xpidFilePath);

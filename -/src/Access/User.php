@@ -34,6 +34,13 @@ class User
         return in_array($this->model->id, app()->getConfig('access/superusers'));
     }
 
+    private $runtimeAddedGroups = [];
+
+    public function runtimeAddGroups($ids)
+    {
+        merge($this->runtimeAddedGroups, $ids);
+    }
+
     private $allowedPermissionsByModulesNamespaces = [];
 
     public function getAllowedPermissions(\ewma\Modules\Module $module)
@@ -49,6 +56,8 @@ class User
             if ($registeredUserGroup) {
                 merge($userGroupsIds, $registeredUserGroup->id);
             }
+
+            merge($userGroupsIds, $this->runtimeAddedGroups);
 
             $userPermissionsByGroups = \ewma\access\models\Permission::where('module_namespace', $module->namespace)
                 ->whereHas('groups', function ($query) use ($userGroupsIds) {

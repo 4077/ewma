@@ -22,78 +22,49 @@ class Response extends Service
      */
     public $app = App::class;
 
-    //
-    // css
-    //
-
-    private $cssFilesPaths;
-
-    public function getCssFilesPaths($update = false)
-    {
-        // console
-//        start_time('css');
-
-        if (null === $this->cssFilesPaths || $update) {
-            $this->cssFilesPaths = [];
-
-            $nodes = $this->app->css->getNodes();
-
-            if ($nodes) {
-                $compilerSettings = $this->app->css->settings['compiler'];
-                $combinerSettings = $this->app->css->settings['combiner'];
-
-                $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
-
-                $hasRecompiledNodes = false;
-                $filesPaths = [];
-                foreach ($nodes as $node) {
-                    /**
-                     * @var $node \ewma\Css\Node
-                     */
-                    if ($compilerSettings['dev_mode']) {
-                        $targetFilePath = $node->getDevModeFilePath();
-                    } else {
-                        $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
-                    }
-
-                    if (!in_array($targetFilePath, $filesPaths)) {
-                        $filesPaths[] = $targetFilePath;
-                        $this->cssFilesPaths[] = $compilerTargetDir . '/' . $targetFilePath;
-                    }
-
-                    if ($compilerSettings['enabled']) {
-                        if ($node->compile($compilerTargetDir, $targetFilePath, $compilerSettings)) {
-                            $hasRecompiledNodes = true;
-                        }
-                    }
-                }
-
-                // комбинатор должен работать если включена перекомпиляция
-                if ($hasRecompiledNodes && ($combinerSettings['enabled'] || $compilerSettings['enabled'])) {
-//                    $this->app->css->combine($compilerTargetDir, $combinerSettings['dir'], $filesPaths);
-                }
-
-                // режим разработки несовместим с использование скомбинированных файлов // todo подумать об этом
-                // из-за того, что в комбинированном файле пути к картинкам кодированные,
-                // а в файлах сгенерированных в режиме разработки реальные
-                if ($combinerSettings['use'] && !$compilerSettings['dev_mode']) {
-                    $combinedPath = $this->app->css->getCombinedPath($filesPaths);
-
-                    // принудительный запуск комбинатора, если файл еще не скомбинирован
-                    if (!$combinerSettings['enabled'] && !file_exists(public_path($combinerSettings['dir'] . '/' . $combinedPath . '.css'))) {
-                        $this->app->css->combine($compilerTargetDir, $combinerSettings['dir'], $filesPaths);
-                    }
-
-                    $this->cssFilesPaths = [$combinerSettings['dir'] . '/' . $combinedPath];
-                }
-            }
-        }
-
-        // console
-//        $this->app->rootController->console(['css: ' . end_time('css')]);
-
-        return $this->cssFilesPaths;
-    }
+//    //
+//    // css
+//    //
+//
+//    private $cssFilesPaths;
+//
+//    public function getCssFilesPaths() // todo del
+//    {
+//        $nodes = $this->app->css->getNodes();
+//
+//        if ($nodes) {
+//            $sequence = array_keys($nodes);
+//
+//            $compilerSettings = $this->app->css->settings['compiler'];
+//
+//            $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
+//
+//            $filesPaths = [];
+//            foreach ($nodes as $nodeCode => $node) {
+//                if (!isset($this->cssFilesPaths[$nodeCode])) {
+//                    if ($compilerSettings['dev_mode']) {
+//                        $targetFilePath = $node->getDevModeFilePath();
+//                    } else {
+//                        $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
+//                    }
+//
+//                    if (!in_array($targetFilePath, $filesPaths)) {
+//                        $filesPaths[] = $targetFilePath;
+//
+//                        $this->cssFilesPaths[$nodeCode] = $compilerTargetDir . '/' . $targetFilePath;
+//                    }
+//
+//                    if ($compilerSettings['enabled']) {
+//                        $node->compile($compilerTargetDir, $targetFilePath, $compilerSettings);
+//                    }
+//                }
+//            }
+//
+//            $this->cssFilesPaths = map($this->cssFilesPaths, $sequence);
+//        }
+//
+//        return $this->cssFilesPaths;
+//    }
 
     //
     // js
@@ -101,29 +72,21 @@ class Response extends Service
 
     private $jsFilesPaths;
 
-    public function getJsFilesPaths($update = false)
+    public function getJsFilesPaths() // todo del
     {
-        // console
-//        start_time('js');
+        $nodes = $this->app->js->getNodes();
 
-        if (null === $this->jsFilesPaths || $update) {
-            $this->jsFilesPaths = [];
+        if ($nodes) {
+            $sequence = array_keys($nodes);
 
-            $nodes = $this->app->js->getNodes();
+            $compilerSettings = $this->app->js->settings['compiler'];
 
-            if ($nodes) {
-                $compiler = $this->app->js->settings['compiler'];
-                $combiner = $this->app->js->settings['combiner'];
+            $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
 
-                $compilerTargetDir = $compiler['dev_mode'] ? $compiler['dev_mode_dir'] : $compiler['dir'];
-
-                $hasRecompiledNodes = false;
-                $filesPaths = [];
-                foreach ($nodes as $node) {
-                    /**
-                     * @var $node \ewma\Js\Node
-                     */
-                    if ($compiler['dev_mode']) {
+            $filesPaths = [];
+            foreach ($nodes as $nodeCode => $node) {
+                if (!isset($this->jsFilesPaths[$nodeCode])) {
+                    if ($compilerSettings['dev_mode']) {
                         $targetFilePath = $node->getFilePath();
                     } else {
                         $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
@@ -131,37 +94,17 @@ class Response extends Service
 
                     if (!in_array($targetFilePath, $filesPaths)) {
                         $filesPaths[] = $targetFilePath;
-                        $this->jsFilesPaths[] = $compilerTargetDir . '/' . $targetFilePath;
+                        $this->jsFilesPaths[$nodeCode] = $compilerTargetDir . '/' . $targetFilePath;
                     }
 
-                    if ($compiler['enabled']) {
-                        if ($node->compile($compilerTargetDir, $targetFilePath, $compiler)) {
-                            $hasRecompiledNodes = true;
-                        }
+                    if ($compilerSettings['enabled']) {
+                        $node->compile($compilerTargetDir, $targetFilePath, $compilerSettings);
                     }
-                }
-
-                // комбинатор должен работать если включена перекомпиляция
-                // запускается только если был перекомпилирован хотя бы один узел
-                if ($hasRecompiledNodes && ($combiner['enabled'] || $compiler['enabled'])) {
-//                    $this->app->js->combine($compilerTargetDir, $combiner['dir'], $filesPaths);
-                }
-
-                if ($combiner['use']) {
-                    $combinedPath = $this->app->js->getCombinedPath($filesPaths);
-
-                    // принудительный запуск комбинатора, если файл еще не скомбинирован
-                    if (!$combiner['enabled'] && !file_exists(public_path($combiner['dir'] . '/' . $combinedPath . '.js'))) {
-                        $this->app->js->combine($compilerTargetDir, $combiner['dir'], $filesPaths);
-                    }
-
-                    $this->jsFilesPaths = [$combiner['dir'] . '/' . $combinedPath];
                 }
             }
-        }
 
-        // console
-//        $this->app->rootController->console(end_time('js'));
+            $this->jsFilesPaths = map($this->jsFilesPaths, $sequence);
+        }
 
         return $this->jsFilesPaths;
     }
@@ -242,15 +185,6 @@ class Response extends Service
         $this->reload = true;
     }
 
-    private function getInstructions()
-    {
-        return [
-            'js'      => $this->app->js->getInstructions(),
-            'cookies' => $this->cookies,
-            'console' => $this->console
-        ];
-    }
-
     public $addViewsCommonInstructions = false;
 
     public function provideCommonJs()
@@ -280,14 +214,18 @@ class Response extends Service
             'js'           => [
                 'version' => $this->app->js->settings['version'],
                 'urls'    => $this->app->js->getUrls(),
-                'paths'   => $this->getJsFilesPaths()
+                'hrefs'   => $this->app->js->getHrefs()
             ],
             'css'          => [
                 'version' => $this->app->css->settings['version'],
                 'urls'    => $this->app->css->getUrls(),
-                'paths'   => $this->getCssFilesPaths()
+                'hrefs'   => $this->app->css->getHrefs(),
             ],
-            'instructions' => $this->getInstructions()
+            'instructions' => [
+                'js'      => $this->app->js->getInstructions(),
+                'cookies' => $this->cookies,
+                'console' => $this->console
+            ]
         ];
 
         $this->app->events->trigger('afterRenderAppData');

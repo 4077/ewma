@@ -10,7 +10,8 @@ var ewma = {
     cancelFollow: false,
 
     log: {
-        events: {
+        requests: 0,
+        events:   {
             bind:    0,
             trigger: 0
         }
@@ -22,49 +23,11 @@ var ewma = {
         tab: Math.random().toString(36).substring(2),
 
         css: {
-            version:             0,
-            versionBeforeChange: 0,
-            loaded:              [],
-
-            checkVersion: function (version) {
-                if (version !== this.version) {
-                    this.versionBeforeChange = this.version;
-                    this.version = version;
-                    this.reloadAll();
-                }
-            },
-
-            reloadAll: function () {
-                for (var i in this.loaded) {
-                    var hrefBeforeChange = ewma.appData.url + this.loaded[i] + ".css?" + this.versionBeforeChange;
-                    var href = ewma.appData.url + this.loaded[i] + ".css?" + this.version;
-
-                    $("head").find("link[href='" + hrefBeforeChange + "']").attr("href", href);
-                }
-            }
+            loaded: []
         },
 
         js: {
-            version:             0,
-            versionBeforeChange: 0,
-            loaded:              [],
-
-            checkVersion: function (version) {
-                if (version !== this.version) {
-                    this.versionBeforeChange = this.version;
-                    this.version = version;
-                    this.reloadAll();
-                }
-            },
-
-            reloadAll: function () {
-                for (var i in this.loaded) {
-                    var srcBeforeChange = ewma.appData.url + this.loaded[i] + ".js?" + this.versionBeforeChange;
-                    var src = ewma.appData.url + this.loaded[i] + ".js?" + this.version;
-
-                    $("head").find("script[src='" + srcBeforeChange + "']").attr("src", src);
-                }
-            }
+            loaded: []
         },
 
         nodes: []
@@ -73,8 +36,8 @@ var ewma = {
     responseHandler: function (response) {
 
         if (response) {
-            ewma.appData.css.checkVersion(response.css.version);
-            ewma.appData.js.checkVersion(response.js.version);
+            // ewma.appData.css.checkVersion(response.css.version);
+            // ewma.appData.js.checkVersion(response.js.version);
 
             ewma.processResponse(response);
         }
@@ -90,11 +53,11 @@ var ewma = {
         ewma.requests++;
 
         if (!quiet) {
-            ewma.showWaitingLayer();
+            ewma.ui.waiting.show(true);
+        }
 
-            setTimeout(function () {
-                $("#ewma__waiting_overlay").addClass("lock");
-            }, 400);
+        if (ewma.log.requests) {
+            p({log: 'request', path: path, data: data, handler: handler, quiet: quiet});
         }
 
         ewma.trigger("before_request");
@@ -112,21 +75,29 @@ var ewma = {
             success: function (response) {
                 ewma.requests--;
 
+                if (ewma.log.requests) {
+                    p({log: 'response', response: response});
+                }
+
                 handler(response);
 
-                ewma.removeXHRError();
-                ewma.removeWaitingLayer();
+                ewma.ui.XHRError.remove();
+                ewma.ui.waiting.remove();
 
-                ewma.trigger("after_request");
+                setTimeout(function () {
+                    ewma.trigger("after_request");
+                });
             },
             error:   function (response) {
                 ewma.requests--;
 
-                if (response.responseJSON.error) {
-                    ewma.showXHRError(response.responseJSON.error);
+                ewma.ui.waiting.remove();
 
-                    ewma.removeWaitingLayer();
-                    ewma.showWaitingLayer(true);
+                if (isset(response.responseJSON) && isset(response.responseJSON.error)) { // todo
+                    ewma.ui.XHRError.show(response.responseJSON.error);
+                    ewma.ui.waiting.show(true);
+                } else {
+                    p('EMPTY RESPONSE');
                 }
             }
         });
@@ -137,7 +108,13 @@ var ewma = {
         stack:               [],
         doublesControlStack: [],
 
-        add: function (path, data) {
+        add: function (path, data, handler) {
+            handler = handler || false;
+
+            if (ewma.log.requests) {
+                p({log: 'multirequest add', path: path, data: data});
+            }
+
             var multirequest = this;
 
             var callJson = JSON.stringify([path, data]);
@@ -148,7 +125,7 @@ var ewma = {
 
                 clearTimeout(multirequest.sendTimeout);
                 this.sendTimeout = setTimeout(function () {
-                    ewma.request('\\ewma~multirequest:handle', {calls: multirequest.stack}, false, true);
+                    ewma.request('\\ewma~multirequest:handle', {calls: multirequest.stack}, handler, true);
 
                     multirequest.stack = [];
                     multirequest.doublesControlStack = [];
@@ -157,70 +134,23 @@ var ewma = {
         }
     },
 
-    showXHRError: function (error) {
-        var ideUrl = "phpstorm://open/?file=" + error.file + "&line=" + error.line;
-
-        $("body").prepend($("<div/>")
-            .attr("id", "ewma__xhr_error")
-            .append($("<div>").html(error.message))
-            .append($("<div>").addClass("line").append(
-                $("<a>")
-                    .html(error.file + ':' + error.line)
-                    .attr("href", ideUrl)
-            ))
-            .click(function () {
-                window.location = ideUrl;
-            }));
-    },
-
-    showWaitingLayer: function (error) {
-        var $overlay = $("#ewma__waiting_overlay");
-
-        if (!$overlay.length) {
-            $("body").prepend($("<div/>").attr("id", "ewma__waiting_overlay"));
-        }
-
-        if (error) {
-            $("#ewma__waiting_overlay")
-                .addClass("error")
-                .click(function () {
-                    $(this).remove();
-                    ewma.removeXHRError();
-                });
-        }
-    },
-
-    removeWaitingLayer: function () {
-        var $overlay = $("#ewma__waiting_overlay");
-
-        if (ewma.requests <= 0) {
-            $overlay.remove();
-
-            ewma.requests = 0;
-        }
-    },
-
-    removeXHRError: function () {
-        $("#ewma__xhr_error").remove();
-    },
-
     processResponse: function (data) {
         if (data) {
             var i, url;
 
-            for (i in data.css.paths) {
-                if (!in_array(data.css.paths[i], ewma.appData.css.loaded)) {
-                    url = ewma.appData.url + data.css.paths[i] + ".css?" + ewma.appData.css.version;
-                    $("head").append('<link rel="stylesheet" type="text/css" href="' + url + '"/>');
-                    ewma.appData.css.loaded.push(data.css.paths[i]);
+            for (i in data.css.hrefs) {
+                if (!in_array(data.css.hrefs[i], ewma.appData.css.loaded)) {
+                    $("head").append('<link rel="stylesheet" type="text/css" href="' + data.css.hrefs[i] + '"/>');
+
+                    ewma.appData.css.loaded.push(data.css.hrefs[i]);
                 }
             }
 
-            for (i in data.js.paths) {
-                if (!in_array(data.js.paths[i], ewma.appData.js.loaded)) {
-                    url = ewma.appData.url + data.js.paths[i] + ".js?" + ewma.appData.js.version;
-                    $("head").append($('<script type="text/javascript" src="' + url + '"></script>')); // todo потестить без $()
-                    ewma.appData.js.loaded.push(data.js.paths[i]);
+            for (i in data.js.hrefs) {
+                if (!in_array(data.js.hrefs[i], ewma.appData.js.loaded)) {
+                    $("head").append($('<script type="text/javascript" src="' + data.js.hrefs[i] + '"></script>'));
+
+                    ewma.appData.js.loaded.push(data.js.hrefs[i]);
                 }
             }
 
@@ -274,25 +204,17 @@ var ewma = {
     },
 
     addConsoleMessage: function (data) {
-        ewma.showConsoleLayer();
+        ewma.ui.console.show();
 
-        $("#ewma__console_layer").append($("<div>")
+        $("#ewma__ui_console").prepend($("<div>")
             .addClass("message")
             .html(data));
     },
 
-    showConsoleLayer: function () {
-        if (!$("#ewma__console_layer").length) {
-            $("body").prepend($("<div/>")
-                .attr("id", "ewma__console_layer")
-                .click(function () {
-                    $("#ewma__console_layer").remove();
-                }));
-        }
-    },
-
     delay: function (fn, timeout) {
-        return setTimeout(fn, timeout || 0);
+        return setTimeout(fn || function () {
+
+        }, timeout || 0);
     },
 
     nodes: {},
@@ -333,7 +255,9 @@ var ewma = {
 
     trigger: function (eventName, args) {
         if (this.log.events.trigger) {
-            p('trigger:   ' + eventName);
+            if (eventName !== 'before_request' && eventName !== 'after_request') {
+                p('trigger:   ' + eventName);
+            }
         }
 
         $.each(ewma.eventContainers, function (n, $eventContainer) {
@@ -398,6 +322,183 @@ var ewma = {
                 ewma.request('\ewma~process/xhr:break:' + this.xpid);
             }
         };
+    },
+
+    history: {
+
+        push: function (route, title) {
+            window.history.pushState(null, title || null, route);
+
+            ewma.trigger('ewma/history/push', {
+                route: route,
+                title: title
+            });
+        },
+
+        replace: function (route, title) {
+            window.history.replaceState(null, title || null, route);
+
+            ewma.trigger('ewma/history/replace', {
+                route: route,
+                title: title
+            });
+        },
+
+        states: 0,
+
+        addState: function () {
+            this.states++;
+
+            this.push(document.location.href);
+        },
+
+        popState: function () {
+            this.states--;
+
+            if (this.states < 0) {
+                this.states = 0;
+            }
+
+            p(this.states);
+
+            return this.states;
+        },
+
+        popstateAllowed: function () {
+            return this.states <= 0;
+        }
+    },
+
+    ui: {
+
+        waiting: {
+
+            indicationInterval: null,
+
+            lockTimeout: null,
+
+            startIndicationTimeout: null,
+
+            indicationStarted: false,
+
+            show: function (error) {
+                if (!$("#ewma__ui_waiting").length) {
+                    $("body").prepend($("<div/>").attr("id", "ewma__ui_waiting"));
+                }
+
+                clearTimeout(ewma.ui.waiting.lockTimeout);
+                ewma.ui.waiting.lockTimeout = setTimeout(function () {
+                    $("#ewma__ui_waiting").addClass("lock");
+                }, 400);
+
+                if (!ewma.ui.waiting.indicationStarted) {
+                    ewma.ui.waiting.indicationStarted = true;
+
+                    clearTimeout(ewma.ui.waiting.startIndicationTimeout);
+                    ewma.ui.waiting.startIndicationTimeout = setTimeout(function () {
+                        ewma.ui.waiting.startIndication();
+                    }, 500);
+                }
+
+                if (error) {
+                    $("#ewma__waiting_overlay")
+                        .addClass("error")
+                        .click(function () {
+                            $(this).remove();
+
+                            ewma.ui.XHRError.remove();
+                        });
+                }
+            },
+
+            remove: function () {
+                clearTimeout(ewma.ui.waiting.lockTimeout);
+
+                var $ui = $("#ewma__ui_waiting");
+
+                if (ewma.requests <= 0) {
+                    $ui.removeClass("lock");
+
+                    ewma.delay(function () {
+                        $ui.remove();
+
+                        ewma.ui.waiting.stopIndication();
+                    });
+
+                    ewma.requests = 0;
+                }
+            },
+
+            startIndication: function () {
+                if (!$("#ewma__ui_waiting__indicator").length) {
+                    $("body").prepend(
+                        $("<div/>").attr("id", "ewma__ui_waiting__indicator").append($("<div/>").attr("id", "ewma__ui_waiting__indicator_bar"))
+                    );
+                }
+
+                var $bar = $("#ewma__ui_waiting__indicator_bar");
+
+                var tick = 0;
+
+                clearInterval(ewma.ui.waiting.indicationInterval)
+                ewma.ui.waiting.indicationInterval = setInterval(function () {
+                    tick++;
+
+                    var v1 = 33 / (tick + 33);
+                    var v2 = 100 - v1 * 100;
+
+                    $("#ewma__ui_waiting__indicator_bar").width(v2 + "%");
+
+                    // p(tick + ' ' + v2);
+
+                }, 10);
+            },
+
+            stopIndication: function () {
+                $("#ewma__ui_waiting__indicator").remove();
+
+                clearInterval(ewma.ui.waiting.indicationInterval);
+                clearTimeout(ewma.ui.waiting.startIndicationTimeout);
+
+                ewma.ui.waiting.indicationStarted = false;
+            }
+        },
+
+        XHRError: {
+
+            show: function (error) {
+                var ideUrl = "phpstorm://open/?file=" + error.file + "&line=" + error.line;
+
+                $("body").prepend($("<div/>")
+                    .attr("id", "ewma__ui_xhr_error")
+                    .append($("<div>").html(error.message))
+                    .append($("<div>").addClass("line").append(
+                        $("<a>")
+                            .html(error.file + ':' + error.line)
+                            .attr("href", ideUrl)
+                    ))
+                    .click(function () {
+                        window.location = ideUrl;
+                    }));
+            },
+
+            remove: function () {
+                $("#ewma__ui_xhr_error").remove();
+            }
+        },
+
+        console: {
+
+            show: function () {
+                if (!$("#ewma__ui_console").length) {
+                    $("body").prepend($("<div/>")
+                        .attr("id", "ewma__ui_console")
+                        .dblclick(function () {
+                            $("#ewma__ui_console").remove();
+                        }));
+                }
+            }
+        },
     }
 };
 
@@ -450,6 +551,10 @@ $.widget("ewma.node", {
         this.__create();
     },
 
+    __create: function () {
+
+    },
+
     w: function (widgetName) {
         return ewma.w(this.options['.w'][widgetName]);
     },
@@ -466,32 +571,40 @@ $.widget("ewma.node", {
 
     r: function (requestName, data, multi, handler, quiet) {
         var requests = this.options['.r'];
-        var request = requests[requestName];
 
-        if (request) {
-            var requestPath;
-            var requestData = this.options['.payload'] || {};
+        if (requests) {
+            var request = requests[requestName];
 
-            if (typeof request === 'string') {
-                requestPath = request;
-            }
+            if (request) {
+                var requestPath;
+                var requestData = JSON.parse(JSON.stringify(this.options['.payload'] || {}));
 
-            if (request instanceof Array) {
-                requestPath = request[0];
+                if (typeof request === 'string') {
+                    requestPath = request;
+                }
 
-                $.extend(requestData, request[1] || {});
-            }
+                if (request instanceof Array) {
+                    requestPath = request[0];
 
-            $.extend(requestData, data);
+                    $.extend(requestData, request[1] || {});
+                }
 
-            if (multi) {
-                ewma.multirequest.add(requestPath, requestData);
-            } else {
+                $.extend(requestData, data);
+
                 handler = handler || ewma.responseHandler;
-                quiet = quiet || false;
 
-                ewma.request(requestPath, requestData, handler, quiet);
+                if (multi) {
+                    ewma.multirequest.add(requestPath, requestData, handler);
+                } else {
+                    quiet = quiet || false;
+
+                    ewma.request(requestPath, requestData, handler, quiet);
+                }
+            } else {
+                // ewma.log('not set request "' + requestName + '"');
             }
+        } else {
+            // ewma.log('not set requests');
         }
     },
 
@@ -506,10 +619,10 @@ $(document).ready(function () {
     });
 
     ewma.appData.url = ewmaAppData.url;
-    ewma.appData.css.version = ewmaAppData.css.version;
-    ewma.appData.css.loaded = ewmaAppData.css.paths;
-    ewma.appData.js.version = ewmaAppData.js.version;
-    ewma.appData.js.loaded = ewmaAppData.js.paths;
+    // ewma.appData.css.version = ewmaAppData.css.version;
+    ewma.appData.css.loaded = ewmaAppData.css.hrefs;
+    // ewma.appData.js.version = ewmaAppData.js.version;
+    ewma.appData.js.loaded = ewmaAppData.js.hrefs;
 
     ewma.processInstructions(ewmaAppData.instructions);
 

@@ -2,78 +2,63 @@
 
 class Logger
 {
-    private $controller;
-
-    private $d;
-
-    private $enabled;
-
-    private $targets;
-
-    private $path;
+    private $app;
 
     private $nodeId;
 
+    private $d;
+
+    private $targets = [];
+
     public function __construct(\ewma\Controllers\Controller $controller)
     {
-        $this->controller = $controller;
-
+        $this->app = $controller->app;
         $this->nodeId = $controller->_nodeId();
 
-        $this->setPath($this->nodeId);
-    }
-
-    public function setPath($path)
-    {
-        $this->path = $path;
-
-        $this->d = &$this->controller->d('\ewma~logs:' . $path, [
-            'enabled' => true,
-            'targets' => [
-                'main' => true,
-                'path' => true
+        $this->d = appd('\ewma~logs:' . $this->nodeId . '|nodes', [
+            'enabled'            => true,
+            'write_to_node_file' => false,
+            'targets'            => [
+                [
+                    'file_path'     => 'main',
+                    'enabled'       => true,
+                    'write_app_irc' => true,
+                    'write_node_id' => true,
+                ]
             ]
         ]);
 
-        $this->enabled = $this->d['enabled'];
-        $this->targets = $this->d['targets'];
+        if ($this->d['enabled']) {
+            $this->renderTargets();
+        }
     }
 
-    private $mainFile;
-
-    private function getMainFile()
+    private function renderTargets()
     {
-        if (null === $this->mainFile) {
-            $this->mainFile = fopen(abs_path('logs/main.log'), 'a');
+        if ($this->d['write_to_node_file']) {
+            $nodesDir = abs_path('logs/nodes');
+
+            if (!file_exists($nodesDir)) {
+                mdir($nodesDir);
+            }
+
+            $this->targets[] = [fopen(abs_path('logs/nodes/' . $this->nodeId . '.log'), 'a'), true, false];
         }
 
-        return $this->mainFile;
-    }
-
-    private $pathFile;
-
-    private function getPathFile()
-    {
-        if (null === $this->pathFile) {
-            $filePath = abs_path('logs/' . ($this->path ?: $this->nodeId) . '.log');
-
-            $this->pathFile = fopen($filePath, 'a');
+        foreach ($this->d['targets'] as $target) {
+            if ($target['enabled']) {
+                $this->targets[] = [fopen(abs_path('logs/' . $target['file_path'] . '.log'), 'a'), $target['write_app_irc'], $target['write_node_id']];
+            }
         }
-
-        return $this->pathFile;
     }
 
     public function write($content)
     {
-        if ($this->enabled) {
-            $targets = $this->targets;
+        if ($this->d['enabled']) {
+            foreach ($this->targets as $target) {
+                [$file, $writeAppIRC, $writeNodeId] = $target;
 
-            if ($targets['main']) {
-                fwrite($this->getMainFile(), implode(' ', [dt(), '[' . ($this->path ?: $this->nodeId) . ']', $content]) . PHP_EOL);
-            }
-
-            if ($targets['path']) {
-                fwrite($this->getPathFile(), implode(' ', [dt(), $content]) . PHP_EOL);
+                fwrite($file, dt() . ' ' . ($writeAppIRC ? $this->app->instanceRandomCode . ' ' : '') . ($writeNodeId ? '[' . $this->nodeId . '] ' : '') . $content . PHP_EOL);
             }
         }
     }

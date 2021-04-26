@@ -60,6 +60,10 @@ class Modules extends Service
         } else {
             $this->registerModules();
             $this->saveToCache();
+
+            $this->app->events->bind('app/terminate', function () {
+                $this->saveToDb();
+            });
         }
 
         $this->load();
@@ -77,6 +81,9 @@ class Modules extends Service
 
     public function reload()
     {
+        $this->cacheByPath = [];
+        $this->cacheByNamespace = [];
+
         $this->modulesByPath = [];
         $this->modulesByNamespace = [];
 
@@ -115,6 +122,19 @@ class Modules extends Service
         }
 
         $this->app->cache->write('modules', $modulesCache);
+    }
+
+    private function saveToDb()
+    {
+        foreach ($this->modulesByPath as $module) {
+            $model = \ewma\models\Module::where('namespace', $module->namespace)->first();
+
+            if (!$model) {
+                \ewma\models\Module::create([
+                                                'namespace' => $module->namespace
+                                            ]);
+            }
+        }
     }
 
     /*

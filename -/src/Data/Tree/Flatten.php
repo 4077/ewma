@@ -92,7 +92,7 @@ class Flatten
     {
         $this->getAllSubnodesRecursion($id);
 
-        unset($this->allSubnodes[$id]); // todo сделать симметрично с getIds
+//        unset($this->allSubnodes[$id]);
 
         return $this->allSubnodes;
     }

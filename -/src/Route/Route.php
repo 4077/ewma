@@ -22,7 +22,15 @@ class Route
 
         if (!$pattern) {
             if (!$this->route) {
-                return true;
+                // проверить правильность этого
+
+                return [
+                    'data'       => [],
+                    'route'      => false,
+                    'base_route' => $this->baseRoute
+                ];
+
+//                return true; - неправильно
             }
         } else {
             $patternData = $this->getPatternData($pattern);

@@ -69,13 +69,29 @@ class Dev extends Service
                 write(abs_path('modules', $fullPath) . '/settings.php', $content);
 
                 $report[] = [
-                    'type' => $type,
-                    'path' => $fullPath,
-                    'ns'   => $newModuleNamespace
+                    'type'     => $type,
+                    'path'     => $fullPath,
+                    'abs_path' => abs_path('modules', $fullPath),
+                    'ns'       => $newModuleNamespace
                 ];
             }
 
+            $this->app->modules->reload();
+
+            \ewma\dev\Svc::getInstance()->updateCache();
+
             return $report;
+        }
+    }
+
+    public function delete($path)
+    {
+        if ($module = $this->app->modules->getByPath($path)) {
+            delete_dir($module->dir);
+
+            $this->app->modules->reload();
+
+            \ewma\dev\Svc::getInstance()->updateCache();
         }
     }
 
@@ -109,13 +125,6 @@ class Dev extends Service
             }
 
             return $newModuleNamespace;
-        }
-    }
-
-    public function delete($path)
-    {
-        if ($module = $this->app->modules->getByPath($path)) {
-            delete_dir($module->dir);
         }
     }
 }

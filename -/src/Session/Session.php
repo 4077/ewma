@@ -42,6 +42,11 @@ class Session extends Service
     private $key;
 
     /**
+     * Публичный идентификатор сессии
+     */
+    private $publicKey;
+
+    /**
      * Время жизни сессии в секундах с момента последнего сохранения
      *
      * todo придумать как затирать старые
@@ -81,6 +86,16 @@ class Session extends Service
         return $this->key;
     }
 
+    public function setPublicKey($key)
+    {
+        $this->publicKey = $key;
+    }
+
+    public function getPublicKey()
+    {
+        return $this->publicKey;
+    }
+
     public function setTimeout($seconds)
     {
         $this->timeout = $seconds;
@@ -110,6 +125,8 @@ class Session extends Service
     public function &getNode($modulePath, $nodePath, $nodeInstance = '')
     {
         if ($this->key) {
+            $nodeInstance = (string)$nodeInstance;
+
             $module = $this->app->modules->getByPath($modulePath);
 
             if ($module) {
@@ -199,6 +216,8 @@ class Session extends Service
      */
     private function nodeSave($moduleNamespace, $nodePath, $nodeInstance = '')
     {
+        $nodeInstance = (string)$nodeInstance;
+
         $closeTime = $this->timeout ? time() + $this->timeout : 0;
         $data = $this->nodes[$moduleNamespace][$nodeInstance][$nodePath];
 
@@ -212,6 +231,7 @@ class Session extends Service
                                          'node_path'        => $nodePath,
                                          'node_instance'    => $nodeInstance,
                                          'key'              => $this->key,
+                                         'public_key'       => $this->publicKey,
                                          'close_time'       => $closeTime,
                                          'data'             => j_($data),
                                      ]);
@@ -265,7 +285,7 @@ class Session extends Service
             return true;
         }
 
-        return $this->nodes[$moduleNamespace][$nodeInstance][$nodePath] != $this->nodesOriginal[$moduleNamespace][$nodeInstance][$nodePath];
+        return $this->nodes[$moduleNamespace][$nodeInstance][$nodePath] !== $this->nodesOriginal[$moduleNamespace][$nodeInstance][$nodePath];
     }
 
     // todo

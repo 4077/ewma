@@ -7,9 +7,13 @@ class Backup extends \Controller
         $envId = $this->data('env_id');
 
         if (!$envId || $this->_env($envId)) {
+            $this->log('run');
+
             $this->cleanOld();
 
             $targetDir = $this->getTargetDir();
+
+            $this->log('target dir: ' . $targetDir);
 
             $this->writeComment($targetDir);
             $this->makeDump($targetDir);
@@ -25,8 +29,7 @@ class Backup extends \Controller
 
     private function getTypeDir()
     {
-        $type = $this->data('type') or
-        $type = 'manual';
+        $type = $this->data('type') ?: 'manual';
 
         $mntPath = dataSets()->get('ewma/backup::mnt_path');
 
@@ -45,9 +48,13 @@ class Backup extends \Controller
     private function cleanOld()
     {
         if ($ttlMins = $this->getTtlMins()) {
+            $this->log('cleanOld (ttl: ' . $ttlMins . ' mins)');
+
             $typeDir = '/' . $this->getTypeDir();
 
             if (strlen($typeDir) > 10) {
+                // find . -type d -mmin +$((60*24*537)) -exec ls -al {} \;
+
                 exec('find ' . $typeDir . ' -type d -mmin +' . $ttlMins . ' -exec rm -rf {} \;');
             }
         }
@@ -85,7 +92,13 @@ class Backup extends \Controller
         $pass = app()->getConfig('databases/default/pass');
         $name = app()->getConfig('databases/default/name');
 
+        $this->log('make dump...');
+
+        start_time();
+
         exec('mysqldump -u ' . $user . ' -p' . $pass . ' ' . $name . ' > ' . $targetDir . '/' . $name . '.sql');
+
+        $this->log('...done in ' . end_time());
     }
 
     private function makeFilesArchive($targetDir)

@@ -14,10 +14,18 @@ class Assets extends \Controller
             ]);
         }
 
-        $jsVersion = $this->app->js->settings['version'];
-        foreach ($this->app->response->getJsFilesPaths() as $js) {
+//        $jsVersion = $this->app->js->settings['version'];
+//        foreach ($this->app->response->getJsFilesPaths() as $js) {
+//            $v->assign('js', [
+//                'SRC' => abs_url($js . '.js' . ($jsVersion ? '?' . $jsVersion : ''))
+//            ]);
+//        }
+
+        $hrefs = $this->app->js->getHrefs();
+
+        foreach ($hrefs as $href) {
             $v->assign('js', [
-                'SRC' => abs_url($js . '.js' . ($jsVersion ? '?' . $jsVersion : ''))
+                'SRC' => $href
             ]);
         }
 
@@ -27,10 +35,11 @@ class Assets extends \Controller
             ]);
         }
 
-        $cssVersion = $this->app->css->settings['version'];
-        foreach ($this->app->response->getCssFilesPaths() as $css) {
+        $hrefs = $this->app->css->getHrefs();
+
+        foreach ($hrefs as $href) {
             $v->assign('css', [
-                'HREF' => abs_url($css . '.css' . ($cssVersion ? '?' . $cssVersion : ''))
+                'HREF' => $href
             ]);
         }
 

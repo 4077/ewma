@@ -4,7 +4,7 @@ html {
     font-size: 13px;
 }
 
-#ewma__waiting_overlay {
+#ewma__ui_waiting {
     position: fixed;
     pointer-events: none;
     width: 100%;
@@ -15,18 +15,35 @@ html {
     z-index: 33554432;
 }
 
-#ewma__waiting_overlay.lock {
+#ewma__ui_waiting.lock {
     cursor: wait;
     pointer-events: all;
 }
 
-#ewma__waiting_overlay.error {
+#ewma__ui_waiting.error {
     cursor: default;
     background-color: #000000;
     opacity: 0.5;
 }
 
-#ewma__xhr_error {
+#ewma__ui_waiting__indicator {
+    position: fixed;
+    pointer-events: none;
+    width: 100%;
+    height: 2px;
+    z-index: 33554432;
+
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+#ewma__ui_waiting__indicator #ewma__ui_waiting__indicator_bar {
+    width: 0;
+    height: 2px;
+
+    background-color: rgba(0, 0, 0, 0.68);
+}
+
+#ewma__ui_xhr_error {
     cursor: pointer;
     position: fixed;
     z-index: 33554433;
@@ -37,33 +54,35 @@ html {
     font-size: 16px;
 }
 
-#ewma__xhr_error:hover {
+#ewma__ui_xhr_error:hover {
     background-color: #560037;
     color: #FFCED1;
 }
 
-#ewma__xhr_error .line {
+#ewma__ui_xhr_error .line {
     margin-top: 13px;
 }
 
-#ewma__xhr_error .line a {
+#ewma__ui_xhr_error .line a {
     color: #B189AC;
     font-size: 14px;
     text-decoration: none;
 }
 
-#ewma__console_layer {
+#ewma__ui_console {
     position: fixed;
     bottom: 0;
+    left: 0;
+    width: 100vw;
     z-index: 33554433;
-    width: 100%;
-    padding: 20px;
     background-color: #091900;
     color: #01AB00;
-    font-size: 16px;
+    font-size: 13px;
+    max-height: 50vh;
+    overflow: auto;
 }
 
-
-#ewma__console_layer .message {
-    margin: 10px 0;
+#ewma__ui_console .message {
+    margin: 5px 0 5px 10px;
+    font-family: monospace;
 }

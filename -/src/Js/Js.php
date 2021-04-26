@@ -26,12 +26,6 @@ class Js extends Service
                 'dev_mode'     => true,
                 'dev_mode_dir' => 'js/dev',
                 'minify'       => false
-            ],
-            'combiner' => [
-                'enabled' => true,
-                'use'     => false,
-                'dir'     => 'js/combined',
-                'minify'  => false
             ]
         ]);
 
@@ -45,11 +39,18 @@ class Js extends Service
     }
 
     public $cache;
+
     private $cacheUpdated;
 
     public function cacheUpdateNodeMTime($nodeId, $mTime)
     {
-        $this->cache['nodes_m_times'][$nodeId] = $mTime;
+        $this->cache['nodes_mtimes'][$nodeId] = $mTime;
+        $this->cacheUpdated = true;
+    }
+
+    public function cacheUpdateNodeMd5($fullCode, $md5)
+    {
+        $this->cache['nodes_md5'][$fullCode] = $md5;
         $this->cacheUpdated = true;
     }
 
@@ -58,23 +59,15 @@ class Js extends Service
         $this->app->cache->write('jsCompiler', $this->cache);
     }
 
-    //
-    // методы для Controller
-    //
-
-    private $nodes;
-
     /**
-     * Обеспечить загрузку js-файла в браузер.
-     * Js-файл будет сгенериван из js-узла,
-     * располагающегося по адресу $relativePath относительно $controller.
-     * Less-узел обладает приоритетом при выборе компилятором.
-     *
-     * @param Controller $controller
-     * @param            $relativePath
-     *
-     * @return Node
+     * @var Node[]
      */
+    private $nodes = [];
+
+    private $buffer = [];
+
+    private $bufferEnabled = false;
+
     public function provide(Controller $controller, $relativePath)
     {
         $nodeId = $controller->_nodeId($relativePath);
@@ -86,7 +79,78 @@ class Js extends Service
 
             $this->nodes[$nodeId] = $node;
 
+            if ($this->bufferEnabled) {
+                $this->buffer[$nodeId] = $node;
+            }
+
             return $node;
+        }
+    }
+
+    public function startBuffer()
+    {
+        $this->bufferEnabled = true;
+    }
+
+    public function stopBuffer()
+    {
+        $output['nodes'] = [];
+
+        foreach ($this->buffer as $node) {
+            $output['nodes'][] = $this->bufferNode($node);
+        }
+
+        $instructions = [];
+
+        foreach ($this->bufferInstructions as $instruction) {
+            if ($instruction['type'] == 'jquery') {
+                if ($instruction['builder']->callable) {
+                    $instructions[] = [
+                        'type' => 'raw',
+                        'code' => $instruction['builder']->code
+                    ];
+                }
+            } else {
+                $instructions[] = $instruction;
+            }
+        }
+
+        $output['instructions'] = $instructions;
+
+        $this->bufferEnabled = false;
+        $this->buffer = [];
+        $this->bufferInstructions = [];
+
+        return $output;
+    }
+
+    private function bufferNode(Node $node)
+    {
+        return [
+            'node_path'     => $node->controller->__meta__->absPath,
+            'relative_path' => $node->relativePath
+        ];
+    }
+
+    public function unbuffer($buffer)
+    {
+        foreach ($buffer['nodes'] as $nodeBuffer) {
+            $this->unbufferNode($nodeBuffer);
+        }
+
+        foreach ($buffer['instructions'] as $instruction) {
+            $this->addInstruction($instruction);
+        }
+    }
+
+    private function unbufferNode($nodeBuffer)
+    {
+        $controller = $this->app->c()->n($nodeBuffer['node_path']);
+
+        $node = new Node($controller, $nodeBuffer['relative_path']);
+
+        if (!isset($this->nodes[$node->id])) {
+            $this->nodes[$node->id] = $node;
         }
     }
 
@@ -99,7 +163,18 @@ class Js extends Service
         }
     }
 
+    private function addInstruction($instruction)
+    {
+        $this->instructions[] = $instruction;
+
+        if ($this->bufferEnabled) {
+            $this->bufferInstructions[] = $instruction;
+        }
+    }
+
     private $instructions = [];
+
+    private $bufferInstructions = [];
 
     public function addCall(Controller $controller, $relativeNodePath, $callString, $callArgs)
     {
@@ -107,21 +182,21 @@ class Js extends Service
             $callString = $controller->_nodeId($relativeNodePath) . $callString;
         }
 
-        $this->instructions[] = [
-            'type' => 'call',
-            'data' => [
-                'method' => $callString,
-                'args'   => $callArgs
-            ]
-        ];
+        $this->addInstruction([
+                                  'type' => 'call',
+                                  'data' => [
+                                      'method' => $callString,
+                                      'args'   => $callArgs
+                                  ]
+                              ]);
     }
 
     public function addRaw($code)
     {
-        $this->instructions[] = [
-            'type' => 'raw',
-            'code' => $code
-        ];
+        $this->addInstruction([
+                                  'type' => 'raw',
+                                  'code' => $code
+                              ]);
     }
 
     public function addJqueryBuilder(Controller $controller, $relativeNodePath, $selector)
@@ -130,27 +205,28 @@ class Js extends Service
 
         $jqueryBuilder = new JqueryBuilder($selector, $nodeId);
 
-        $this->instructions[] = [
-            'type'    => 'jquery',
-            'builder' => $jqueryBuilder
-        ];
+        $this->addInstruction([
+                                  'type'    => 'jquery',
+                                  'builder' => $jqueryBuilder
+                              ]);
 
         return $jqueryBuilder;
     }
-
-    /**
-     * методы для \Ewma\Response\Response
-     */
 
     public function getUrls()
     {
         return $this->urls;
     }
 
+    /**
+     * @return Node[]
+     */
     public function getNodes()
     {
         return $this->nodes;
     }
+
+    //
 
     public function getInstructions()
     {
@@ -172,37 +248,66 @@ class Js extends Service
         return $output;
     }
 
-    public function combine($sourceDir, $targetDir, $filesPaths)
+//    public function getFilesPaths()
+//    {
+//        $output = [];
+//
+//        $compilerSettings = $this->app->js->settings['compiler'];
+//
+//        $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
+//
+//        $filesPaths = [];
+//        foreach ($this->nodes as $nodeCode => $node) {
+//            if ($compilerSettings['dev_mode']) {
+//                $targetFilePath = $node->getFilePath();
+//            } else {
+//                $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
+//            }
+//
+//            if (!in_array($targetFilePath, $filesPaths)) {
+//                $filesPaths[] = $targetFilePath;
+//
+//                $output[] = $compilerTargetDir . '/' . $targetFilePath;
+//            }
+//
+//            if ($compilerSettings['enabled']) {
+//                $node->compile($compilerTargetDir, $targetFilePath, $compilerSettings);
+//            }
+//        }
+//
+//        return $output;
+//    }
+
+    public function getHrefs()
     {
-        $combiner = $this->settings['combiner'];
+        $output = [];
 
-        $combinedJsArray = [];
-        foreach ($filesPaths as $filePath) {
-            $combinedJsArray[] = read(abs_path($sourceDir, $filePath . '.js'));
+        $compilerSettings = $this->settings['compiler'];
+
+        $compilerTargetDir = $compilerSettings['dev_mode'] ? $compilerSettings['dev_mode_dir'] : $compilerSettings['dir'];
+
+        $addedFilesPaths = [];
+
+        foreach ($this->nodes as $nodeCode => $node) {
+            if ($compilerSettings['dev_mode']) {
+                $targetFilePath = $node->getFilePath();
+            } else {
+                $targetFilePath = $this->app->paths->getFingerprintPath($node->getFingerprint());
+            }
+
+            if ($compilerSettings['enabled']) {
+                $node->compile($compilerTargetDir, $targetFilePath, $compilerSettings);
+            }
+
+            if (!in_array($targetFilePath, $addedFilesPaths)) {
+                $addedFilesPaths[] = $targetFilePath;
+
+                $md5 = $this->cache['nodes_md5'][$nodeCode] ?? false;
+
+                $output[] = '/' . $compilerTargetDir . '/' . $targetFilePath . '.js' . ($md5 ? '?' . $md5 : '');
+            }
         }
 
-        $combinedJs = implode(';', $combinedJsArray);
-
-        if ($combiner['minify']) {
-            $combinedJs = Minifier::minify($combinedJs);
-        }
-
-        $targetFilePath = public_path($targetDir, $this->getCombinedPath($filesPaths) . '.js');
-
-        // файл перезаписывается только если изменилось содержание (иначе браузер будет качать его каждый раз)
-        $currentFileContent = read($targetFilePath);
-        if ($currentFileContent !== $combinedJs) {
-            write($targetFilePath, $combinedJs);
-        }
-    }
-
-    public function getCombinedPath($filesPaths)
-    {
-        $fingerprint = md5(implode(',', $filesPaths));
-
-        $dirPath = implode('/', str_split(substr($fingerprint, 0, 8), 2));
-        $fileName = substr($fingerprint, 7, 8);
-
-        return $dirPath . '/' . $fileName;
+        return $output;
     }
 }

@@ -8,7 +8,7 @@ class Transformer
 
         $output = [];
         foreach ($rows as $row) {
-            $output[$row[$field]] = $row;
+            $output[$row->$field] = $row;
         }
 
         return $output;
@@ -25,13 +25,13 @@ class Transformer
 
         $output = [];
         foreach ($rows as $n => $row) {
-            $output[$n] = $row[$field];
+            $output[$n] = $row->$field;
         }
 
         return $output;
     }
 
-    public static function getColumns($rows, $fieldsList = [])
+    public static function getColumns($rows, $fieldsList = []) // models only (not stdObject)
     {
         $rows = $rows ?: [];
 
@@ -52,7 +52,7 @@ class Transformer
     public static function getCellOfFirstRow($rows, $fieldName)
     {
         if ($rows) {
-            return $rows[0][$fieldName];
+            return $rows[0]->$fieldName;
         }
     }
 
@@ -62,7 +62,7 @@ class Transformer
 
         $output = [];
         foreach ($rows as $row) {
-            $output[$row[$indexFieldName]] = $row[$valueFieldName];
+            $output[$row->$indexFieldName] = $row->$valueFieldName;
         }
 
         return $output;

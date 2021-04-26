@@ -10,6 +10,7 @@ class Call
     }
 
     private $path;
+
     private $data = [];
 
     public function set($data)

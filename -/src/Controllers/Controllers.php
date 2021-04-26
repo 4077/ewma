@@ -29,8 +29,8 @@ class Controllers extends Service
 
     public function getNodeController($callPath, Controller $caller)
     {
-        list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);
-        list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+        [$callPath, $instance] = $this->explodeToPathAndInstance($callPath, $caller);
+        [$path, $method, $args] = array_pad(explode(':', $callPath), 3, null);
 
         $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
 
@@ -55,8 +55,8 @@ class Controllers extends Service
 
             return handlers()->render($handlerSource, $data);
         } else {
-            list($callPath, $instance) = $this->explodeToPathAndInstance($callPath, $caller);
-            list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+            [$callPath, $instance] = $this->explodeToPathAndInstance($callPath, $caller);
+            [$path, $method, $args] = array_pad(explode(':', $callPath), 3, null);
 
             $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
 
@@ -124,7 +124,7 @@ class Controllers extends Service
     private function getPrototype($absPath)
     {
         if (!isset($this->prototypes[$absPath])) {
-            list($modulePath, $nodePath) = $this->app->paths->separateAbsPath($absPath);
+            [$modulePath, $nodePath] = $this->app->paths->separateAbsPath($absPath);
 
             $module = $this->app->modules->getByPath($modulePath);
 
@@ -164,7 +164,7 @@ class Controllers extends Service
     public function explodeToPathAndInstance($path, Controller $caller)
     {
         if (false !== strpos($path, '|')) {
-            list($path, $instance) = explode('|', $path);
+            [$path, $instance] = explode('|', $path);
 
             if (!$instance) {
                 $instance = $caller->__meta__->instance;
@@ -181,14 +181,14 @@ class Controllers extends Service
     public function renderAbsPath($callPath, Controller $caller)
     {
         if (false !== strpos($callPath, '|')) {
-            list($callPath, $instance) = explode('|', $callPath);
+            [$callPath, $instance] = explode('|', $callPath);
 
             if (!$instance) {
                 $instance = $caller->__meta__->instance;
             }
         }
 
-        list($path, $method, $args) = array_pad(explode(':', $callPath), 3, null);
+        [$path, $method, $args] = array_pad(explode(':', $callPath), 3, null);
 
         $absPath = $this->app->paths->resolve($path, $caller->__meta__->absPath);
 
