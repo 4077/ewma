@@ -45,7 +45,7 @@
         "illuminate/cache": "*",
         "illuminate/events": "5.*",
         "sleeping-owl/with-join": "1.0.11",
-        "symfony/http-foundation": "^3.0",
+        "symfony/http-foundation": "^8.1",
         "nesbot/carbon": "~1.0",
         "league/flysystem": "~1.0",
         "oyejorge/less.php": "~1.7.0.10",
